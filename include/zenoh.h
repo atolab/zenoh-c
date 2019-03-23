@@ -2,6 +2,7 @@
 #define ZENOH_C_H_DEFINED_
 
 #include "zenoh/msg.h"
+#include "zenoh/codec.h"
 
 typedef struct {
   int z;

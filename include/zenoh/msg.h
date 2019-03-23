@@ -2,6 +2,7 @@
 #define ZENOH_C_MSG_H_
 
 #include "zenoh/types.h"
+#include "zenoh/iobuf.h"
 
 /* Message ID */
 
@@ -90,19 +91,50 @@
 #define Z_PERIODIC_PULL_MODE 0x04
 
 typedef struct {
-  vle_t id;
+  z_vle_t id;
   char* name;
 } z_property_t;
 
-z_property_t* make_z_property(vle_t id, const char* name);
-void free_z_property(z_property_t* p);
+/*
+ * Creates a new property with the given id and name. Notice that the ownership
+ * for the name remains with the caller.
+ */ 
+z_property_t* z_property_make(z_vle_t id, const char* name);
+void z_property_free(z_property_t** p);
 
+#define HAS_PROPERTIES (m) (m.properties != 0) 
+
+/*------------------ Scout Message ------------------*/
 typedef struct {
   uint8_t header;
-  vle_t mask;
-  z_vec_t* properties;
+  z_vle_t mask;
+  z_vec_t *properties;
 } z_scout_t;
 
-z_scout_t* make_z_scout(vle_t mask, z_vec_t* ps);
+/*------------------ Hello Message ------------------*/
+typedef struct {
+  uint8_t header;
+  z_vle_t mask;
+  z_vec_t *locators;
+  z_vec_t *properties;
+} z_hello_t;
 
+/*------------------ Open Message ------------------*/
+typedef struct {
+  uint8_t header;
+  uint8_t version;  
+  z_array_uint8_t pid; 
+  z_vle_t lease;  
+  z_vec_t *properties;
+} z_open_t;
+
+
+/*------------------ Accept Message ------------------*/
+typedef struct {
+  uint8_t header;  
+  z_array_uint8_t client_pid;
+  z_array_uint8_t broker_pid; 
+  z_vle_t lease; 
+  z_vec_t *properties;
+} z_accept_t;
 #endif /* ZENOH_C_MSG_H_ */
