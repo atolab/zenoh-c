@@ -12,9 +12,7 @@
 
 enum result_kind {
   VLE,
-  SCOUT,
   HELLO,
-  OPEN,
   ACCEPT,
   CLOSE,
   ARRAY_UINT8,
@@ -22,23 +20,17 @@ enum result_kind {
   ERROR
 };
 
-typedef struct {
-  enum result_kind tag;
-  union {
-    int error;
-    z_vle_t vle;
-    z_scout_t scout;
-    z_hello_t hello;
-    z_open_t open;
-    z_accept_t accept;
-    z_array_uint8_t a_uint8;    
-  } value;
-} z_result_t;
+#define Z_RESULT_DECLARE(type, name) \
+typedef struct { \
+  enum result_kind tag; \
+  union { \
+    type  name; \
+    int error; \
+  } value;\
+} z_ ## name ## _result_t
 
-#define RESULT_IS(kind, result) (result.tag == kind)
-#define Z_RESULT_VLE (value) (z_result_t){VLE, value} 
-
-z_result_t z_error_result(int code);
-
+Z_RESULT_DECLARE (z_vle_t, vle);
+Z_RESULT_DECLARE (z_array_uint8_t, array_uint8);
+Z_RESULT_DECLARE (z_accept_t, accept);
 
 #endif /* ZENOH_C_RESULT_H */

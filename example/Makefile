@@ -3,4 +3,3 @@ all:
 
 clean:
 	${RM} driver 
-	${RM} -rf driver.SYM 

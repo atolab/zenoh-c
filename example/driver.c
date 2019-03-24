@@ -13,9 +13,9 @@
 #include "zenoh/codec.h"
 
 int main(int argc, char** argv) {
-  if (argc < 2) {
-    printf("USAGE:\n\t driver <broker-ip>\n");
-    return 1;
+  char* broker =  "127.0.0.1";
+  if (argc > 1) {
+    broker = argv[1];
   }
   
   int sock;
@@ -72,7 +72,7 @@ int main(int argc, char** argv) {
   int rb = recv(sock, rbuf->buf, 1, 0);
   printf("Received %d bytes\n", rb);  
   rbuf->w_pos = rb;
-  z_result_t r_len = z_vle_decode(rbuf);
+  z_vle_result_t r_len = z_vle_decode(rbuf);
   if (r_len.tag == VLE) {
     printf("Message Length: %llu\n", r_len.value.vle);   
     z_iobuf_clear(rbuf);
@@ -81,7 +81,7 @@ int main(int argc, char** argv) {
     rbuf->w_pos = rb;
     uint8_t h = z_iobuf_read(rbuf);
     printf("Message header: 0x%x\n", h);
-    z_result_t ra = z_accept_decode(rbuf, h);
+    z_accept_result_t ra = z_accept_decode(rbuf, h);
     if (ra.tag == ACCEPT) {
       printf("Session successfully opened\n");   
     }
