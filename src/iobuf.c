@@ -45,13 +45,18 @@ uint8_t z_iobuf_read(z_iobuf_t* iob) {
   return iob->buf[iob->r_pos++]; 
 }
 
-uint8_t* z_iobuf_read_n(z_iobuf_t* iob, unsigned int length) {
-  printf("readable = %d - len = %d\n", z_iobuf_readable(iob) , length);
-  assert(z_iobuf_readable(iob) >= length);
-  uint8_t* dst = (uint8_t*)malloc(length);
+
+uint8_t* z_iobuf_read_to_n(z_iobuf_t* iob, uint8_t* dst, unsigned int length) {
+  assert(z_iobuf_readable(iob) >= length);  
   memcpy(dst, iob->buf + iob->r_pos, length);
   iob->r_pos += length;
   return dst;
+  
+}
+
+uint8_t* z_iobuf_read_n(z_iobuf_t* iob, unsigned int length) {  
+  uint8_t* dst = (uint8_t*)malloc(length);
+  return z_iobuf_read_to_n(iob, dst, length);  
 }
 
 

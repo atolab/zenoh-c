@@ -149,13 +149,14 @@ typedef struct {
   uint8_t reason;
 } z_close_t; 
 
-/*------------------ Declare Message ------------------*/
+/*------------------ Declare Messages ------------------*/
 typedef struct  {
   uint8_t header;
   z_vle_t sn;
   z_vec_t declarations;
 } z_declare_t;
 
+/*------------------  Resource Declaration Message ------------------*/
 typedef struct { 
   uint8_t header;
   z_vle_t rid;
@@ -163,12 +164,21 @@ typedef struct {
   z_vec_t* properties;
 } z_res_decl_t;
 
+/*------------------ Delcare Publisher ------------------*/
 typedef struct { 
   uint8_t header;
   z_vle_t rid;  
   z_vec_t* properties;
 } z_pub_decl_t;
 
+/*------------------ Declare Storage ------------------*/
+typedef struct { 
+  uint8_t header;
+  z_vle_t rid;  
+  z_vec_t* properties;
+} z_storage_decl_t;
+
+/*------------------ Temporal Properties ------------------*/
 typedef struct {
     z_vle_t origin;
     z_vle_t period;
@@ -180,6 +190,7 @@ typedef struct {
   z_temporal_property_t tprop;
 } z_sub_mode_t;
 
+/*------------------ Declare Subscriber Message ------------------*/
 typedef struct { 
   uint8_t header;
   z_vle_t rid;  
@@ -187,16 +198,19 @@ typedef struct {
   z_vec_t* properties;
 } z_sub_decl_t;
 
+/*------------------ Declaration Commit Message ------------------*/
 typedef struct {
   uint8_t header;
   uint8_t cid;
 } z_commit_decl_t;
 
+/*------------------ Declaration Result  Message ------------------*/
 typedef struct {
   uint8_t header;
   uint8_t cid;
   uint8_t status;
 } z_result_decl_t;
+
 /*------------------ StreamData Message ------------------*/
 typedef struct {
   uint8_t header;
