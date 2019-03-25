@@ -32,5 +32,6 @@ typedef struct { \
 Z_RESULT_DECLARE (z_vle_t, vle);
 Z_RESULT_DECLARE (z_array_uint8_t, array_uint8);
 Z_RESULT_DECLARE (z_accept_t, accept);
+Z_RESULT_DECLARE (z_close_t, close);
 
 #endif /* ZENOH_C_RESULT_H */
