@@ -8,7 +8,7 @@
 
 typedef  uint64_t z_vle_t;
 
-Z_ARRAY_DECLARE(uint8_t);
+Z_ARRAY_DECLARE(uint8_t)
 
 
 #endif /* ZENOH_C_TYPES_H_ */ 

@@ -104,78 +104,52 @@ void z_property_free(z_property_t** p);
 
 #define HAS_PROPERTIES (m) (m.properties != 0) 
 
-typedef struct {
-  uint8_t header; 
-} z_message_t;
-
 /*------------------ Scout Message ------------------*/
-typedef struct {
-  uint8_t header;
-  z_vle_t mask;
-  z_vec_t *properties;
+typedef struct {  
+  z_vle_t mask;  
 } z_scout_t;
 
 /*------------------ Hello Message ------------------*/
-typedef struct {
-  uint8_t header;
+typedef struct {  
   z_vle_t mask;
-  z_vec_t *locators;
-  z_vec_t *properties;
+  z_vec_t *locators;  
 } z_hello_t;
 
 /*------------------ Open Message ------------------*/
-typedef struct {
-  uint8_t header;
+typedef struct {  
   uint8_t version;  
   z_array_uint8_t pid; 
-  z_vle_t lease;  
-  z_vec_t *properties;
+  z_vle_t lease;    
 } z_open_t;
 
 
 /*------------------ Accept Message ------------------*/
-typedef struct {
-  uint8_t header;  
+typedef struct {    
   z_array_uint8_t client_pid;
   z_array_uint8_t broker_pid; 
-  z_vle_t lease; 
-  z_vec_t *properties;
+  z_vle_t lease;   
 } z_accept_t;
 
 /*------------------ Close Message ------------------*/
-typedef struct {
-  uint8_t header;
+typedef struct {  
   z_array_uint8_t pid;
   uint8_t reason;
 } z_close_t; 
 
-/*------------------ Declare Messages ------------------*/
-typedef struct  {
-  uint8_t header;
-  z_vle_t sn;
-  z_vec_t declarations;
-} z_declare_t;
-
 /*------------------  Resource Declaration Message ------------------*/
-typedef struct { 
-  uint8_t header;
+typedef struct {   
   z_vle_t rid;
-  const char* r_name;
-  z_vec_t* properties;
+  const char* r_name;  
 } z_res_decl_t;
 
 /*------------------ Delcare Publisher ------------------*/
-typedef struct { 
-  uint8_t header;
-  z_vle_t rid;  
-  z_vec_t* properties;
+typedef struct {   
+  z_vle_t rid;    
 } z_pub_decl_t;
 
 /*------------------ Declare Storage ------------------*/
-typedef struct { 
-  uint8_t header;
-  z_vle_t rid;  
-  z_vec_t* properties;
+typedef struct {   
+  z_vle_t rid;    
 } z_storage_decl_t;
 
 /*------------------ Temporal Properties ------------------*/
@@ -191,32 +165,80 @@ typedef struct {
 } z_sub_mode_t;
 
 /*------------------ Declare Subscriber Message ------------------*/
-typedef struct { 
-  uint8_t header;
+typedef struct {   
   z_vle_t rid;  
-  z_sub_mode_t sub_mode;
-  z_vec_t* properties;
+  z_sub_mode_t sub_mode;  
 } z_sub_decl_t;
 
 /*------------------ Declaration Commit Message ------------------*/
-typedef struct {
-  uint8_t header;
+typedef struct {  
   uint8_t cid;
 } z_commit_decl_t;
 
 /*------------------ Declaration Result  Message ------------------*/
-typedef struct {
-  uint8_t header;
+typedef struct {  
   uint8_t cid;
   uint8_t status;
 } z_result_decl_t;
 
-/*------------------ StreamData Message ------------------*/
+/**
+ *  On the wire this is represented as:
+ *     |header|payload|properties|
+ *  The declaration of the structure does not follow this
+ *  convention for alignement purposes.
+ */
+typedef struct {  
+  z_vec_t* properties;
+  union {
+    z_res_decl_t resource;
+    z_pub_decl_t pub;
+    z_sub_decl_t sub;
+    z_storage_decl_t storage;
+    z_commit_decl_t commit;
+    z_result_decl_t result;
+  } payload;  
+  uint8_t header; 
+} z_declaration_t;
+
 typedef struct {
-  uint8_t header;
+  unsigned int length;
+  z_declaration_t *elem;  
+} z_array_declaration_t;
+
+/*------------------ Declare Messages ------------------*/
+typedef struct  {  
+  z_vle_t sn;
+  z_array_declaration_t declarations;
+} z_declare_t;
+
+
+/*------------------ StreamData Message ------------------*/
+typedef struct {  
   z_vle_t sn;
   z_vle_t rid;
   z_array_uint8_t payload;
 } z_stream_data_t;
+
+
+/**
+ *  On the wire this is represented as:
+ *     |header|payload|properties|
+ *  The declaration of the structure does not follow this
+ *  convention for alignement purposes.
+ */
+typedef struct {
+  z_vec_t* properties;  
+  union {
+    z_open_t open;
+    z_accept_t accept;
+    z_close_t close;
+    z_declare_t declare;
+    z_stream_data_t stream_data;
+    z_scout_t scout;
+    z_hello_t hello;
+  } payload;
+  uint8_t header; 
+} z_message_t;
+
 
 #endif /* ZENOH_C_MSG_H_ */

@@ -72,3 +72,8 @@ void z_iobuf_clear(z_iobuf_t *buf) {
   buf->r_pos = 0;
   buf->w_pos = 0;
 }
+
+z_array_uint8_t z_iobuf_to_array(z_iobuf_t* buf) {
+  z_array_uint8_t a = {z_iobuf_readable(buf), &buf->buf[buf->r_pos]};
+  return a;
+}

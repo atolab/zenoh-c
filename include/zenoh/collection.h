@@ -5,10 +5,10 @@
 typedef struct { \
   unsigned int length; \
   T* elem; \
-} z_array_##T
+} z_array_##T;
 
 #define Z_ARRAY_S_MAKE(T, arr, len) \
-z_array_##T arr = {len, (T*)malloc(len*sizeof(T))}
+z_array_##T arr = {len, (T*)malloc(len*sizeof(T))};
 
 #define Z_ARRAY_H_MAKE(T, arr, len) \
 z_array_##T * arr = (z_array_##T*)malloc(sizeof(z_array_##T)); \

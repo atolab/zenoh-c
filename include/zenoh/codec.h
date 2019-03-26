@@ -37,13 +37,13 @@ DECLARE_MSG_DECODE(close);
 
 DECLARE_MSG_ENCODE(declare);
 
-DECLARE_MSG_ENCODE(res_decl);
-DECLARE_MSG_DECODE(res_decl);
+// DECLARE_MSG_ENCODE(res_decl);
+// DECLARE_MSG_DECODE(res_decl);
 
-DECLARE_MSG_ENCODE(pub_decl);
-DECLARE_MSG_DECODE(pub_decl);
+// DECLARE_MSG_ENCODE(pub_decl);
+// DECLARE_MSG_DECODE(pub_decl);
 
-DECLARE_MSG_ENCODE(storage_decl);
+// DECLARE_MSG_ENCODE(storage_decl);
 
 DECLARE_MSG_ENCODE(temporal_property);
 DECLARE_MSG_DECODE_NOH(temporal_property);
@@ -51,18 +51,17 @@ DECLARE_MSG_DECODE_NOH(temporal_property);
 DECLARE_MSG_ENCODE(sub_mode);
 DECLARE_MSG_DECODE_NOH(sub_mode);
 
-DECLARE_MSG_ENCODE(sub_decl);
-DECLARE_MSG_DECODE(sub_decl);
+// DECLARE_MSG_ENCODE(sub_decl);
+// DECLARE_MSG_DECODE(sub_decl);
 
-DECLARE_MSG_ENCODE(commit_decl);
-DECLARE_MSG_DECODE(commit_decl);
+// DECLARE_MSG_ENCODE(commit_decl);
+// DECLARE_MSG_DECODE(commit_decl);
 
-DECLARE_MSG_ENCODE(result_decl);
-DECLARE_MSG_DECODE(result_decl);
+// DECLARE_MSG_ENCODE(result_decl);
+// DECLARE_MSG_DECODE(result_decl);
 
 DECLARE_MSG_CODEC(stream_data);
 
-void 
-encode_message(z_iobuf_t* buf, const z_message_t* m);
-
+void z_message_encode(z_iobuf_t* buf, const z_message_t* m);
+z_message_result_t z_message_decode(z_iobuf_t* buf);
 #endif /* ZENOH_C_CODEC_H */

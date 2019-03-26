@@ -13,7 +13,14 @@ include_directories(
 )
 
 file(GLOB Sources "src/*.c")
+link_directories("${PROJECT_SOURCE_DIR}/build")
 
 add_library(zenohc SHARED ${Sources})
 
-install (TARGETS zenohc DESTINATION ${PROJECT_SOURCE_DIR}/bin)
+add_executable(driver example/driver.c)
+# target_link_directories(driver "${PROJECT_SOURCE_DIR}/build")
+
+target_link_libraries(driver zenohc)
+
+install (TARGETS zenohc  DESTINATION ${PROJECT_SOURCE_DIR}/lib)
+install (TARGETS driver  DESTINATION ${PROJECT_SOURCE_DIR}/bin)

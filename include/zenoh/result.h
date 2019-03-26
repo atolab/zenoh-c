@@ -21,14 +21,11 @@ enum result_kind {
   Z_ACCEPT_TAG,
   Z_CLOSE_TAG,
   Z_DECLARE_TAG,
-  Z_RES_DECL_TAG,
-  Z_PUB_DECL_TAG,
+  Z_DECLARATION_TAG,
   Z_TEMP_PROPERTY_TAG,
   Z_SUB_MODE_TAG,
-  Z_SUB_DECL_TAG,
-  Z_COMMIT_DECL_TAG,
-  Z_RESULT_TAG,
   Z_STREAM_DATA_TAG,
+  Z_MESSAGE_TAG,
   Z_ERROR_TAG
 };
 
@@ -63,6 +60,12 @@ typedef struct { \
     out_r->value.error = e; \
     return; \
   }
+#define ASSERT_RESULT(r, msg) \
+  if (r.tag == Z_ERROR_TAG) { \
+    printf(msg); \
+    printf("\n"); \
+    exit(r.value.error); \
+  }
 
 Z_RESULT_DECLARE (z_vle_t, vle);
 Z_RESULT_DECLARE (z_array_uint8_t, array_uint8);
@@ -71,6 +74,7 @@ Z_RESULT_DECLARE (char*, string);
 Z_RESULT_DECLARE (z_accept_t, accept);
 Z_RESULT_DECLARE (z_close_t, close);
 Z_RESULT_DECLARE (z_declare_t, declare);
+Z_RESULT_DECLARE (z_declaration_t, declaration);
 Z_RESULT_DECLARE (z_res_decl_t, res_decl);
 Z_RESULT_DECLARE (z_pub_decl_t, pub_decl);
 Z_RESULT_DECLARE (z_temporal_property_t, temporal_property);
@@ -79,17 +83,7 @@ Z_RESULT_DECLARE (z_sub_decl_t, sub_decl);
 Z_RESULT_DECLARE (z_commit_decl_t, commit_decl);
 Z_RESULT_DECLARE (z_result_decl_t, result_decl);
 Z_RESULT_DECLARE (z_stream_data_t, stream_data);
+Z_RESULT_DECLARE (z_message_t, message);
 
-typedef struct {
-  enum result_kind tag;
-
-  union { 
-    z_accept_result_t accept;
-    z_close_result_t close;
-    z_declare_result_t declare;
-    z_stream_data_result_t stream_data;
-    uint8_t error;
-  } value;
-} z_message_result_t;
 
 #endif /* ZENOH_C_RESULT_H */
