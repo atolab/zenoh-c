@@ -131,10 +131,12 @@ z_open(char* locator, on_disconnect_t *on_disconnect) {
   assert(strcmp(tx, "tcp") == 0);
   char *addr = strtok(NULL, ":");  
   char *s_port = strtok(NULL, ":");    
-  fflush(stdout);
+  
   int port;
   sscanf(s_port, "%d", &port);    
   int sock;
+
+  printf("Locator: %s:%d", addr, port);
   struct sockaddr_in serv_addr;  
   
   sock = socket(PF_INET, SOCK_STREAM, 0);
@@ -184,13 +186,14 @@ z_open(char* locator, on_disconnect_t *on_disconnect) {
   msg.payload.open.lease = ZENOH_DEFAULT_LEASE;
   msg.properties = 0;
 
+  printf("Sending Open\n");
   z_send_msg(sock, &r.value.zenoh.wbuf, &msg);
   z_message_result_t r_msg = z_recv_msg(sock, &r.value.zenoh.rbuf);
   ASSERT_RESULT(r_msg, "Failed to receive accept")
 
   r.value.zenoh.sock = sock;
-  r.value.zenoh.on_disconnect = on_disconnect;
-
+  r.value.zenoh.pid = pid;
+  r.value.zenoh.on_disconnect = on_disconnect;  
   return r;
 }
 
@@ -230,9 +233,11 @@ z_declare_resource(zenoh_t *z, const char* resource) {
   return r_rid;
 }
 
-int z_declare_subscriber(zenoh_t *z, z_vle_t rid,  z_sub_mode_t sm, subscriber_callback_t *callback) {
+int
+z_declare_subscriber(zenoh_t *z, z_vle_t rid,  z_sub_mode_t sm, subscriber_callback_t *callback) {
   return 0;
 }
+
 int 
 z_declare_publisher(zenoh_t *z,  z_vle_t rid) {
   z_message_t msg;
@@ -243,11 +248,11 @@ z_declare_publisher(zenoh_t *z,  z_vle_t rid) {
   z_array_declaration_t decl = {2, (z_declaration_t*)malloc(2*sizeof(z_declaration_t))};
 
   
-  decl.elem[1].header = Z_PUBLISHER_DECL;
-  decl.elem[1].payload.pub.rid = rid;
+  decl.elem[0].header = Z_PUBLISHER_DECL;
+  decl.elem[0].payload.pub.rid = rid;
   
-  decl.elem[2].header = Z_COMMIT_DECL;
-  decl.elem[2].payload.commit.cid = z->cid++;
+  decl.elem[1].header = Z_COMMIT_DECL;
+  decl.elem[1].payload.commit.cid = z->cid++;
   
   msg.payload.declare.declarations = decl;  
   z_send_msg(z->sock, &z->wbuf, &msg);  
