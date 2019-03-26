@@ -61,9 +61,9 @@
 #define Z_MID_MASK 0x1f
 #define Z_FLAGS_MASK = 0xe0
 
-#define Z_HAS_FLAG (h, f) ((h & f) != 0)
-#define Z_MID (h) (MID_MASK & h)
-#define Z_FLAGS (h) (FLAGS_MASK & h)
+#define Z_HAS_FLAG(h, f) ((h & f) != 0)
+#define Z_MID(h) (Z_MID_MASK & h)
+#define Z_FLAGS(h) (Z_FLAGS_MASK & h)
 
 /* Scout Flags */
 #define Z_SCOUT_BROKER 0x01

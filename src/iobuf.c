@@ -2,22 +2,20 @@
 #include <assert.h>
 #include <stdio.h>
 
-z_iobuf_t* z_iobuf_make(unsigned int capacity) {
-  z_iobuf_t* iobuf = (z_iobuf_t*)malloc(sizeof(z_iobuf_t));
-  iobuf->r_pos = 0;
-  iobuf->w_pos = 0; 
-  iobuf->capacity = capacity;
-  iobuf->buf = (uint8_t*)malloc(capacity);
+z_iobuf_t z_iobuf_make(unsigned int capacity) {
+  z_iobuf_t iobuf;
+  iobuf.r_pos = 0;
+  iobuf.w_pos = 0; 
+  iobuf.capacity = capacity;
+  iobuf.buf = (uint8_t*)malloc(capacity);
   return iobuf;
 }
 
-void z_iobuf_free(z_iobuf_t** iobuf) {
-  z_iobuf_t* buf = *iobuf;
+void z_iobuf_free(z_iobuf_t* buf) {  
   buf->r_pos = 0;
   buf->w_pos = 0;
   buf->capacity = 0;
-  free(buf->buf);
-  free(buf);
+  free(buf->buf);  
   buf = 0;
 }
 

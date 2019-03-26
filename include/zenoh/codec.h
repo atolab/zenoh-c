@@ -10,6 +10,9 @@ void z_ ##name ##_encode(z_iobuf_t* buf, const z_ ##name ##_t* m)
 #define DECLARE_MSG_DECODE(name) \
 z_ ##name ##_result_t z_ ##name ## _decode(z_iobuf_t* buf, uint8_t header)
 
+#define DECLARE_MSG_DECODE_NOH(name) \
+z_ ##name ##_result_t z_ ##name ## _decode(z_iobuf_t* buf)
+
 #define DECLARE_MSG_CODEC(name)\
   DECLARE_MSG_DECODE(name); \
   DECLARE_MSG_ENCODE(name)
@@ -24,19 +27,35 @@ z_array_uint8_result_t z_array_uint8_decode(z_iobuf_t* buf);
 void z_string_encode(z_iobuf_t* buf, const char* s);
 z_string_result_t z_string_decode(z_iobuf_t* buf);
 
+
 DECLARE_MSG_ENCODE(open);
 DECLARE_MSG_DECODE(accept);
-DECLARE_MSG_CODEC(close);
+
+DECLARE_MSG_ENCODE(close);
+DECLARE_MSG_DECODE(close);
+
 DECLARE_MSG_ENCODE(declare);
+
 DECLARE_MSG_ENCODE(res_decl);
+DECLARE_MSG_DECODE(res_decl);
+
 DECLARE_MSG_ENCODE(pub_decl);
 DECLARE_MSG_ENCODE(storage_decl);
+
 DECLARE_MSG_ENCODE(temporal_property);
+DECLARE_MSG_DECODE_NOH(temporal_property);
+
 DECLARE_MSG_ENCODE(sub_mode);
+DECLARE_MSG_DECODE_NOH(sub_mode);
+
 DECLARE_MSG_ENCODE(sub_decl);
+DECLARE_MSG_DECODE(sub_decl);
+
 DECLARE_MSG_ENCODE(commit_decl);
 DECLARE_MSG_DECODE(result_decl);
 DECLARE_MSG_CODEC(stream_data);
 
+void 
+encode_message(z_iobuf_t* buf, const z_message_t* m);
 
 #endif /* ZENOH_C_CODEC_H */

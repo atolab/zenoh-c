@@ -3,24 +3,23 @@
 
 #include <assert.h>
 
-inline z_vec_t* z_vec_make(unsigned int capacity) {
-  z_vec_t* v = (z_vec_t*) malloc(sizeof(z_vec_t));
-  v->capacity_ = capacity;
-  v->length_ = 0;
-  v->elem_ = (void**)malloc(sizeof(void*) * capacity);
+inline z_vec_t z_vec_make(unsigned int capacity) {
+  z_vec_t v;
+  v.capacity_ = capacity;
+  v.length_ = 0;
+  v.elem_ = (void**)malloc(sizeof(void*) * capacity);
   return v;
 }
 
-z_vec_t* z_vec_clone(const z_vec_t* v) {
-  z_vec_t* u = z_vec_make(v->capacity_);
+z_vec_t z_vec_clone(const z_vec_t* v) {
+  z_vec_t u = z_vec_make(v->capacity_);
   int i;
   for (i = 0; i < v->length_; ++i) 
-    z_vec_append(u, v->elem_[i]);
+    z_vec_append(&u, v->elem_[i]);
   return u;
 }
 
-void z_vec_free(z_vec_t** pv) {
-  z_vec_t* v = *pv;
+void z_vec_free(z_vec_t* v) {  
   int i;
   for (i = 0; i < v->length_; ++i) 
     free(v->elem_[i]);
@@ -28,7 +27,7 @@ void z_vec_free(z_vec_t** pv) {
   v-> capacity_ = 0;
   free(v->elem_);
   v->elem_ = 0;
-  free(v);
+  
 }
 
 inline unsigned int z_vec_length(const z_vec_t* v) { return v->length_; }

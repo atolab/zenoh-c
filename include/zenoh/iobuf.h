@@ -10,8 +10,8 @@ typedef struct {
   uint8_t* buf;
 } z_iobuf_t;
 
-z_iobuf_t* z_iobuf_make(unsigned int capacity);
-void z_iobuf_free(z_iobuf_t** buf);
+z_iobuf_t z_iobuf_make(unsigned int capacity);
+void z_iobuf_free(z_iobuf_t* buf);
 unsigned int z_iobuf_readable(const z_iobuf_t* buf);
 unsigned int z_iobuf_writable(const z_iobuf_t* buf);
 void z_iobuf_write(z_iobuf_t* buf, uint8_t b);

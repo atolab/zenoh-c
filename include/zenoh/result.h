@@ -3,12 +3,14 @@
 
 #include "zenoh/msg.h"
 
-#define VLE_PARSE_ERROR 0x01
-#define ARRAY_PARSE_ERROR 0x02
-#define PROPERTY_PARSE_ERROR 0x03
-#define PROPERTIES_PARSE_ERROR 0x04
-#define MESSAGE_PARSE_ERROR 0x05
-#define UNEXPECTED_MESSAGE 0x06
+#define Z_VLE_PARSE_ERROR 0x01
+#define Z_ARRAY_PARSE_ERROR 0x02
+#define Z_STRING_PARSE_ERROR 0x03
+#define Z_PROPERTY_PARSE_ERROR 0x04
+#define Z_PROPERTIES_PARSE_ERROR 0x05
+#define Z_MESSAGE_PARSE_ERROR 0x06
+#define Z_INSUFFICIENT_IOBUF_SIZE 0x07
+#define Z_UNEXPECTED_MESSAGE 0x7f
 
 enum result_kind {
   Z_VLE_TAG,
@@ -39,6 +41,22 @@ typedef struct { \
   } value;\
 } z_ ## name ## _result_t
 
+#define Z_P_RESULT_DECLARE(type, name) \
+typedef struct { \
+  enum result_kind tag; \
+  union { \
+    type * name; \
+    int error; \
+  } value;\
+} z_ ## name ## _result_t
+
+#define ASSURE_RESULT(in_r, out_r, e) \
+  if (in_r.tag == Z_ERROR_TAG) { \
+    out_r.tag = Z_ERROR_TAG; \
+    out_r.value.error = e; \
+    return out_r; \
+  }
+
 Z_RESULT_DECLARE (z_vle_t, vle);
 Z_RESULT_DECLARE (z_array_uint8_t, array_uint8);
 Z_RESULT_DECLARE (char*, string);
@@ -55,5 +73,16 @@ Z_RESULT_DECLARE (z_commit_decl_t, commit);
 Z_RESULT_DECLARE (z_result_decl_t, result_decl);
 Z_RESULT_DECLARE (z_stream_data_t, stream_data);
 
+typedef struct {
+  enum result_kind tag;
+
+  union { 
+    z_accept_result_t accept;
+    z_close_result_t close;
+    z_declare_result_t declare;
+    z_stream_data_result_t stream_data;
+    uint8_t error;
+  } value;
+} z_message_result_t;
 
 #endif /* ZENOH_C_RESULT_H */
