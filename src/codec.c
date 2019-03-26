@@ -14,7 +14,7 @@ z_vle_encode(z_iobuf_t* buf, z_vle_t v) {
 z_vle_result_t 
 z_vle_decode(z_iobuf_t* buf) {
   z_vle_result_t r;
-  r.tag = Z_VLE_TAG;
+  r.tag = Z_OK_TAG;
   r.value.vle = 0;
 
   uint8_t c;  
@@ -37,7 +37,7 @@ z_array_uint8_encode(z_iobuf_t* buf, const z_array_uint8_t* bs) {
 
 void
 z_array_uint8_decode_na(z_iobuf_t* buf, z_array_uint8_result_t *r) {  
-  r->tag = Z_ARRAY_UINT8_TAG;
+  r->tag = Z_OK_TAG;
   z_vle_result_t r_vle = z_vle_decode(buf);
   ASSURE_RESULT_P(r_vle, r, Z_VLE_PARSE_ERROR)
   r->value.array_uint8.length = (unsigned int)r_vle.value.vle;  
@@ -63,7 +63,7 @@ z_string_encode(z_iobuf_t* buf, const char* s) {
 z_string_result_t 
 z_string_decode(z_iobuf_t* buf) {
   z_string_result_t r;
-  r.tag = Z_STRING_TAG;
+  r.tag = Z_OK_TAG;
   z_vle_result_t vr = z_vle_decode(buf);
   ASSURE_RESULT(vr, r, Z_VLE_PARSE_ERROR)
   size_t len = vr.value.vle;
@@ -86,7 +86,7 @@ z_open_encode(z_iobuf_t* buf, const z_open_t* m) {
 void
 z_accept_decode_na(z_iobuf_t* buf, uint8_t header, z_accept_result_t *r) {  
 
-  r->tag = Z_ACCEPT_TAG;  
+  r->tag = Z_OK_TAG;  
 
   z_array_uint8_result_t r_cpid = z_array_uint8_decode(buf);
   ASSURE_RESULT_P(r_cpid, r, Z_ARRAY_PARSE_ERROR) 
@@ -119,7 +119,7 @@ z_close_encode(z_iobuf_t* buf, const z_close_t* m) {
 
 void 
 z_close_decode_na(z_iobuf_t* buf, uint8_t header, z_close_result_t *r) {   
-  r->tag = Z_CLOSE_TAG;
+  r->tag = Z_OK_TAG;
   z_array_uint8_result_t ar =  z_array_uint8_decode(buf);
   ASSURE_RESULT_P(ar, r, Z_ARRAY_PARSE_ERROR)
   r->value.close.pid = ar.value.array_uint8;
@@ -133,58 +133,6 @@ z_close_decode(z_iobuf_t* buf, uint8_t header) {
   return r;
 }
 
-// void 
-// z_res_decl_encode(z_iobuf_t* buf, const z_res_decl_t* m) { 
-//   z_vle_encode(buf, m->rid);
-//   z_string_encode(buf, m->r_name);
-//   // TODO: Encode Properties
-// }
-
-// void
-// z_res_decl_decode_na(z_iobuf_t* buf, uint8_t header, z_res_decl_result_t *r) {  
-//   r->tag = Z_RES_DECL_TAG;
-//   z_vle_result_t r_vle = z_vle_decode(buf);
-//   ASSURE_RESULT_P(r_vle, r, Z_VLE_PARSE_ERROR)
-//   z_string_result_t r_str = z_string_decode(buf);
-//   ASSURE_RESULT_P(r_str, r, Z_STRING_PARSE_ERROR)  
-//   r->value.res_decl.rid = r_vle.value.vle;
-//   r->value.res_decl.r_name = r_str.value.string;
-// }
-
-// z_res_decl_result_t 
-// z_res_decl_decode(z_iobuf_t* buf, uint8_t header) {
-//   z_res_decl_result_t r;
-//   z_res_decl_decode_na(buf, header, &r);
-//   return r;
-// }
-
-// void 
-// z_pub_decl_encode(z_iobuf_t* buf, const z_pub_decl_t* m) {
-//   z_vle_encode(buf, m->rid);
-//   // TODO: Encode Properties    
-// }
-
-// // void 
-// // z_pub_decl_decode_na(z_iobuf_t* buf, uint8_t header, z_pub_decl_result_t *r) {
-// //   z_vle_result_t r_vle = z_vle_decode(buf);
-// //   ASSURE_RESULT_P(r_vle, r, Z_VLE_PARSE_ERROR)
-// //   r->tag = Z_PUB_DECL_TAG;
-// //   r->value.pub_decl.rid = r_vle.value.vle;
-// //   // TODO: Decode Props
-// // }
-
-// // z_pub_decl_result_t
-// // z_pub_decl_decode(z_iobuf_t* buf, uint8_t header) {
-// //   z_pub_decl_result_t r;
-// //   z_pub_decl_decode_na(buf, header, &r);
-// //   return r;    
-// // }
-
-// // void 
-// // z_storage_decl_encode(z_iobuf_t* buf, const z_storage_decl_t* m) { 
-// //   z_vle_encode(buf, m->rid);
-// //   // TODO: Encode Properties    
-// // }
 void 
 z_temporal_property_encode(z_iobuf_t* buf, const z_temporal_property_t* tp) { 
   z_vle_encode(buf, tp->origin);
@@ -194,7 +142,7 @@ z_temporal_property_encode(z_iobuf_t* buf, const z_temporal_property_t* tp) {
 
 void
 z_temporal_property_decode_na(z_iobuf_t* buf, z_temporal_property_result_t *r) {  
-  r->tag = Z_TEMP_PROPERTY_TAG;
+  r->tag = Z_OK_TAG;
   z_vle_result_t r_origin = z_vle_decode(buf);
   ASSURE_RESULT_P(r_origin, r, Z_VLE_PARSE_ERROR)
   z_vle_result_t r_period = z_vle_decode(buf);
@@ -230,7 +178,7 @@ z_sub_mode_encode(z_iobuf_t* buf, const z_sub_mode_t* m) {
 void
 z_sub_mode_decode_na(z_iobuf_t* buf, z_sub_mode_result_t *r) {  
   z_temporal_property_result_t r_tp;
-  r->tag = Z_SUB_MODE_TAG;
+  r->tag = Z_OK_TAG;
   r->value.sub_mode.kind = z_iobuf_read(buf);
   switch (r->value.sub_mode.kind) {
     case Z_PERIODIC_PULL_MODE:
@@ -250,70 +198,6 @@ z_sub_mode_decode(z_iobuf_t* buf) {
   z_sub_mode_decode_na(buf, &r);
   return r;
 }
-
-// void 
-// z_sub_decl_encode(z_iobuf_t* buf, const z_sub_decl_t* m) {
-//   z_vle_encode(buf, m->rid);
-//   z_sub_mode_encode(buf, &m->sub_mode);
-//   // TODO: Encode Properties    
-// }
-
-// void 
-// z_sub_decl_decode_na(z_iobuf_t* buf, uint8_t header, z_sub_decl_result_t *r) {  
-//   r->tag = Z_SUB_DECL_TAG;
-//   z_vle_result_t r_rid = z_vle_decode(buf);
-//   ASSURE_RESULT_P(r_rid, r, Z_VLE_PARSE_ERROR)
-//   z_sub_mode_result_t r_sm = z_sub_mode_decode(buf);
-//   ASSURE_RESULT_P(r_sm, r, Z_MESSAGE_PARSE_ERROR)
-//   r->value.sub_decl.rid = r_rid.value.vle;
-//   r->value.sub_decl.sub_mode = r_sm.value.sub_mode;  
-// }
-
-// z_sub_decl_result_t 
-// z_sub_decl_decode(z_iobuf_t* buf, uint8_t header) {
-//   z_sub_decl_result_t r;
-//   z_sub_decl_decode_na(buf, header, &r);
-//   return r;
-// }
-
-// void 
-// z_commit_decl_encode(z_iobuf_t* buf, const z_commit_decl_t* m) { 
-//   z_iobuf_write(buf, m->cid);
-// }
-
-// void 
-// z_commit_decl_decode_na(z_iobuf_t* buf, uint8_t header, z_commit_decl_result_t *r) {
-//   r->tag = Z_COMMIT_DECL_TAG;
-//   r->value.commit_decl.cid = z_iobuf_read(buf);
-// }
-
-// z_commit_decl_result_t
-// z_commit_decl_decode(z_iobuf_t* buf, uint8_t header) {
-//   z_commit_decl_result_t r;
-//   z_commit_decl_decode_na(buf, header, &r);
-//   return r;
-// }
-
-// void 
-// z_result_decl_encode(z_iobuf_t* buf, const z_result_decl_t *d) {
-//   z_iobuf_write(buf, d->cid);
-//   z_iobuf_write(buf, d->status);
-// }
-
-// void 
-// z_result_decl_decode_na(z_iobuf_t* buf, uint8_t header, z_result_decl_result_t *r) {   
-//   r->tag = Z_RES_DECL_TAG;
-//   r->value.result_decl.cid = z_iobuf_read(buf);
-//   r->value.result_decl.status = z_iobuf_read(buf);  
-// }
-
-// z_result_decl_result_t 
-// z_result_decl_decode(z_iobuf_t* buf, uint8_t header) { 
-//   z_result_decl_result_t r;
-//   z_result_decl_decode_na(buf, header, &r);
-//   return r;
-// }
-
 
 void 
 z_declaration_encode(z_iobuf_t *buf, z_declaration_t *d) {
@@ -350,7 +234,7 @@ z_declaration_decode_na(z_iobuf_t *buf, z_declaration_result_t *r) {
   z_vle_result_t r_vle;
   z_string_result_t r_str;
   z_sub_mode_result_t r_sm;
-  r->tag = Z_DECLARATION_TAG;
+  r->tag = Z_OK_TAG;
   r->value.declaration.header = z_iobuf_read(buf); 
   switch (Z_MID(r->value.declaration.header)) {
     case Z_RESOURCE_DECL:      
@@ -455,7 +339,7 @@ z_stream_data_encode(z_iobuf_t* buf, const z_stream_data_t* m) {
 
 void
 z_stream_data_decode_na(z_iobuf_t* buf, uint8_t header, z_stream_data_result_t *r) {  
-  r->tag = Z_STREAM_DATA_TAG;
+  r->tag = Z_OK_TAG;
   z_vle_result_t r_vle = z_vle_decode(buf);
   ASSURE_RESULT_P(r_vle, r, Z_VLE_PARSE_ERROR)
   
@@ -507,31 +391,31 @@ z_message_decode(z_iobuf_t* buf) {
   z_declare_result_t r_d;
 
   uint8_t h = z_iobuf_read(buf);
-  r.tag = Z_MESSAGE_TAG;
+  r.tag = Z_OK_TAG;
   r.value.message.header = h;
 
   uint8_t mid = Z_MID(h);
   switch (mid) {
     case Z_STREAM_DATA:
-      r.tag = Z_STREAM_DATA_TAG;
+      r.tag = Z_OK_TAG;
       r_sd = z_stream_data_decode(buf, h);
       ASSURE_RESULT(r_sd, r, Z_MESSAGE_PARSE_ERROR)
       r.value.message.payload.stream_data = r_sd.value.stream_data;
       break;
     case Z_ACCEPT:
-      r.tag = Z_ACCEPT_TAG;
+      r.tag = Z_OK_TAG;
       r_a = z_accept_decode(buf, h);
       ASSURE_RESULT(r_a, r, Z_MESSAGE_PARSE_ERROR)
       r.value.message.payload.accept = r_a.value.accept;
       break;
     case Z_CLOSE:
-      r.tag = Z_CLOSE_TAG;
+      r.tag = Z_OK_TAG;
       r_c = z_close_decode(buf, h);
       ASSURE_RESULT(r_c, r, Z_MESSAGE_PARSE_ERROR)
       r.value.message.payload.close = r_c.value.close;
       break;
     case Z_DECLARE:
-      r.tag = Z_DECLARE_TAG;
+      r.tag = Z_OK_TAG;
       r_d = z_declare_decode(buf, h);
       ASSURE_RESULT(r_d, r, Z_MESSAGE_PARSE_ERROR)
       r.value.message.payload.declare = r_d.value.declare;

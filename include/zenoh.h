@@ -1,33 +1,20 @@
 #ifndef ZENOH_C_H_DEFINED_
 #define ZENOH_C_H_DEFINED_
 
+#include "zenoh/config.h"
 #include "zenoh/msg.h"
 #include "zenoh/codec.h"
 
-typedef struct {
-  int z;
-} zenoh_t;
 
-typedef struct {
-  int z;
-} z_sub_t;
+z_zenoh_result_t 
+z_open(char* locator, on_disconnect_t *on_disconnect);
+void z_close(zenoh_t* z);
+z_vle_result_t z_declare_resource(zenoh_t *z, const char* resource);
+int z_declare_subscriber(zenoh_t *z, z_vle_t rid, z_sub_mode_t sm, subscriber_callback_t *callback);
+int z_declare_publisher(zenoh_t *z, z_vle_t rid);
 
-typedef struct {
-  int z;
-} z_pub_t;
-typedef void *subscriber_callback(const char* , const char* , unsigned int);
-
-zenoh_t* open(const char* locator);
-void close(zenoh_t* z);
-
-
-z_sub_t* subscribe(const char* resource, subscriber_callback callback);
-z_pub_t* publish(const char* resource);
-
-void stream(z_pub_t* pub, const char* data, unsigned int offset, unsigned int len);
-void write(const char* resource, const char* data, unsigned int offset, unsigned int len);
-
-
+void z_stream_data(zenoh_t *z, z_vle_t rid, const z_array_uint8_t *payload);
+void z_write_data(zenoh_t *z, const char* resource, const z_array_uint8_t *payload);
 
 
 #endif /* ZENOH_C_H_DEFINED_ */

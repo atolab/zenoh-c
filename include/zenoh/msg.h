@@ -2,7 +2,6 @@
 #define ZENOH_C_MSG_H_
 
 #include "zenoh/types.h"
-#include "zenoh/iobuf.h"
 
 /* Message ID */
 
