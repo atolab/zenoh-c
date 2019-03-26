@@ -2,6 +2,8 @@
 #include <unistd.h>
 #include "zenoh.h"
 
+
+
 int main(int argc, char **argv) {
   char *locator = strdup("tcp/127.0.0.1:7447");
   if (argc > 1) {

@@ -31,7 +31,8 @@ uint8_t z_iobuf_get(z_iobuf_t* buf, unsigned int pos);
 void z_iobuf_clear(z_iobuf_t *buf);
 z_array_uint8_t z_iobuf_to_array(z_iobuf_t* buf);
 
-typedef void on_disconnect_t(void);
+
+typedef void on_disconnect_t(void *z);
 
 typedef struct {
   int sock;
@@ -41,6 +42,7 @@ typedef struct {
   z_iobuf_t wbuf;
   z_iobuf_t rbuf;
   z_array_uint8_t pid;
+  char *locator;
   on_disconnect_t *on_disconnect;
 } zenoh_t;
 
