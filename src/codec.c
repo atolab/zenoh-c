@@ -35,16 +35,21 @@ z_array_uint8_encode(z_iobuf_t* buf, const z_array_uint8_t* bs) {
   z_iobuf_write_n(buf, bs->elem, 0,  bs->length);
 }
 
+void
+z_array_uint8_decode_na(z_iobuf_t* buf, z_array_uint8_result_t *r) {  
+  r->tag = Z_ARRAY_UINT8_TAG;
+  z_vle_result_t r_vle = z_vle_decode(buf);
+  ASSURE_RESULT_P(r_vle, r, Z_VLE_PARSE_ERROR)
+  r->value.array_uint8.length = (unsigned int)r_vle.value.vle;  
+  r->value.array_uint8.elem = z_iobuf_read_n(buf, r->value.array_uint8.length); 
+}
+
 z_array_uint8_result_t 
 z_array_uint8_decode(z_iobuf_t* buf) {
   printf("z_array_uint8_decode\n");
   z_array_uint8_result_t r;
-  r.tag = Z_ARRAY_UINT8_TAG;
-  z_vle_result_t r_vle = z_vle_decode(buf);
-  ASSURE_RESULT(r_vle, r, Z_VLE_PARSE_ERROR)
-  r.value.array_uint8.length = (unsigned int)r_vle.value.vle;  
-  r.value.array_uint8.elem = z_iobuf_read_n(buf, r.value.array_uint8.length); 
-  return r;
+  z_array_uint8_decode_na(buf, &r);
+  return r;  
 }
 
 void 
@@ -79,30 +84,34 @@ z_open_encode(z_iobuf_t* buf, const z_open_t* m) {
   // TODO: Encode properties if present
 }
 
-z_accept_result_t 
-z_accept_decode(z_iobuf_t* buf, uint8_t header) {
-  z_accept_result_t r;
-  r.tag = Z_ACCEPT_TAG;  
-  r.value.accept.header = header;
+void
+z_accept_decode_na(z_iobuf_t* buf, uint8_t header, z_accept_result_t *r) {  
+
+  r->tag = Z_ACCEPT_TAG;  
+  r->value.accept.header = header;
 
   z_array_uint8_result_t r_cpid = z_array_uint8_decode(buf);
-  ASSURE_RESULT(r_cpid, r, Z_ARRAY_PARSE_ERROR) 
+  ASSURE_RESULT_P(r_cpid, r, Z_ARRAY_PARSE_ERROR) 
 
   z_array_uint8_result_t r_bpid = z_array_uint8_decode(buf);
-  ASSURE_RESULT(r_bpid, r, Z_ARRAY_PARSE_ERROR)
+  ASSURE_RESULT_P(r_bpid, r, Z_ARRAY_PARSE_ERROR)
 
   z_vle_result_t r_vle = z_vle_decode(buf);
-  ASSURE_RESULT(r_vle, r, Z_VLE_PARSE_ERROR)
+  ASSURE_RESULT_P(r_vle, r, Z_VLE_PARSE_ERROR)
   
   // TODO: Decode Properties
 
-  r.value.accept.client_pid = r_cpid.value.array_uint8;
-  r.value.accept.broker_pid = r_bpid.value.array_uint8;
-  r.value.accept.lease = r_vle.value.vle;
-
-  return r;
+  r->value.accept.client_pid = r_cpid.value.array_uint8;
+  r->value.accept.broker_pid = r_bpid.value.array_uint8;
+  r->value.accept.lease = r_vle.value.vle;
 }
 
+z_accept_result_t 
+z_accept_decode(z_iobuf_t* buf, uint8_t header) {
+  z_accept_result_t r;
+  z_accept_decode_na(buf, header, &r);
+  return r;
+}
 
 void 
 z_close_encode(z_iobuf_t* buf, const z_close_t* m) { 
@@ -111,15 +120,20 @@ z_close_encode(z_iobuf_t* buf, const z_close_t* m) {
   z_iobuf_write(buf, m->reason);
 }
 
+void 
+z_close_decode_na(z_iobuf_t* buf, uint8_t header, z_close_result_t *r) {   
+  r->tag = Z_CLOSE_TAG;
+  r->value.close.header = z_iobuf_read(buf);
+  z_array_uint8_result_t ar =  z_array_uint8_decode(buf);
+  ASSURE_RESULT_P(ar, r, Z_ARRAY_PARSE_ERROR)
+  r->value.close.pid = ar.value.array_uint8;
+  r->value.close.reason = z_iobuf_read(buf);  
+}
+
 z_close_result_t 
 z_close_decode(z_iobuf_t* buf, uint8_t header) { 
   z_close_result_t r;
-  r.tag = Z_CLOSE_TAG;
-  r.value.close.header = z_iobuf_read(buf);
-  z_array_uint8_result_t ar =  z_array_uint8_decode(buf);
-  ASSURE_RESULT(ar, r, Z_ARRAY_PARSE_ERROR)
-  r.value.close.pid = ar.value.array_uint8;
-  r.value.close.reason = z_iobuf_read(buf);
+  z_close_decode_na(buf, header, &r); 
   return r;
 }
 
@@ -131,17 +145,22 @@ z_res_decl_encode(z_iobuf_t* buf, const z_res_decl_t* m) {
   // TODO: Encode Properties
 }
 
+void
+z_res_decl_decode_na(z_iobuf_t* buf, uint8_t header, z_res_decl_result_t *r) {  
+  r->tag = Z_RES_DECL_TAG;
+  z_vle_result_t r_vle = z_vle_decode(buf);
+  ASSURE_RESULT_P(r_vle, r, Z_VLE_PARSE_ERROR)
+  z_string_result_t r_str = z_string_decode(buf);
+  ASSURE_RESULT_P(r_str, r, Z_STRING_PARSE_ERROR)  
+  r->value.res_decl.header = header;
+  r->value.res_decl.rid = r_vle.value.vle;
+  r->value.res_decl.r_name = r_str.value.string;
+}
+
 z_res_decl_result_t 
 z_res_decl_decode(z_iobuf_t* buf, uint8_t header) {
   z_res_decl_result_t r;
-  r.tag = Z_RES_DECL_TAG;
-  z_vle_result_t r_vle = z_vle_decode(buf);
-  ASSURE_RESULT(r_vle, r, Z_VLE_PARSE_ERROR)
-  z_string_result_t r_str = z_string_decode(buf);
-  ASSURE_RESULT(r_str, r, Z_STRING_PARSE_ERROR)  
-  r.value.res_decl.header = header;
-  r.value.res_decl.rid = r_vle.value.vle;
-  r.value.res_decl.r_name = r_str.value.string;
+  z_res_decl_decode_na(buf, header, &r);
   return r;
 }
 
@@ -151,6 +170,24 @@ z_pub_decl_encode(z_iobuf_t* buf, const z_pub_decl_t* m) {
   z_vle_encode(buf, m->rid);
   // TODO: Encode Properties    
 }
+
+void 
+z_pub_decl_decode_na(z_iobuf_t* buf, uint8_t header, z_pub_decl_result_t *r) {
+  z_vle_result_t r_vle = z_vle_decode(buf);
+  ASSURE_RESULT_P(r_vle, r, Z_VLE_PARSE_ERROR)
+  r->tag = Z_PUB_DECL_TAG;
+  r->value.pub_decl.header = header;
+  r->value.pub_decl.rid = r_vle.value.vle;
+  // TODO: Decode Props
+}
+
+z_pub_decl_result_t
+z_pub_decl_decode(z_iobuf_t* buf, uint8_t header) {
+  z_pub_decl_result_t r;
+  z_pub_decl_decode_na(buf, header, &r);
+  return r;    
+}
+
 void 
 z_storage_decl_encode(z_iobuf_t* buf, const z_storage_decl_t* m) { 
   z_iobuf_write(buf, m->header);
@@ -164,20 +201,25 @@ z_temporal_property_encode(z_iobuf_t* buf, const z_temporal_property_t* tp) {
   z_vle_encode(buf, tp->duration);
 }
 
+void
+z_temporal_property_decode_na(z_iobuf_t* buf, z_temporal_property_result_t *r) {  
+  r->tag = Z_TEMP_PROPERTY_TAG;
+  z_vle_result_t r_origin = z_vle_decode(buf);
+  ASSURE_RESULT_P(r_origin, r, Z_VLE_PARSE_ERROR)
+  z_vle_result_t r_period = z_vle_decode(buf);
+  ASSURE_RESULT_P(r_period, r, Z_VLE_PARSE_ERROR)
+  z_vle_result_t r_duration = z_vle_decode(buf);
+  ASSURE_RESULT_P(r_duration, r, Z_VLE_PARSE_ERROR)
+
+  r->value.temporal_property.origin = r_origin.value.vle;
+  r->value.temporal_property.period = r_period.value.vle;
+  r->value.temporal_property.duration = r_duration.value.vle;  
+}
+
 z_temporal_property_result_t 
 z_temporal_property_decode(z_iobuf_t* buf) {
   z_temporal_property_result_t r;
-  r.tag = Z_TEMP_PROPERTY_TAG;
-  z_vle_result_t r_origin = z_vle_decode(buf);
-  ASSURE_RESULT(r_origin, r, Z_VLE_PARSE_ERROR)
-  z_vle_result_t r_period = z_vle_decode(buf);
-  ASSURE_RESULT(r_period, r, Z_VLE_PARSE_ERROR)
-  z_vle_result_t r_duration = z_vle_decode(buf);
-  ASSURE_RESULT(r_duration, r, Z_VLE_PARSE_ERROR)
-
-  r.value.temporal_property.origin = r_origin.value.vle;
-  r.value.temporal_property.period = r_period.value.vle;
-  r.value.temporal_property.duration = r_duration.value.vle;
+  z_temporal_property_decode_na(buf, &r);
   return r;
 }
 
@@ -194,25 +236,29 @@ z_sub_mode_encode(z_iobuf_t* buf, const z_sub_mode_t* m) {
   }
 }
 
-z_sub_mode_result_t 
-z_sub_mode_decode(z_iobuf_t* buf) {
-  z_sub_mode_result_t r;
+void
+z_sub_mode_decode_na(z_iobuf_t* buf, z_sub_mode_result_t *r) {  
   z_temporal_property_result_t r_tp;
-  r.tag = Z_SUB_MODE_TAG;
-  r.value.sub_mode.kind = z_iobuf_read(buf);
-  switch (r.value.sub_mode.kind) {
+  r->tag = Z_SUB_MODE_TAG;
+  r->value.sub_mode.kind = z_iobuf_read(buf);
+  switch (r->value.sub_mode.kind) {
     case Z_PERIODIC_PULL_MODE:
     case Z_PERIODIC_PUSH_MODE:      
       r_tp = z_temporal_property_decode(buf);
-      ASSURE_RESULT(r_tp, r, Z_MESSAGE_PARSE_ERROR)
-      r.value.sub_mode.tprop = r_tp.value.temporal_property;
+      ASSURE_RESULT_P(r_tp, r, Z_MESSAGE_PARSE_ERROR)
+      r->value.sub_mode.tprop = r_tp.value.temporal_property;
       break; 
     default:
       break;
-  }
-  return r;
+  }  
 }
 
+z_sub_mode_result_t 
+z_sub_mode_decode(z_iobuf_t* buf) {
+  z_sub_mode_result_t r;
+  z_sub_mode_decode_na(buf, &r);
+  return r;
+}
 
 void 
 z_sub_decl_encode(z_iobuf_t* buf, const z_sub_decl_t* m) {
@@ -222,16 +268,22 @@ z_sub_decl_encode(z_iobuf_t* buf, const z_sub_decl_t* m) {
   // TODO: Encode Properties    
 }
 
+void 
+z_sub_decl_decode_na(z_iobuf_t* buf, uint8_t header, z_sub_decl_result_t *r) {  
+  r->tag = Z_SUB_DECL_TAG;
+  z_vle_result_t r_rid = z_vle_decode(buf);
+  ASSURE_RESULT_P(r_rid, r, Z_VLE_PARSE_ERROR)
+  z_sub_mode_result_t r_sm = z_sub_mode_decode(buf);
+  ASSURE_RESULT_P(r_sm, r, Z_MESSAGE_PARSE_ERROR)
+  r->value.sub_decl.header = header;
+  r->value.sub_decl.rid = r_rid.value.vle;
+  r->value.sub_decl.sub_mode = r_sm.value.sub_mode;  
+}
+
 z_sub_decl_result_t 
 z_sub_decl_decode(z_iobuf_t* buf, uint8_t header) {
   z_sub_decl_result_t r;
-  r.tag = Z_SUB_DECL_TAG;
-  z_vle_result_t r_rid = z_vle_decode(buf);
-  ASSURE_RESULT(r_rid, r, Z_VLE_PARSE_ERROR)
-  z_sub_mode_result_t r_sm = z_sub_mode_decode(buf);
-  ASSURE_RESULT(r_sm, r, Z_MESSAGE_PARSE_ERROR)
-  r.value.sub_decl.rid = r_rid.value.vle;
-  r.value.sub_decl.sub_mode = r_sm.value.sub_mode;
+  z_sub_decl_decode_na(buf, header, &r);
   return r;
 }
 
@@ -241,13 +293,39 @@ z_commit_decl_encode(z_iobuf_t* buf, const z_commit_decl_t* m) {
   z_iobuf_write(buf, m->cid);
 }
 
+void 
+z_commit_decl_decode_na(z_iobuf_t* buf, uint8_t header, z_commit_decl_result_t *r) {
+  r->tag = Z_COMMIT_DECL_TAG;
+  r->value.commit_decl.header = header;
+  r->value.commit_decl.header = z_iobuf_read(buf);
+}
+
+z_commit_decl_result_t
+z_commit_decl_decode(z_iobuf_t* buf, uint8_t header) {
+  z_commit_decl_result_t r;
+  z_commit_decl_decode_na(buf, header, &r);
+  return r;
+}
+
+void 
+z_result_decl_encode(z_iobuf_t* buf, const z_result_decl_t *d) {
+  z_iobuf_write(buf, d->header);
+  z_iobuf_write(buf, d->cid);
+  z_iobuf_write(buf, d->status);
+}
+
+void 
+z_result_decl_decode_na(z_iobuf_t* buf, uint8_t header, z_result_decl_result_t *r) {   
+  r->tag = Z_RES_DECL_TAG;
+  r->value.result_decl.header = header;
+  r->value.result_decl.cid = z_iobuf_read(buf);
+  r->value.result_decl.status = z_iobuf_read(buf);  
+}
+
 z_result_decl_result_t 
 z_result_decl_decode(z_iobuf_t* buf, uint8_t header) { 
   z_result_decl_result_t r;
-  r.tag = Z_RES_DECL_TAG;
-  r.value.result_decl.header = header;
-  r.value.result_decl.cid = z_iobuf_read(buf);
-  r.value.result_decl.status = z_iobuf_read(buf);
+  z_result_decl_decode_na(buf, header, &r);
   return r;
 }
 
@@ -285,69 +363,54 @@ z_declare_encode(z_iobuf_t* buf, const z_declare_t* m) {
 }
 
 
-z_declare_result_t
-z_declare_decode(z_iobuf_t* buf, uint8_t header) { 
-  z_declare_result_t r;
-  
+void
+z_declare_decode_na(z_iobuf_t* buf, uint8_t header, z_declare_result_t *r) { 
+  z_res_decl_result_t *r_rd;
+  z_pub_decl_result_t *r_pd;
+  z_sub_decl_result_t *r_sd;
+  z_commit_decl_result_t *r_cd;
   z_vle_result_t r_sn = z_vle_decode(buf);
-  ASSURE_RESULT(r_sn, r, Z_VLE_PARSE_ERROR)
+  ASSURE_RESULT_P(r_sn, r, Z_VLE_PARSE_ERROR)
 
   z_vle_result_t r_dlen = z_vle_decode(buf);
-  ASSURE_RESULT(r_dlen, r, Z_VLE_PARSE_ERROR)
+  ASSURE_RESULT_P(r_dlen, r, Z_VLE_PARSE_ERROR)
   z_vec_t vec = z_vec_make(r_dlen.value.vle);
   int i;
   for (i = 0; i < r_dlen.value.vle; ++i) {
     uint8_t h = z_iobuf_read(buf);
     switch (Z_MID(h)) {
        case Z_RESOURCE_DECL: 
-        
-        z_res_decl_encode(buf, (z_res_decl_t*)d);
+        r_rd = (z_res_decl_result_t *)malloc(sizeof(z_res_decl_result_t));
+        z_res_decl_decode_na(buf, h, r_rd);
+        z_vec_append(&vec, r);        
         break;
       case Z_PUBLISHER_DECL:
-        z_pub_decl_encode(buf, (z_pub_decl_t*)d);
+        r_pd = (z_pub_decl_result_t *)malloc(sizeof(z_pub_decl_result_t));
+        z_pub_decl_decode_na(buf, h, r_pd);
+        z_vec_append(&vec, r);        
         break;
       case Z_SUBSCRIBER_DECL:
-        z_sub_decl_encode(buf, (z_sub_decl_t*)d);
-        break;
-      case Z_STORAGE_DECL:
-        z_storage_decl_encode(buf, (z_storage_decl_t*)d);
-        break;
+        r_sd = (z_sub_decl_result_t *)malloc(sizeof(z_sub_decl_result_t));
+        z_sub_decl_decode_na(buf, h, r_sd);
+        z_vec_append(&vec, r);        
+        break;      
       case Z_COMMIT_DECL:
-        z_commit_decl_encode(buf, (z_commit_decl_t*)d);
-        break;
-      default:
-        printf("WARNING: Trying to encode unknown declaration!\n");
-        break;
-    }
-    }
-  }
-  unsigned int len = z_vec_length(&m->declarations);
-  int i;
-  for (i = 0; i < len; ++i) {
-    z_message_t* d = (z_message_t*)z_vec_get(&m->declarations, i);
-    uint8_t did = Z_MID(m->header);
-    switch (did) {
-      case Z_RESOURCE_DECL: 
-        z_res_decl_encode(buf, (z_res_decl_t*)d);
-        break;
-      case Z_PUBLISHER_DECL:
-        z_pub_decl_encode(buf, (z_pub_decl_t*)d);
-        break;
-      case Z_SUBSCRIBER_DECL:
-        z_sub_decl_encode(buf, (z_sub_decl_t*)d);
-        break;
-      case Z_STORAGE_DECL:
-        z_storage_decl_encode(buf, (z_storage_decl_t*)d);
-        break;
-      case Z_COMMIT_DECL:
-        z_commit_decl_encode(buf, (z_commit_decl_t*)d);
+        r_cd = (z_commit_decl_result_t *)malloc(sizeof(z_commit_decl_result_t));
+        z_commit_decl_decode_na(buf, h, r_cd);
+        z_vec_append(&vec, r);        
         break;
       default:
         printf("WARNING: Trying to encode unknown declaration!\n");
         break;
     }
   }
+}
 
+z_declare_result_t
+z_declare_decode(z_iobuf_t* buf, uint8_t header) { 
+  z_declare_result_t r;
+  z_declare_decode_na(buf, header, &r);
+  return r;
 }
 
 void 
@@ -358,21 +421,26 @@ z_stream_data_encode(z_iobuf_t* buf, const z_stream_data_t* m) {
   z_array_uint8_encode(buf, &m->payload);
 }
 
+void
+z_stream_data_decode_na(z_iobuf_t* buf, uint8_t header, z_stream_data_result_t *r) {  
+  r->tag = Z_STREAM_DATA_TAG;
+  r->value.stream_data.header = header;
+  z_vle_result_t r_vle = z_vle_decode(buf);
+  ASSURE_RESULT_P(r_vle, r, Z_VLE_PARSE_ERROR)
+  
+  r->value.stream_data.sn = r_vle.value.vle;
+  r_vle = z_vle_decode(buf);
+  ASSURE_RESULT_P(r_vle, r, Z_VLE_PARSE_ERROR)
+  
+  r->value.stream_data.rid = r_vle.value.vle;  
+  z_array_uint8_result_t r_au8 = z_array_uint8_decode(buf);
+  ASSURE_RESULT_P(r_au8, r, Z_ARRAY_PARSE_ERROR)  
+}
+
 z_stream_data_result_t 
 z_stream_data_decode(z_iobuf_t* buf, uint8_t header) {
   z_stream_data_result_t r;
-  r.tag = Z_STREAM_DATA_TAG;
-  r.value.stream_data.header = header;
-  z_vle_result_t r_vle = z_vle_decode(buf);
-  ASSURE_RESULT(r_vle, r, Z_VLE_PARSE_ERROR)
-  
-  r.value.stream_data.sn = r_vle.value.vle;
-  r_vle = z_vle_decode(buf);
-  ASSURE_RESULT(r_vle, r, Z_VLE_PARSE_ERROR)
-  
-  r.value.stream_data.rid = r_vle.value.vle;  
-  z_array_uint8_result_t r_au8 = z_array_uint8_decode(buf);
-  ASSURE_RESULT(r_au8, r, Z_ARRAY_PARSE_ERROR)
+  z_stream_data_decode_na(buf, header, &r);
   return r;
 }
 
@@ -402,7 +470,8 @@ z_message_result_t
 decode_message(z_iobuf_t* buf) {
   z_message_result_t r; 
   uint8_t h = z_iobuf_read(buf);
-  switch (Z_MID(h)) {
+  uint8_t mid = Z_MID(h);
+  switch (mid) {
     case Z_STREAM_DATA:
       r.tag = Z_STREAM_DATA_TAG;
       r.value.stream_data = 
@@ -421,7 +490,10 @@ decode_message(z_iobuf_t* buf) {
       r.value.declare = z_declare_decode(buf, h);
       break;
     default:
+      r.tag = Z_ERROR_TAG;
+      r.value.error = Z_MESSAGE_PARSE_ERROR;
       printf("WARNING: Trying to encode message with unknown ID(%d)", mid); 
+
   }
   return r;
 }

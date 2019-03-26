@@ -26,7 +26,7 @@ enum result_kind {
   Z_TEMP_PROPERTY_TAG,
   Z_SUB_MODE_TAG,
   Z_SUB_DECL_TAG,
-  Z_COMMIT_TAG,
+  Z_COMMIT_DECL_TAG,
   Z_RESULT_TAG,
   Z_STREAM_DATA_TAG,
   Z_ERROR_TAG
@@ -57,6 +57,13 @@ typedef struct { \
     return out_r; \
   }
 
+#define ASSURE_RESULT_P(in_r, out_r, e) \
+  if (in_r.tag == Z_ERROR_TAG) { \
+    out_r->tag = Z_ERROR_TAG; \
+    out_r->value.error = e; \
+    return; \
+  }
+
 Z_RESULT_DECLARE (z_vle_t, vle);
 Z_RESULT_DECLARE (z_array_uint8_t, array_uint8);
 Z_RESULT_DECLARE (char*, string);
@@ -69,7 +76,7 @@ Z_RESULT_DECLARE (z_pub_decl_t, pub_decl);
 Z_RESULT_DECLARE (z_temporal_property_t, temporal_property);
 Z_RESULT_DECLARE (z_sub_mode_t, sub_mode);
 Z_RESULT_DECLARE (z_sub_decl_t, sub_decl);
-Z_RESULT_DECLARE (z_commit_decl_t, commit);
+Z_RESULT_DECLARE (z_commit_decl_t, commit_decl);
 Z_RESULT_DECLARE (z_result_decl_t, result_decl);
 Z_RESULT_DECLARE (z_stream_data_t, stream_data);
 
