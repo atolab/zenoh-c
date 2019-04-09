@@ -59,11 +59,15 @@ z_open(char* locator, on_disconnect_t *on_disconnect) {
 
   printf("Sending Open\n");
   z_send_msg(sock, &r.value.zenoh.wbuf, &msg);
-  z_message_result_t r_msg = z_recv_msg(sock, &r.value.zenoh.rbuf);
-  ASSERT_RESULT(r_msg, "Failed to receive accept")
+  z_message_p_result_t r_msg = z_recv_msg(sock, &r.value.zenoh.rbuf);
+  ASSERT_P_RESULT(r_msg, "Failed to receive accept");
 
   r.value.zenoh.sock = sock;
   r.value.zenoh.pid = pid;  
+  r.value.zenoh.declarations = z_list_empty;
+  r.value.zenoh.subscriptions = z_list_empty;
+  r.value.zenoh.reply_msg_mvar = z_mvar_empty();
+
   if (on_disconnect != 0)
     r.value.zenoh.on_disconnect = on_disconnect;  
   else 
@@ -77,7 +81,8 @@ void z_close(zenoh_t* z) { }
 z_vle_result_t 
 z_declare_resource(zenoh_t *z, const char* resource) {
   z_message_t msg;
-  z_message_result_t r_msg;
+  z_message_p_result_t r_msg;
+  z_message_p_result_init(&r_msg);
   z_vle_result_t r_rid;
   r_rid.tag = Z_OK_TAG;
   msg.header = Z_DECLARE;
@@ -97,10 +102,15 @@ z_declare_resource(zenoh_t *z, const char* resource) {
   z_send_msg(z->sock, &z->wbuf, &msg);
   printf(">>> Waiting for message...\n");
   r_msg = z_recv_msg(z->sock, &z->rbuf);
-  ASSERT_RESULT(r_msg, "Failed to receive accept")
-  if (Z_MID(r_msg.value.message.header) == Z_DECLARE) {    
+  ASSERT_P_RESULT(r_msg, "Failed to receive accept");
+  if (Z_MID(r_msg.value.message->header) == Z_DECLARE) {    
     r_rid.value.vle = z->rid++;    
   } 
+  else if (Z_MID(r_msg.value.message->header) == Z_CLOSE) {
+    r_rid.tag = Z_ERROR_TAG;
+    r_rid.value.error = r_msg.value.message->payload.close.reason;
+  }
+
   else {
     r_rid.tag = Z_ERROR_TAG;
     r_rid.value.error = Z_RESOURCE_DECL_ERROR;
@@ -115,11 +125,12 @@ z_declare_subscriber(zenoh_t *z, z_vle_t rid,  z_sub_mode_t sm, subscriber_callb
 
 int 
 z_declare_publisher(zenoh_t *z,  z_vle_t rid) {
-  z_message_t msg;
-  z_message_result_t r_msg;
+  z_message_t *msg = (z_message_t *)malloc(sizeof(z_message_t));
+  z_message_p_result_t r_msg;
+  z_message_p_result_init(&r_msg);
 
-  msg.header = Z_DECLARE;
-  msg.payload.declare.sn = z->sn++;
+  msg->header = Z_DECLARE;
+  msg->payload.declare.sn = z->sn++;
   z_array_declaration_t decl = {2, (z_declaration_t*)malloc(2*sizeof(z_declaration_t))};
 
   
@@ -129,12 +140,12 @@ z_declare_publisher(zenoh_t *z,  z_vle_t rid) {
   decl.elem[1].header = Z_COMMIT_DECL;
   decl.elem[1].payload.commit.cid = z->cid++;
   
-  msg.payload.declare.declarations = decl;  
-  z_send_msg(z->sock, &z->wbuf, &msg);  
+  msg->payload.declare.declarations = decl;  
+  z_send_msg(z->sock, &z->wbuf, msg);  
   r_msg = z_recv_msg(z->sock, &z->rbuf);
-  ASSERT_RESULT(r_msg, "Failed to receive accept")
+  ASSERT_P_RESULT(r_msg, "Failed to receive message");
   
-  if (Z_MID(r_msg.value.message.header) == Z_DECLARE) {
+  if (Z_MID(r_msg.value.message->header) == Z_DECLARE) {
     printf ("Declaration was accepted");    
     return 0;
   }
@@ -142,9 +153,9 @@ z_declare_publisher(zenoh_t *z,  z_vle_t rid) {
   
 }
 
-int z_stream_data(zenoh_t *z, z_vle_t rid, const z_array_uint8_t *payload) { 
+int z_compact_data(zenoh_t *z, z_vle_t rid, const z_array_uint8_t *payload) { 
   z_message_t msg;
-  msg.header = Z_STREAM_DATA;
+  msg.header = Z_COMPACT_DATA;
   msg.payload.stream_data.rid = rid;    
   msg.payload.stream_data.payload = *payload;  
   msg.payload.stream_data.sn = z->sn++;

@@ -14,7 +14,8 @@
 
 #define Z_DECLARE         0x06
 
-#define Z_STREAM_DATA     0x07
+#define Z_COMPACT_DATA    0x07
+#define Z_STREAM_DATA     0x1a
 #define Z_BATCH_DATA      0x08
 #define Z_WRITE_DATA      0x09
 
@@ -89,6 +90,9 @@
 #define Z_PERIODIC_PUSH_MODE 0x03
 #define Z_PERIODIC_PULL_MODE 0x04
 
+/* Close Reasons */
+#define Z_PEER_CLOSE 0
+#define Z_ERROR_CLOSE 1
 typedef struct {
   z_vle_t id;
   char* name;
@@ -216,7 +220,7 @@ typedef struct {
   z_vle_t sn;
   z_vle_t rid;
   z_array_uint8_t payload;
-} z_stream_data_t;
+} z_compact_data_t;
 
 
 /**
@@ -232,7 +236,7 @@ typedef struct {
     z_accept_t accept;
     z_close_t close;
     z_declare_t declare;
-    z_stream_data_t stream_data;
+    z_compact_data_t stream_data;
     z_scout_t scout;
     z_hello_t hello;
   } payload;

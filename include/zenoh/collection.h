@@ -39,4 +39,24 @@ const void* z_vec_get(const z_vec_t* v, unsigned int i);
 void z_vec_set(z_vec_t* sv, unsigned int i, void* e);
 
 
+/*-------- Linked List --------*/
+
+typedef struct z_list  {
+  void *elem;
+  struct z_list *tail;
+} z_list_t;
+
+static z_list_t * z_list_empty;
+z_list_t * z_list_of(void *x);
+z_list_t * z_list_cons(z_list_t *xs, void *x);
+void * z_list_head(z_list_t *xs);
+z_list_t * z_list_tail(z_list_t *xs);
+unsigned int z_list_len(z_list_t *xs);
+/**
+ * Drops the element at the specified position. 
+ */
+z_list_t * z_list_drop_elem(z_list_t *xs, unsigned int position);
+void z_list_free(z_list_t *xs);
+
+
 #endif /* ZENOH_C_VECTOR_H */

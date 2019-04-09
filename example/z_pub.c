@@ -16,7 +16,7 @@ int main(int argc, char **argv) {
   zenoh_t z = r_z.value.zenoh;
 
   printf("Declaring Resource...\n");
-  z_vle_result_t r_rid = z_declare_resource(&z, "/demo/sensor/temp");
+  z_vle_result_t r_rid = z_declare_resource(&z, "/demo/hello");
   ASSERT_RESULT(r_rid, "Unable to register result")
   z_vle_t rid = r_rid.value.vle;
 
@@ -32,7 +32,7 @@ int main(int argc, char **argv) {
   z_array_uint8_t bs = z_iobuf_to_array(&sdata);    
   while (1) {
     printf("Streaming Data...\n");
-    z_stream_data(&z, rid, &bs);
+    z_compact_data(&z, rid, &bs);
     sleep(1);
   }
 

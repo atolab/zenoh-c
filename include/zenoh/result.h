@@ -36,7 +36,8 @@ typedef struct { \
     type * name; \
     int error; \
   } value;\
-} z_ ## name ## _result_t;
+} z_ ## name ## _p_result_t; \
+void z_ ## name ## _p_result_init(z_ ## name ## _p_result_t *r);
 
 #define ASSURE_RESULT(in_r, out_r, e) \
   if (in_r.tag == Z_ERROR_TAG) { \
@@ -45,7 +46,7 @@ typedef struct { \
     return out_r; \
   }
 
-#define ASSURE_RESULT_P(in_r, out_r, e) \
+#define ASSURE_P_RESULT(in_r, out_r, e) \
   if (in_r.tag == Z_ERROR_TAG) { \
     out_r->tag = Z_ERROR_TAG; \
     out_r->value.error = e; \
@@ -57,6 +58,14 @@ typedef struct { \
     printf("\n"); \
     exit(r.value.error); \
   }
+
+#define ASSERT_P_RESULT(r, msg) \
+  if (r.tag == Z_ERROR_TAG) { \
+    printf(msg); \
+    printf("\n"); \
+    exit(r.value.error); \
+  }
+
 
 Z_RESULT_DECLARE (z_vle_t, vle)
 Z_RESULT_DECLARE (z_array_uint8_t, array_uint8)
@@ -73,8 +82,8 @@ Z_RESULT_DECLARE (z_sub_mode_t, sub_mode)
 Z_RESULT_DECLARE (z_sub_decl_t, sub_decl)
 Z_RESULT_DECLARE (z_commit_decl_t, commit_decl)
 Z_RESULT_DECLARE (z_result_decl_t, result_decl)
-Z_RESULT_DECLARE (z_stream_data_t, stream_data)
-Z_RESULT_DECLARE (z_message_t, message)
+Z_RESULT_DECLARE (z_compact_data_t, compact_data)
+Z_P_RESULT_DECLARE (z_message_t, message)
 Z_RESULT_DECLARE(zenoh_t, zenoh)
 Z_RESULT_DECLARE(z_sub_t, sub)
 Z_RESULT_DECLARE(z_pub_t, pub)

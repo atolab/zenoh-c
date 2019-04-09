@@ -5,8 +5,9 @@
 #include <stdint.h>
 #include <string.h>
 #include "zenoh/collection.h"
+#include "zenoh/mvar.h"
 
-typedef  uint64_t z_vle_t;
+typedef  unsigned long long  z_vle_t;
 
 Z_ARRAY_DECLARE(uint8_t)
 
@@ -44,6 +45,10 @@ typedef struct {
   z_array_uint8_t pid;
   char *locator;
   on_disconnect_t *on_disconnect;
+  z_list_t *declarations;
+  z_list_t *subscriptions;
+  z_mvar_t *reply_msg_mvar;
+  void *runtime;
 } zenoh_t;
 
 typedef struct {

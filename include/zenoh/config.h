@@ -7,8 +7,8 @@
 #define ZENOH_PROTO_VERSION 0x01
 #define ZENOH_DEFAULT_LEASE 10000
 
-#define ZENOH_MACOS 1 
-// #define ZENOH_LINUX 0
+// #define ZENOH_MACOS 1 
+#define ZENOH_LINUX 0
 // #define ZENOH_CONTIKI 0
 // #define ZENOH_MBED 0
 // #define ZENOH_WINDOWS 0

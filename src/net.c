@@ -30,7 +30,9 @@ int open_tx_session(char *locator) {
   
   sock = socket(PF_INET, SOCK_STREAM, 0);
   int set = 1;
+#if defined (ZENOH_MACOS)
   setsockopt(sock, SOL_SOCKET, SO_NOSIGPIPE, (void *)&set, sizeof(int));
+#endif
  
   if (sock < 0) {    
     return sock;
@@ -59,7 +61,7 @@ int z_send_buf(int sock, z_iobuf_t* buf) {
   int wb;
   do {
     printf("Sending data on socket....\n");    
-    wb = send(sock, ptr, n, MSG_SEND);       
+    wb = send(sock, ptr, n, MSG_NOSIGNAL);       
     printf("Socket returned: %d\n", wb);    
     if (wb <= 0) {
       printf("Broker closed connection.... [%d]\n", wb);
@@ -125,11 +127,12 @@ z_recv_vle(int sock) {
   return z_vle_decode(&iobuf);
 }
 
-z_message_result_t
+z_message_p_result_t
 z_recv_msg(int sock, z_iobuf_t* buf) {   
   z_iobuf_clear(buf);
   printf(">> recv_msg\n"); 
-  z_message_result_t r;
+  z_message_p_result_t r;
+  z_message_p_result_init(&r);
   r.tag = Z_ERROR_TAG;
   z_vle_result_t r_vle = z_recv_vle(sock);  
   ASSURE_RESULT(r_vle, r, Z_VLE_PARSE_ERROR)

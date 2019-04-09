@@ -1,6 +1,6 @@
 #include "zenoh/collection.h"
 #include <stdlib.h>
-
+#include <string.h>
 #include <assert.h>
 
 inline z_vec_t z_vec_make(unsigned int capacity) {
@@ -44,5 +44,69 @@ const void* z_vec_get(const z_vec_t* v, unsigned int i) {
 void z_vec_set(z_vec_t* v, unsigned int i, void* e) {
   assert(i < v->capacity_);
   v->elem_[i] = e;
+}
+
+static z_list_t * z_list_empty = 0;
+
+z_list_t * z_list_of(void *x) {
+  z_list_t *xs = (z_list_t *)malloc(sizeof(z_list_t));
+  bzero(xs, sizeof(z_list_t));
+  xs->elem = x;
+  return xs;  
+}
+
+z_list_t * z_list_cons(z_list_t *xs, void *x) {
+  z_list_t *lst = z_list_of(x);
+  lst->tail = xs;
+  return lst;
+}
+
+void * z_list_head(z_list_t *xs) {
+  return xs->elem;
+}
+
+z_list_t * z_list_tail(z_list_t *xs) {
+  return xs->tail;
+}
+
+unsigned int z_list_len(z_list_t *xs) {
+  unsigned int len = 0;
+  while (xs != z_list_empty) {
+    len += 1;
+    xs = z_list_tail(xs);
+  }
+  return len;
+}
+
+z_list_t * z_list_drop_elem(z_list_t *xs, unsigned int position) {
+  assert (position < z_list_len(xs));
+  z_list_t *head = xs;
+  z_list_t *previous;
+  if (position == 0) {
+    xs = head->tail;
+    free(head);
+    return xs;
+  }
+  
+  unsigned int idx = 0;
+  while (idx < position) {
+    previous = xs;
+    xs = xs->tail;
+    idx++;
+  }
+
+  previous->tail = xs->tail;
+  free(xs);
+  return head;
+}
+
+void z_list_free(z_list_t *xs) {
+  z_list_t *current = xs;
+  z_list_t *tail;
+  if (current != z_list_empty) {
+    tail = z_list_tail(current);
+    free(current);
+    current = tail;
+  }
 }
 
