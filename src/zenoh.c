@@ -153,12 +153,12 @@ z_declare_publisher(zenoh_t *z,  z_vle_t rid) {
   
 }
 
-int z_compact_data(zenoh_t *z, z_vle_t rid, const z_array_uint8_t *payload) { 
+int z_compact_data(zenoh_t *z, z_vle_t rid, z_iobuf_t payload) { 
   z_message_t msg;
   msg.header = Z_COMPACT_DATA;
-  msg.payload.stream_data.rid = rid;    
-  msg.payload.stream_data.payload = *payload;  
-  msg.payload.stream_data.sn = z->sn++;
+  msg.payload.compact_data.rid = rid;    
+  msg.payload.compact_data.payload = payload;  
+  msg.payload.compact_data.sn = z->sn++;
   if (z_send_msg(z->sock, &z->wbuf, &msg) == 0) 
     return 0;
   else
@@ -167,8 +167,25 @@ int z_compact_data(zenoh_t *z, z_vle_t rid, const z_array_uint8_t *payload) {
     z->on_disconnect(z);
     return z_send_msg(z->sock, &z->wbuf, &msg);
   }
-
 }
+
+int 
+z_stream_data(zenoh_t *z, z_vle_t rid, z_iobuf_t payload_header) {
+  z_message_t msg;
+  msg.header = Z_STREAM_DATA;
+  msg.payload.stream_data.rid = rid;      
+  msg.payload.stream_data.sn = z->sn++;
+  msg.payload.stream_data.payload_header = payload_header;
+  if (z_send_msg(z->sock, &z->wbuf, &msg) == 0) 
+    return 0;
+  else
+  {
+    Z_DEBUG("Trying to reconnect....\n");
+    z->on_disconnect(z);
+    return z_send_msg(z->sock, &z->wbuf, &msg);
+  }
+}
+
 int z_write_data(zenoh_t *z, const char* resource, const z_array_uint8_t *payload) { 
   return 0;
 }

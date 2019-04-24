@@ -74,6 +74,19 @@ z_string_decode(z_iobuf_t* buf) {
   return r;
 }
 
+void z_iobuf_encode(z_iobuf_t *buf, const z_iobuf_t *bs) {
+  z_vle_t len = z_iobuf_readable(bs);
+  z_vle_encode(buf, len);
+  z_iobuf_write_n(buf, bs->buf, bs->r_pos, bs->w_pos);
+}
+
+z_iobuf_t z_iobuf_decode(z_iobuf_t *buf) {
+  z_vle_result_t r_len = z_vle_decode(buf);
+  ASSERT_RESULT(r_len, Z_VLE_PARSE_ERROR);
+  uint8_t *bs = z_iobuf_read_n(buf, r_len.value.vle);
+  return z_iobuf_wrap(bs, r_len.value.vle);
+}
+
 void 
 z_open_encode(z_iobuf_t* buf, const z_open_t* m) {
   z_iobuf_write(buf, m->version);  
@@ -345,10 +358,10 @@ z_compact_data_decode_na(z_iobuf_t* buf, uint8_t header, z_compact_data_result_t
   r->value.compact_data.sn = r_vle.value.vle;
   r_vle = z_vle_decode(buf);
   ASSURE_P_RESULT(r_vle, r, Z_VLE_PARSE_ERROR)
-  
   r->value.compact_data.rid = r_vle.value.vle;  
-  z_array_uint8_result_t r_au8 = z_array_uint8_decode(buf);
+  z_array_uint8_result_t r_au8 = z_array_uint8_decode(buf);  
   ASSURE_P_RESULT(r_au8, r, Z_ARRAY_PARSE_ERROR)  
+  r->value.compact_data.payload = r_au8.value.array_uint8;
 }
 
 z_compact_data_result_t 
@@ -358,6 +371,95 @@ z_compact_data_decode(z_iobuf_t* buf, uint8_t header) {
   return r;
 }
 
+void z_payload_header_encode(z_iobuf_t *buf, const z_payload_header_t *ph) {
+  uint8_t flags = ph->flags;
+  z_iobuf_write(buf, flags);
+  if (flags & Z_SRC_ID) 
+    z_iobuf_write_n(buf, (uint8_t*)ph->src_id, 0, 16);
+  if (flags & Z_SRC_SN)
+    z_vle_encode(buf, ph->src_sn);    
+  if (flags & Z_BRK_ID) 
+    z_iobuf_write_n(buf, (uint8_t*)ph->brk_id, 0, 16);
+  if (flags & Z_BRK_SN)
+    z_vle_encode(buf, ph->brk_sn);
+  if (flags & Z_KIND)
+    z_vle_encode(buf, ph->kind);
+  if (flags & Z_ENCODING)
+    z_vle_encode(buf, ph->encoding);
+}
+
+void 
+z_payload_header_decode_na(z_iobuf_t *buf, z_payload_header_result_t *r) {  
+  z_vle_result_t r_vle;
+  uint8_t flags = z_iobuf_read(buf);
+  if (flags & Z_SRC_ID) 
+    z_iobuf_read_to_n(buf, r->value.payload_header.src_id, 16);
+    
+  if (flags & Z_SRC_SN)  
+    r_vle = z_vle_decode(buf);
+    ASSURE_P_RESULT(r_vle, r, Z_VLE_PARSE_ERROR);
+    r->value.payload_header.src_sn = r_vle.value.vle;
+
+  if (flags & Z_BRK_ID) 
+    z_iobuf_read_to_n(buf, r->value.payload_header.brk_id, 16);
+
+  if (flags & Z_BRK_SN)
+    r_vle = z_vle_decode(buf);
+    ASSURE_P_RESULT(r_vle, r, Z_VLE_PARSE_ERROR);
+    r->value.payload_header.brk_sn = r_vle.value.vle;
+
+  if (flags & Z_KIND)
+    r_vle = z_vle_decode(buf);
+    ASSURE_P_RESULT(r_vle, r, Z_VLE_PARSE_ERROR);
+    r->value.payload_header.kind = r_vle.value.vle;
+  
+  if (flags & Z_ENCODING)
+    r_vle = z_vle_decode(buf);
+    ASSURE_P_RESULT(r_vle, r, Z_VLE_PARSE_ERROR);
+    r->value.payload_header.encoding = r_vle.value.vle;
+
+  r->value.payload_header.flags = flags;
+  r->tag = Z_OK_TAG;
+}
+
+z_payload_header_result_t 
+z_payload_header_decode(z_iobuf_t *buf) {  
+  z_payload_header_result_t r;
+  z_payload_header_decode_na(buf, &r);
+  return r;
+}
+
+void 
+z_stream_data_encode(z_iobuf_t *buf, const z_stream_data_t* m) {
+  z_vle_encode(buf, m->sn);
+  z_vle_encode(buf, m->rid);
+  z_vle_t len = z_iobuf_readable(&m->payload_header);
+  z_vle_encode(buf, len);
+  z_iobuf_write_n(buf, &m->payload_header, m->payload_header.r_pos, m->payload_header.w_pos);
+}
+
+void z_stream_data_decode_na(z_iobuf_t *buf, uint8_t header, z_stream_data_result_t *r) {
+  r->tag = Z_OK_TAG;
+  z_vle_result_t r_vle = z_vle_decode(buf);
+  ASSURE_P_RESULT(r_vle, r, Z_VLE_PARSE_ERROR);
+  r->value.stream_data.sn = r_vle.value.vle;
+
+  r_vle = z_vle_decode(buf);
+  ASSURE_P_RESULT(r_vle, r, Z_VLE_PARSE_ERROR);
+  r->value.stream_data.rid = r_vle.value.vle;
+
+  r_vle = z_vle_decode(buf);
+  ASSURE_P_RESULT(r_vle, r, Z_VLE_PARSE_ERROR);  
+  uint8_t *ph = z_iobuf_read_n(buf, r_vle.value.vle);
+  r->value.stream_data.payload_header = z_iobuf_wrap(ph, r_vle.value.vle);
+}
+
+z_stream_data_result_t
+z_stream_data_decode(z_iobuf_t *buf, uint8_t header) {
+  z_stream_data_result_t r;
+  z_stream_data_decode_na(buf, header, &r);
+  return r;
+}
 
 void 
 z_message_encode(z_iobuf_t* buf, const z_message_t* m) {
@@ -365,7 +467,10 @@ z_message_encode(z_iobuf_t* buf, const z_message_t* m) {
   uint8_t mid = Z_MID(m->header);
   switch (mid) {
     case Z_COMPACT_DATA:
-      z_compact_data_encode(buf, &m->payload.stream_data);
+      z_compact_data_encode(buf, &m->payload.compact_data);
+      break;    
+    case Z_STREAM_DATA:
+      z_stream_data_encode(buf, &m->payload.stream_data);
       break;
     case Z_OPEN:
       z_open_encode(buf, &m->payload.open);
@@ -384,8 +489,9 @@ z_message_encode(z_iobuf_t* buf, const z_message_t* m) {
 z_message_p_result_t
 z_message_decode(z_iobuf_t* buf) {
   z_message_p_result_t r;
-  z_message_p_result_init(&r);   
-  z_compact_data_result_t r_sd;
+  z_message_p_result_init(&r); 
+  z_compact_data_result_t r_cd;  
+  z_stream_data_result_t r_sd;
   z_accept_result_t r_a;
   z_close_result_t r_c;
   z_declare_result_t r_d;
@@ -398,9 +504,15 @@ z_message_decode(z_iobuf_t* buf) {
   switch (mid) {
     case Z_COMPACT_DATA:
       r.tag = Z_OK_TAG;
-      r_sd = z_compact_data_decode(buf, h);
+      r_cd = z_compact_data_decode(buf, h);
       ASSURE_RESULT(r_sd, r, Z_MESSAGE_PARSE_ERROR)
-      r.value.message->payload.stream_data = r_sd.value.compact_data;
+      r.value.message->payload.compact_data = r_cd.value.compact_data;
+      break;
+    case Z_STREAM_DATA:
+      r.tag = Z_OK_TAG;
+      r_sd = z_stream_data_decode(buf, h);
+      ASSURE_RESULT(r_sd, r, Z_MESSAGE_PARSE_ERROR)
+      r.value.message->payload.stream_data = r_sd.value.stream_data;
       break;
     case Z_ACCEPT:
       r.tag = Z_OK_TAG;

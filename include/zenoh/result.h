@@ -12,6 +12,7 @@
 #define Z_INSUFFICIENT_IOBUF_SIZE 0x07
 #define Z_IO_ERROR 0x08
 #define Z_RESOURCE_DECL_ERROR 0x09
+#define Z_PAYLOAD_HEADER_PARSE_ERROR 0x0a
 #define Z_UNEXPECTED_MESSAGE 0x7f
 
 
@@ -83,6 +84,8 @@ Z_RESULT_DECLARE (z_sub_decl_t, sub_decl)
 Z_RESULT_DECLARE (z_commit_decl_t, commit_decl)
 Z_RESULT_DECLARE (z_result_decl_t, result_decl)
 Z_RESULT_DECLARE (z_compact_data_t, compact_data)
+Z_RESULT_DECLARE (z_payload_header_t, payload_header)
+Z_RESULT_DECLARE (z_stream_data_t, stream_data)
 Z_P_RESULT_DECLARE (z_message_t, message)
 Z_RESULT_DECLARE(zenoh_t, zenoh)
 Z_RESULT_DECLARE(z_sub_t, sub)

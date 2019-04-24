@@ -33,6 +33,8 @@ typedef struct {
 } z_iobuf_t;
 
 z_iobuf_t z_iobuf_make(unsigned int capacity);
+z_iobuf_t z_iobuf_wrap(uint8_t *buf, unsigned int capacity);
+
 void z_iobuf_free(z_iobuf_t* buf);
 unsigned int z_iobuf_readable(const z_iobuf_t* buf);
 unsigned int z_iobuf_writable(const z_iobuf_t* buf);

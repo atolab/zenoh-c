@@ -29,8 +29,8 @@ int open_tx_session(char *locator) {
   struct sockaddr_in serv_addr;  
   
   sock = socket(PF_INET, SOCK_STREAM, 0);
-  int set = 1;
-#if defined (ZENOH_MACOS)
+
+#if (ZENOH_MACOS == 1)
   setsockopt(sock, SOL_SOCKET, SO_NOSIGPIPE, (void *)&set, sizeof(int));
 #endif
  

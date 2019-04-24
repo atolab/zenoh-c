@@ -5,10 +5,10 @@ set (zenoh_c_VERSION_MAJOR 0)
 set (zenoh_c_VERSION_MINOR 1)
 
 if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release)
+  set(CMAKE_BUILD_TYPE Debug)
 endif()
 
-# Use cmake .. -DCMAKE_BUILD_TYPE=Debug for debug
+# Use cmake .. -DCMAKE_BUILD_TYPE=Debug for debug / Release
 
 set(CMAKE_CXX_FLAGS "-Wall -Wextra")
 set(CMAKE_CXX_FLAGS_DEBUG "-g")

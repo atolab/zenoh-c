@@ -14,7 +14,7 @@
  *  - 1 : ERROR
  *  - 0 : NOTHING
  */ 
-#define ZENOH_DEBUG 1
+#define ZENOH_DEBUG 2
 
 #define ZENOH_MACOS 1 
 // #define ZENOH_LINUX 0

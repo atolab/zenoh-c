@@ -93,6 +93,16 @@
 /* Close Reasons */
 #define Z_PEER_CLOSE 0
 #define Z_ERROR_CLOSE 1
+
+/* Payload Header */
+#define Z_SRC_ID 0x01
+#define Z_SRC_SN 0x02
+#define Z_BRK_ID 0x04
+#define Z_BRK_SN 0x08
+#define Z_T_STAMP 0x10
+#define Z_KIND 0x20
+#define Z_ENCODING 0x40
+
 typedef struct {
   z_vle_t id;
   char* name;
@@ -215,13 +225,32 @@ typedef struct  {
 } z_declare_t;
 
 
+/*------------------ Compact Message ------------------*/
+typedef struct {  
+  z_vle_t sn;
+  z_vle_t rid;
+  z_iobuf_t payload;
+} z_compact_data_t;
+
+
+/*------------------ Payload Header ------------------*/
+typedef struct {  
+  z_vle_t src_sn;
+  z_vle_t brk_sn;
+  z_vle_t kind;
+  z_vle_t encoding;
+  uint8_t src_id[16];
+  uint8_t brk_id[16];
+  uint8_t flags;  
+  z_iobuf_t payload;
+} z_payload_header_t;
+
 /*------------------ StreamData Message ------------------*/
 typedef struct {  
   z_vle_t sn;
   z_vle_t rid;
-  z_array_uint8_t payload;
-} z_compact_data_t;
-
+  z_iobuf_t payload_header;
+} z_stream_data_t;
 
 /**
  *  On the wire this is represented as:
@@ -236,7 +265,8 @@ typedef struct {
     z_accept_t accept;
     z_close_t close;
     z_declare_t declare;
-    z_compact_data_t stream_data;
+    z_compact_data_t compact_data;
+    z_stream_data_t stream_data;
     z_scout_t scout;
     z_hello_t hello;
   } payload;
