@@ -21,9 +21,9 @@ z_vle_decode(z_iobuf_t* buf) {
   int i = 0;
   do {
     c = z_iobuf_read(buf);
-    printf("vle c = 0x%x\n",c);
+    Z_DEBUG_VA("vle c = 0x%x\n",c);
     r.value.vle = r.value.vle | ((c & 0x7f) << i);
-    printf("current vle  = %llu\n",r.value.vle);
+    Z_DEBUG_VA("current vle  = %llu\n",r.value.vle);
     i += 7;
   } while (c > 0x7f); 
   return r;
@@ -45,8 +45,7 @@ z_array_uint8_decode_na(z_iobuf_t* buf, z_array_uint8_result_t *r) {
 }
 
 z_array_uint8_result_t 
-z_array_uint8_decode(z_iobuf_t* buf) {
-  printf("z_array_uint8_decode\n");
+z_array_uint8_decode(z_iobuf_t* buf) {  
   z_array_uint8_result_t r;
   z_array_uint8_decode_na(buf, &r);
   return r;  
@@ -378,7 +377,7 @@ z_message_encode(z_iobuf_t* buf, const z_message_t* m) {
       z_declare_encode(buf, &m->payload.declare);
       break;
     default:
-      printf("WARNING: Trying to encode message with unknown ID(%d)", mid); 
+      Z_ERROR("WARNING: Trying to encode message with unknown ID(%d)", mid); 
   }
 }
 
@@ -424,7 +423,7 @@ z_message_decode(z_iobuf_t* buf) {
     default:
       r.tag = Z_ERROR_TAG;
       r.value.error = Z_MESSAGE_PARSE_ERROR;
-      printf("WARNING: Trying to encode message with unknown ID(%d)", mid); 
+      Z_ERROR("WARNING: Trying to encode message with unknown ID(%d)", mid); 
 
   }
   return r;

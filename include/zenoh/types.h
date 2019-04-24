@@ -7,6 +7,20 @@
 #include "zenoh/collection.h"
 #include "zenoh/mvar.h"
 
+#if (ZENOH_DEBUG == 2)
+#define Z_DEBUG(x) printf(x)
+#define Z_DEBUG_VA(x, ...) printf(x, __VA_ARGS__) 
+#define Z_ERROR(x, ...) printf(x, __VA_ARGS__) 
+#elif (ZENOH_DEBUG == 1)
+#define Z_ERROR(x, ...) printf(x, __VA_ARGS__) 
+#define Z_DEBUG_VA(x, ...) 
+#define Z_DEBUG(x) 
+#elif (ZENOH_DEBUG == 0)
+#define Z_DEBUG(x) 
+#define Z_DEBUG_VA(x, ...) 
+#define Z_ERROR(x, ...) 
+#endif 
+
 typedef  unsigned long long  z_vle_t;
 
 Z_ARRAY_DECLARE(uint8_t)

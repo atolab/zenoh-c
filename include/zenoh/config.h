@@ -7,6 +7,15 @@
 #define ZENOH_PROTO_VERSION 0x01
 #define ZENOH_DEFAULT_LEASE 10000
 
+
+/**
+ * ZENOH_DEBUG :
+ *  - 2 : ERROR + DEBUG
+ *  - 1 : ERROR
+ *  - 0 : NOTHING
+ */ 
+#define ZENOH_DEBUG 1
+
 #define ZENOH_MACOS 1 
 // #define ZENOH_LINUX 0
 // #define ZENOH_CONTIKI 0

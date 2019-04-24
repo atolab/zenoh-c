@@ -38,7 +38,7 @@ void z_iobuf_write_n(z_iobuf_t* iob, uint8_t* bs, unsigned int offset, unsigned 
 }
 
 uint8_t z_iobuf_read(z_iobuf_t* iob) {
-  printf("r_pos = %d - w_pos = %d\n", iob->r_pos , iob->w_pos);
+  Z_DEBUG_VA("r_pos = %d - w_pos = %d\n", iob->r_pos , iob->w_pos);
   assert(iob->r_pos < iob->w_pos);
   return iob->buf[iob->r_pos++]; 
 }

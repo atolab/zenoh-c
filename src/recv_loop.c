@@ -28,6 +28,7 @@ void* z_recv_loop(void* arg) {
         }
 
     }
+    return 0;
 }
 int z_start_recv_loop(zenoh_t* z) { 
     z_runtime_t *zr = (z_runtime_t*)malloc(sizeof(z_runtime_t));    

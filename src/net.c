@@ -14,7 +14,7 @@
 
 
 int open_tx_session(char *locator) {
-  printf("Connecting to: %s:\n", locator);
+  Z_DEBUG_VA("Connecting to: %s:\n", locator);
   char *tx = strtok(locator, "/");  
   assert(strcmp(tx, "tcp") == 0);
   char *addr = strtok(NULL, ":");  
@@ -24,7 +24,7 @@ int open_tx_session(char *locator) {
   sscanf(s_port, "%d", &port);    
   int sock;
 
-  printf("Connecting to: %s:%d\n", addr, port);
+  Z_DEBUG_VA("Connecting to: %s:%d\n", addr, port);
 
   struct sockaddr_in serv_addr;  
   
@@ -60,15 +60,15 @@ int z_send_buf(int sock, z_iobuf_t* buf) {
   int n = len;
   int wb;
   do {
-    printf("Sending data on socket....\n");    
+    Z_DEBUG("Sending data on socket....\n");    
   #if (ZENOH_LINUX == 1)
     wb = send(sock, ptr, n, MSG_NOSIGNAL);       
   #else
     wb = send(sock, ptr, n, 0);       
   #endif 
-    printf("Socket returned: %d\n", wb);    
+    Z_DEBUG_VA("Socket returned: %d\n", wb);    
     if (wb <= 0) {
-      printf("Broker closed connection.... [%d]\n", wb);
+      Z_DEBUG_VA("Broker closed connection.... [%d]\n", wb);
       return -1;
     }
     n -= wb;
@@ -92,16 +92,16 @@ int z_recv_n(int sock, z_iobuf_t* buf, size_t len) {
 
 size_t 
 z_send_msg(int sock, z_iobuf_t* buf, z_message_t* m) {
-  printf(">> send_msg\n");
+  Z_DEBUG(">> send_msg\n");
   z_iobuf_clear(buf);
-  printf(">> \t z_message_encode\n");
+  Z_DEBUG(">> \t z_message_encode\n");
   z_message_encode(buf, m);
   z_iobuf_t l_buf = z_iobuf_make(10);
   z_vle_t len =  z_iobuf_readable(buf);
   z_vle_encode(&l_buf, len); 
   z_send_buf(sock, &l_buf);
   z_iobuf_free(&l_buf);
-  printf(">> Message encoded is %llu bytes", len);    
+  Z_DEBUG_VA(">> Message encoded is %llu bytes", len);    
   return z_send_buf(sock, buf);  
 }
 
@@ -113,7 +113,7 @@ z_recv_vle(int sock) {
   int i = 0;
   do {
     n = recv(sock, &buf[i], 1, 0);
-    printf(">> recv_vle [%d] : 0x%x\n", i, buf[i]);
+    Z_DEBUG_VA(">> recv_vle [%d] : 0x%x\n", i, buf[i]);
     i++;        
   } while ((buf[i] > 0x7f) && (n != 0) && (i < 10));
 
@@ -127,21 +127,21 @@ z_recv_vle(int sock) {
   iobuf.r_pos = 0;
   iobuf.w_pos = i;
   iobuf.buf = buf;
-  printf(">> \tz_vle_decode\n");
+  Z_DEBUG(">> \tz_vle_decode\n");
   return z_vle_decode(&iobuf);
 }
 
 z_message_p_result_t
 z_recv_msg(int sock, z_iobuf_t* buf) {   
   z_iobuf_clear(buf);
-  printf(">> recv_msg\n"); 
+  Z_DEBUG(">> recv_msg\n"); 
   z_message_p_result_t r;
   z_message_p_result_init(&r);
   r.tag = Z_ERROR_TAG;
   z_vle_result_t r_vle = z_recv_vle(sock);  
   ASSURE_RESULT(r_vle, r, Z_VLE_PARSE_ERROR)
   size_t len = r_vle.value.vle;  
-  printf(">> \t msg len = %zu\n", len); 
+  Z_DEBUG_VA(">> \t msg len = %zu\n", len); 
   if (z_iobuf_writable(buf) < len) {
     r.tag = Z_ERROR_TAG;
     r.value.error = Z_INSUFFICIENT_IOBUF_SIZE;
@@ -150,6 +150,6 @@ z_recv_msg(int sock, z_iobuf_t* buf) {
   z_recv_n(sock, buf, len);
   buf->r_pos = 0;
   buf->w_pos = len;
-  printf(">> \t z_message_decode\n"); 
+  Z_DEBUG(">> \t z_message_decode\n"); 
   return z_message_decode(buf);  
 }

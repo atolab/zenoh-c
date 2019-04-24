@@ -4,6 +4,16 @@ project(zenoh)
 set (zenoh_c_VERSION_MAJOR 0)
 set (zenoh_c_VERSION_MINOR 1)
 
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
+
+# Use cmake .. -DCMAKE_BUILD_TYPE=Debug for debug
+
+set(CMAKE_CXX_FLAGS "-Wall -Wextra")
+set(CMAKE_CXX_FLAGS_DEBUG "-g")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
@@ -24,10 +34,12 @@ target_link_libraries(zenohc Threads::Threads)
 
 target_link_libraries(zenohc)
 add_executable(z_pub example/z_pub.c)
+add_executable(z_pub_thr example/z_pub_thr.c)
 add_executable(z_data_struct example/z_data_struct.c)
 # target_link_directories(driver "${PROJECT_SOURCE_DIR}/build")
 
 target_link_libraries(z_pub zenohc)
+target_link_libraries(z_pub_thr zenohc)
 target_link_libraries(z_data_struct zenohc)
 
 install (TARGETS zenohc  DESTINATION ${PROJECT_SOURCE_DIR}/lib)

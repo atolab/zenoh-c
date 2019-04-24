@@ -14,7 +14,7 @@ void default_on_disconnect(void *vz) {
     sleep(3);
     // Try to reconnect -- eventually we should scout here.
     // We should also re-do declarations.
-    printf("Tring to reconnect...\n");
+    Z_DEBUG("Tring to reconnect...\n");
     int sock = open_tx_session(strdup(z->locator));
     if (sock > 0) {  
       z->sock = sock;
@@ -57,7 +57,7 @@ z_open(char* locator, on_disconnect_t *on_disconnect) {
   msg.payload.open.lease = ZENOH_DEFAULT_LEASE;
   msg.properties = 0;
 
-  printf("Sending Open\n");
+  Z_DEBUG("Sending Open\n");
   z_send_msg(sock, &r.value.zenoh.wbuf, &msg);
   z_message_p_result_t r_msg = z_recv_msg(sock, &r.value.zenoh.rbuf);
   ASSERT_P_RESULT(r_msg, "Failed to receive accept");
@@ -98,9 +98,9 @@ z_declare_resource(zenoh_t *z, const char* resource) {
   
   msg.payload.declare.declarations = decl;
   z_iobuf_clear(&z->wbuf);
-  printf(">>> Sending Declare...\n");
+  Z_DEBUG(">>> Sending Declare...\n");
   z_send_msg(z->sock, &z->wbuf, &msg);
-  printf(">>> Waiting for message...\n");
+  Z_DEBUG(">>> Waiting for message...\n");
   r_msg = z_recv_msg(z->sock, &z->rbuf);
   ASSERT_P_RESULT(r_msg, "Failed to receive accept");
   if (Z_MID(r_msg.value.message->header) == Z_DECLARE) {    
@@ -146,7 +146,7 @@ z_declare_publisher(zenoh_t *z,  z_vle_t rid) {
   ASSERT_P_RESULT(r_msg, "Failed to receive message");
   
   if (Z_MID(r_msg.value.message->header) == Z_DECLARE) {
-    printf ("Declaration was accepted");    
+    Z_DEBUG ("Declaration was accepted");    
     return 0;
   }
   else return -1;
@@ -163,7 +163,7 @@ int z_compact_data(zenoh_t *z, z_vle_t rid, const z_array_uint8_t *payload) {
     return 0;
   else
   {
-    printf("Trying to reconnect....\n");
+    Z_DEBUG("Trying to reconnect....\n");
     z->on_disconnect(z);
     return z_send_msg(z->sock, &z->wbuf, &msg);
   }
