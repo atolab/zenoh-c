@@ -61,7 +61,11 @@ int z_send_buf(int sock, z_iobuf_t* buf) {
   int wb;
   do {
     printf("Sending data on socket....\n");    
+  #if (ZENOH_LINUX == 1)
     wb = send(sock, ptr, n, MSG_NOSIGNAL);       
+  #else
+    wb = send(sock, ptr, n, 0);       
+  #endif 
     printf("Socket returned: %d\n", wb);    
     if (wb <= 0) {
       printf("Broker closed connection.... [%d]\n", wb);
