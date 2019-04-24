@@ -22,11 +22,10 @@ int main(int argc, char **argv) {
   }  
   z_iobuf_t sdata = z_iobuf_make(256);
   char *str = "- Hello World -!";  
-  z_string_encode(&sdata, str);
-  z_array_uint8_t bs = z_iobuf_to_array(&sdata);    
+  z_string_encode(&sdata, str);  
   
   while (1) {      
-    z_stream_data(&z, rid, 0, &bs);    
+    z_compact_data(&z, rid, sdata);    
   }
 
   return 0;

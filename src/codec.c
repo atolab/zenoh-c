@@ -82,7 +82,7 @@ void z_iobuf_encode(z_iobuf_t *buf, const z_iobuf_t *bs) {
 
 z_iobuf_t z_iobuf_decode(z_iobuf_t *buf) {
   z_vle_result_t r_len = z_vle_decode(buf);
-  ASSERT_RESULT(r_len, Z_VLE_PARSE_ERROR);
+  ASSERT_RESULT(r_len, "Unable to decode iobuf");
   uint8_t *bs = z_iobuf_read_n(buf, r_len.value.vle);
   return z_iobuf_wrap(bs, r_len.value.vle);
 }
@@ -345,8 +345,8 @@ z_declare_decode(z_iobuf_t* buf, uint8_t header) {
 void 
 z_compact_data_encode(z_iobuf_t* buf, const z_compact_data_t* m) {
   z_vle_encode(buf, m->sn);
-  z_vle_encode(buf, m->rid);  
-  z_array_uint8_encode(buf, &m->payload);
+  z_vle_encode(buf, m->rid);
+  z_iobuf_encode(buf, &m->payload);    
 }
 
 void
@@ -358,10 +358,8 @@ z_compact_data_decode_na(z_iobuf_t* buf, uint8_t header, z_compact_data_result_t
   r->value.compact_data.sn = r_vle.value.vle;
   r_vle = z_vle_decode(buf);
   ASSURE_P_RESULT(r_vle, r, Z_VLE_PARSE_ERROR)
-  r->value.compact_data.rid = r_vle.value.vle;  
-  z_array_uint8_result_t r_au8 = z_array_uint8_decode(buf);  
-  ASSURE_P_RESULT(r_au8, r, Z_ARRAY_PARSE_ERROR)  
-  r->value.compact_data.payload = r_au8.value.array_uint8;
+  r->value.compact_data.rid = r_vle.value.vle;    
+  r->value.compact_data.payload = z_iobuf_decode(buf);
 }
 
 z_compact_data_result_t 
@@ -434,8 +432,8 @@ z_stream_data_encode(z_iobuf_t *buf, const z_stream_data_t* m) {
   z_vle_encode(buf, m->sn);
   z_vle_encode(buf, m->rid);
   z_vle_t len = z_iobuf_readable(&m->payload_header);
-  z_vle_encode(buf, len);
-  z_iobuf_write_n(buf, &m->payload_header, m->payload_header.r_pos, m->payload_header.w_pos);
+  z_vle_encode(buf, len);  
+  z_iobuf_write_n(buf, m->payload_header.buf, m->payload_header.r_pos, m->payload_header.w_pos);
 }
 
 void z_stream_data_decode_na(z_iobuf_t *buf, uint8_t header, z_stream_data_result_t *r) {

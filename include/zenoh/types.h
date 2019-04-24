@@ -39,7 +39,7 @@ void z_iobuf_free(z_iobuf_t* buf);
 unsigned int z_iobuf_readable(const z_iobuf_t* buf);
 unsigned int z_iobuf_writable(const z_iobuf_t* buf);
 void z_iobuf_write(z_iobuf_t* buf, uint8_t b);
-void z_iobuf_write_n(z_iobuf_t* buf, uint8_t* bs, unsigned int offset, unsigned int length);
+void z_iobuf_write_n(z_iobuf_t* buf, const uint8_t *bs, unsigned int offset, unsigned int length);
 uint8_t z_iobuf_read(z_iobuf_t* buf);
 uint8_t* z_iobuf_read_n(z_iobuf_t* buf, unsigned int length);
 uint8_t* z_iobuf_read_to_n(z_iobuf_t* buf, uint8_t* dest, unsigned int length);

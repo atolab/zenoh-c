@@ -37,7 +37,7 @@ void z_iobuf_write(z_iobuf_t* iob, uint8_t b) {
   iob->buf[iob->w_pos++] = b; 
 }
 
-void z_iobuf_write_n(z_iobuf_t* iob, uint8_t* bs, unsigned int offset, unsigned int length) {
+void z_iobuf_write_n(z_iobuf_t* iob, const uint8_t* bs, unsigned int offset, unsigned int length) {
   assert(z_iobuf_writable(iob) >= length); 
   memcpy(iob->buf + iob->w_pos, bs + offset, length);
   iob->w_pos += length;

@@ -60,7 +60,14 @@ DECLARE_MSG_DECODE_NOH(sub_mode);
 // DECLARE_MSG_ENCODE(result_decl);
 // DECLARE_MSG_DECODE(result_decl);
 
-DECLARE_MSG_CODEC(compact_data);
+DECLARE_MSG_ENCODE(compact_data);
+DECLARE_MSG_DECODE(compact_data);
+
+DECLARE_MSG_ENCODE(payload_header);
+DECLARE_MSG_DECODE_NOH(payload_header);
+
+DECLARE_MSG_ENCODE(stream_data);
+DECLARE_MSG_DECODE(stream_data);
 
 void z_message_encode(z_iobuf_t* buf, const z_message_t* m);
 z_message_p_result_t z_message_decode(z_iobuf_t* buf);

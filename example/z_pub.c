@@ -29,10 +29,12 @@ int main(int argc, char **argv) {
   z_iobuf_t sdata = z_iobuf_make(256);
   char *str = "Hello World!";  
   z_string_encode(&sdata, str);
-  z_array_uint8_t bs = z_iobuf_to_array(&sdata);    
-  while (1) {
-    printf("Streaming Data...\n");
-    z_compact_data(&z, rid, &bs);
+  
+  z_payload_header_t ph;
+  ph.flags = 0;
+  printf("Streaming Data...\n");
+  while (1) {    
+    z_stream_data(&z, rid, sdata);   
     sleep(1);
   }
 
