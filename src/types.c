@@ -83,3 +83,29 @@ z_array_uint8_t z_iobuf_to_array(z_iobuf_t* buf) {
   z_array_uint8_t a = {z_iobuf_readable(buf), &buf->buf[buf->r_pos]};
   return a;
 }
+
+
+
+void z_register_subscription(zenoh_t *z, z_vle_t rid,  subscriber_callback_t *callback) {
+  z_subscription_t *sub = (z_subscription_t *) malloc(sizeof(z_subscription_t));
+  sub->rid = rid;
+  sub->callback = callback;
+  z->subscriptions = z_list_cons(z->subscriptions, sub);
+}
+
+z_subscription_t *z_get_subscription(zenoh_t *z, z_vle_t rid) {
+  if (z->subscriptions == 0) {
+    printf(">>> Empty subscription set");
+    return 0;
+  }
+  else {
+    z_subscription_t *sub = (z_subscription_t *)z_list_head(z->subscriptions);
+    z_list_t *subs = z_list_tail(z->subscriptions);
+    while (subs != 0 && sub->rid != rid) {      
+      sub = z_list_head(subs);
+      subs = z_list_tail(subs);  
+    }    
+    if (sub->rid == rid) return sub;
+    else return 0;
+  }
+}

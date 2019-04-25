@@ -75,6 +75,15 @@ typedef struct {
   int z;
 } z_pub_t;
 
-typedef void subscriber_callback_t(z_vle_t rid, z_array_uint8_t data);
+typedef void subscriber_callback_t(uint8_t mid, z_vle_t rid, z_iobuf_t data);
+
+typedef struct {
+  z_vle_t rid;
+  subscriber_callback_t *callback;
+} z_subscription_t;
+
+void z_register_subscription(zenoh_t *z, z_vle_t rid,  subscriber_callback_t *callback);
+z_subscription_t *z_get_subscription(zenoh_t *z, z_vle_t rid);
+
 
 #endif /* ZENOH_C_TYPES_H_ */ 

@@ -12,7 +12,8 @@ z_ ##name ##_result_t z_ ##name ## _decode(z_iobuf_t* buf, uint8_t header); \
 void  z_ ## name ## _decode_na(z_iobuf_t* buf, uint8_t header, z_ ##name ##_result_t *r)
 
 #define DECLARE_MSG_DECODE_NOH(name) \
-z_ ##name ##_result_t z_ ##name ## _decode(z_iobuf_t* buf)
+z_ ##name ##_result_t z_ ##name ## _decode(z_iobuf_t* buf); \
+void  z_ ## name ## _decode_na(z_iobuf_t* buf, z_ ##name ##_result_t *r)
 
 #define DECLARE_MSG_CODEC(name)\
   DECLARE_MSG_DECODE(name); \

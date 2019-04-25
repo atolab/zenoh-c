@@ -12,19 +12,41 @@ typedef struct {
 void* z_recv_loop(void* arg) {
     zenoh_t *z = (zenoh_t*)arg;
     z_runtime_t *rt = (z_runtime_t*)z->runtime;
+    uint8_t mid;
+    z_subscription_t *sub;
     while (rt->running) {
         z_message_p_result_t r = z_recv_msg(z->sock, &z->rbuf);
         if (r.tag == Z_OK_TAG) {
-            switch (Z_MID(r.value.message->header)) {    
+            mid = Z_MID(r.value.message->header);
+            switch (mid) {    
+                case Z_STREAM_DATA:          
+                    Z_DEBUG_VA("Received message %d\n", Z_MID(r.value.message->header));          
+                    sub = z_get_subscription(z, r.value.message->payload.stream_data.rid);
+                    if (sub != 0) {
+                        sub->callback(mid, r.value.message->payload.stream_data.rid,
+                                    r.value.message->payload.stream_data.payload_header);
+                    } else {
+                        Z_DEBUG_VA("No subscription found for resource %llu\n", r.value.message->payload.stream_data.rid);          
+                    } 
+
+                    break;
+                case Z_COMPACT_DATA:                    
+                    sub = z_get_subscription(z, r.value.message->payload.stream_data.rid);
+                    if (sub != 0) {
+                        sub->callback(mid, r.value.message->payload.compact_data.rid,
+                                    r.value.message->payload.compact_data.payload);
+                    } 
+                    break;                    
                 case Z_DECLARE:
-                    if (z_mvar_is_empty(z->reply_msg_mvar)) {                        
-                        z_mvar_put(z->reply_msg_mvar, &r.value.message->payload.declare);
-                    }            
+                    break;
                 case Z_ACCEPT:
                     break;
                 default:
                     break;
             }
+        } else {
+            Z_DEBUG("Connection closed due to receive error");
+            return 0;
         }
 
     }

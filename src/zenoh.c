@@ -44,6 +44,9 @@ z_open(char* locator, on_disconnect_t *on_disconnect) {
   r.value.zenoh.rbuf = z_iobuf_make(ZENOH_READ_BUF_LEN);  
   r.value.zenoh.wbuf = z_iobuf_make(ZENOH_WRITE_BUF_LEN);  
   r.value.zenoh.rid = 0;  
+  r.value.zenoh.subscriptions = 0;
+  r.value.zenoh.declarations = 0;
+  r.value.zenoh.reply_msg_mvar = 0;
 
   Z_ARRAY_S_MAKE(uint8_t, pid, ZENOH_PID_LENGTH);   
   for (int i = 0; i < ZENOH_PID_LENGTH; ++i) 
@@ -100,6 +103,12 @@ z_declare_resource(zenoh_t *z, const char* resource) {
   z_iobuf_clear(&z->wbuf);
   Z_DEBUG(">>> Sending Declare...\n");
   z_send_msg(z->sock, &z->wbuf, &msg);
+  // This will be refactored to use mvars
+  r_rid.value.vle = z->rid++;    
+  return r_rid;
+
+// -- This will be refactored to use mvars
+#if 0
   Z_DEBUG(">>> Waiting for message...\n");
   r_msg = z_recv_msg(z->sock, &z->rbuf);
   ASSERT_P_RESULT(r_msg, "Failed to receive accept");
@@ -116,10 +125,30 @@ z_declare_resource(zenoh_t *z, const char* resource) {
     r_rid.value.error = Z_RESOURCE_DECL_ERROR;
   }
   return r_rid;
+#endif 
 }
 
 int
 z_declare_subscriber(zenoh_t *z, z_vle_t rid,  z_sub_mode_t sm, subscriber_callback_t *callback) {
+  z_message_t *msg = (z_message_t *)malloc(sizeof(z_message_t));
+  z_message_p_result_t r_msg;
+  z_message_p_result_init(&r_msg);
+
+  msg->header = Z_DECLARE;
+  msg->payload.declare.sn = z->sn++;
+  z_array_declaration_t decl = {2, (z_declaration_t*)malloc(2*sizeof(z_declaration_t))};
+  
+  decl.elem[0].header = Z_SUBSCRIBER_DECL;
+  decl.elem[0].payload.sub.sub_mode = sm;
+  decl.elem[0].payload.sub.rid = rid;
+  
+  decl.elem[1].header = Z_COMMIT_DECL;
+  decl.elem[1].payload.commit.cid = z->cid++;
+  
+  msg->payload.declare.declarations = decl;  
+  z_send_msg(z->sock, &z->wbuf, msg);  
+  z_register_subscription(z, rid, callback);
+  // -- This will be refactored to use mvars
   return 0;
 }
 
@@ -142,6 +171,9 @@ z_declare_publisher(zenoh_t *z,  z_vle_t rid) {
   
   msg->payload.declare.declarations = decl;  
   z_send_msg(z->sock, &z->wbuf, msg);  
+  // -- This will be refactored to use mvars
+  return 0;
+#if 0
   r_msg = z_recv_msg(z->sock, &z->rbuf);
   ASSERT_P_RESULT(r_msg, "Failed to receive message");
   
@@ -150,6 +182,7 @@ z_declare_publisher(zenoh_t *z,  z_vle_t rid) {
     return 0;
   }
   else return -1;
+#endif 
   
 }
 

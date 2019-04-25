@@ -84,7 +84,9 @@ z_iobuf_t z_iobuf_decode(z_iobuf_t *buf) {
   z_vle_result_t r_len = z_vle_decode(buf);
   ASSERT_RESULT(r_len, "Unable to decode iobuf");
   uint8_t *bs = z_iobuf_read_n(buf, r_len.value.vle);
-  return z_iobuf_wrap(bs, r_len.value.vle);
+  z_iobuf_t iob = z_iobuf_wrap(bs, r_len.value.vle);
+  iob.w_pos = r_len.value.vle;
+  return iob;
 }
 
 void 
@@ -453,6 +455,7 @@ void z_stream_data_decode_na(z_iobuf_t *buf, uint8_t header, z_stream_data_resul
   ASSURE_P_RESULT(r_vle, r, Z_VLE_PARSE_ERROR);  
   uint8_t *ph = z_iobuf_read_n(buf, r_vle.value.vle);
   r->value.stream_data.payload_header = z_iobuf_wrap(ph, r_vle.value.vle);
+  r->value.stream_data.payload_header.w_pos = r_vle.value.vle;
 }
 
 z_stream_data_result_t
