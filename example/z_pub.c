@@ -30,11 +30,14 @@ int main(int argc, char **argv) {
   char *str = "Hello World!";  
   z_string_encode(&sdata, str);
   
+  z_iobuf_t phbuf = z_iobuf_make(256);
   z_payload_header_t ph;
   ph.flags = 0;
+  ph.payload = sdata;
+  z_payload_header_encode(&phbuf, &ph);
   printf("Streaming Data...\n");
   while (1) {    
-    z_stream_data(&z, rid, sdata);   
+    z_stream_data(&z, rid, phbuf);   
     sleep(1);
   }
 

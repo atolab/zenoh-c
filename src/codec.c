@@ -384,6 +384,8 @@ void z_payload_header_encode(z_iobuf_t *buf, const z_payload_header_t *ph) {
     z_vle_encode(buf, ph->kind);
   if (flags & Z_ENCODING)
     z_vle_encode(buf, ph->encoding);
+
+  z_iobuf_encode(buf, &ph->payload);
 }
 
 void 
@@ -417,6 +419,7 @@ z_payload_header_decode_na(z_iobuf_t *buf, z_payload_header_result_t *r) {
     r->value.payload_header.encoding = r_vle.value.vle;
 
   r->value.payload_header.flags = flags;
+  r->value.payload_header.payload = z_iobuf_decode(buf);
   r->tag = Z_OK_TAG;
 }
 
