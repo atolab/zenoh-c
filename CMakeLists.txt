@@ -36,12 +36,15 @@ target_link_libraries(zenohc)
 add_executable(z_pub example/z_pub.c)
 add_executable(z_sub example/z_sub.c)
 add_executable(z_pub_thr example/z_pub_thr.c)
+add_executable(z_sub_thr example/z_sub_thr.c)
+
 add_executable(z_data_struct example/z_data_struct.c)
 # target_link_directories(driver "${PROJECT_SOURCE_DIR}/build")
 
 target_link_libraries(z_pub zenohc)
 target_link_libraries(z_sub zenohc)
 target_link_libraries(z_pub_thr zenohc)
+target_link_libraries(z_sub_thr zenohc)
 target_link_libraries(z_data_struct zenohc)
 
 install (TARGETS zenohc  DESTINATION ${PROJECT_SOURCE_DIR}/lib)
