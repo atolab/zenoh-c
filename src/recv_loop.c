@@ -12,10 +12,12 @@ typedef struct {
 void* z_recv_loop(void* arg) {
     zenoh_t *z = (zenoh_t*)arg;
     z_runtime_t *rt = (z_runtime_t*)z->runtime;
+    z_message_p_result_t r;
+    z_message_p_result_init(&r);
     uint8_t mid;
     z_subscription_t *sub;
     while (rt->running) {
-        z_message_p_result_t r = z_recv_msg(z->sock, &z->rbuf);
+        z_recv_msg_na(z->sock, &z->rbuf, &r);
         if (r.tag == Z_OK_TAG) {
             mid = Z_MID(r.value.message->header);
             switch (mid) {    
@@ -24,18 +26,19 @@ void* z_recv_loop(void* arg) {
                     sub = z_get_subscription(z, r.value.message->payload.stream_data.rid);
                     if (sub != 0) {
                         sub->callback(mid, r.value.message->payload.stream_data.rid,
-                                    r.value.message->payload.stream_data.payload_header);
+                                    r.value.message->payload.stream_data.payload_header);                                              
                     } else {
                         Z_DEBUG_VA("No subscription found for resource %llu\n", r.value.message->payload.stream_data.rid);          
-                    } 
-
+                    }                     
+                    z_iobuf_free(&r.value.message->payload.stream_data.payload_header);                        
                     break;
                 case Z_COMPACT_DATA:                    
                     sub = z_get_subscription(z, r.value.message->payload.stream_data.rid);
                     if (sub != 0) {
                         sub->callback(mid, r.value.message->payload.compact_data.rid,
-                                    r.value.message->payload.compact_data.payload);
+                                    r.value.message->payload.compact_data.payload);                        
                     } 
+                    z_iobuf_free(&r.value.message->payload.compact_data.payload);
                     break;                    
                 case Z_DECLARE:
                     break;
@@ -43,12 +46,11 @@ void* z_recv_loop(void* arg) {
                     break;
                 default:
                     break;
-            }
+            }                        
         } else {
             Z_DEBUG("Connection closed due to receive error");
             return 0;
-        }
-
+        }        
     }
     return 0;
 }

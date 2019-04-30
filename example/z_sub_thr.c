@@ -31,8 +31,7 @@ void listener(uint8_t mid, z_vle_t rid, z_iobuf_t data) {
     stop = tv;
     print_stats(&start, &stop);
     count = 0;
-  }
-  
+  }    
 }
 
 int main(int argc, char **argv) {

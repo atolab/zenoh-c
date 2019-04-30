@@ -490,10 +490,8 @@ z_message_encode(z_iobuf_t* buf, const z_message_t* m) {
   }
 }
 
-z_message_p_result_t
-z_message_decode(z_iobuf_t* buf) {
-  z_message_p_result_t r;
-  z_message_p_result_init(&r); 
+void
+z_message_decode_na(z_iobuf_t* buf, z_message_p_result_t* r) {
   z_compact_data_result_t r_cd;  
   z_stream_data_result_t r_sd;
   z_accept_result_t r_a;
@@ -501,46 +499,53 @@ z_message_decode(z_iobuf_t* buf) {
   z_declare_result_t r_d;
 
   uint8_t h = z_iobuf_read(buf);
-  r.tag = Z_OK_TAG;
-  r.value.message->header = h;
+  r->tag = Z_OK_TAG;
+  r->value.message->header = h;
 
   uint8_t mid = Z_MID(h);
   switch (mid) {
     case Z_COMPACT_DATA:
-      r.tag = Z_OK_TAG;
+      r->tag = Z_OK_TAG;
       r_cd = z_compact_data_decode(buf, h);
-      ASSURE_RESULT(r_sd, r, Z_MESSAGE_PARSE_ERROR)
-      r.value.message->payload.compact_data = r_cd.value.compact_data;
+      ASSURE_P_RESULT(r_sd, r, Z_MESSAGE_PARSE_ERROR)
+      r->value.message->payload.compact_data = r_cd.value.compact_data;
       break;
     case Z_STREAM_DATA:
-      r.tag = Z_OK_TAG;
+      r->tag = Z_OK_TAG;
       r_sd = z_stream_data_decode(buf, h);
-      ASSURE_RESULT(r_sd, r, Z_MESSAGE_PARSE_ERROR)
-      r.value.message->payload.stream_data = r_sd.value.stream_data;
+      ASSURE_P_RESULT(r_sd, r, Z_MESSAGE_PARSE_ERROR)
+      r->value.message->payload.stream_data = r_sd.value.stream_data;
       break;
     case Z_ACCEPT:
-      r.tag = Z_OK_TAG;
+      r->tag = Z_OK_TAG;
       r_a = z_accept_decode(buf, h);
-      ASSURE_RESULT(r_a, r, Z_MESSAGE_PARSE_ERROR)
-      r.value.message->payload.accept = r_a.value.accept;
+      ASSURE_P_RESULT(r_a, r, Z_MESSAGE_PARSE_ERROR)
+      r->value.message->payload.accept = r_a.value.accept;
       break;
     case Z_CLOSE:
-      r.tag = Z_OK_TAG;
+      r->tag = Z_OK_TAG;
       r_c = z_close_decode(buf, h);
-      ASSURE_RESULT(r_c, r, Z_MESSAGE_PARSE_ERROR)
-      r.value.message->payload.close = r_c.value.close;
+      ASSURE_P_RESULT(r_c, r, Z_MESSAGE_PARSE_ERROR)
+      r->value.message->payload.close = r_c.value.close;
       break;
     case Z_DECLARE:
-      r.tag = Z_OK_TAG;
+      r->tag = Z_OK_TAG;
       r_d = z_declare_decode(buf, h);
-      ASSURE_RESULT(r_d, r, Z_MESSAGE_PARSE_ERROR)
-      r.value.message->payload.declare = r_d.value.declare;
+      ASSURE_P_RESULT(r_d, r, Z_MESSAGE_PARSE_ERROR)
+      r->value.message->payload.declare = r_d.value.declare;
       break;
     default:
-      r.tag = Z_ERROR_TAG;
-      r.value.error = Z_MESSAGE_PARSE_ERROR;
+      r->tag = Z_ERROR_TAG;
+      r->value.error = Z_MESSAGE_PARSE_ERROR;
       Z_ERROR("WARNING: Trying to encode message with unknown ID(%d)", mid); 
 
   }
+}
+
+z_message_p_result_t
+z_message_decode(z_iobuf_t* buf) {
+  z_message_p_result_t r;
+  z_message_p_result_init(&r); 
+  z_message_decode_na(buf, &r);
   return r;
 }

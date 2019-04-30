@@ -148,6 +148,7 @@ z_declare_subscriber(zenoh_t *z, z_vle_t rid,  z_sub_mode_t sm, subscriber_callb
   msg->payload.declare.declarations = decl;  
   z_send_msg(z->sock, &z->wbuf, msg);  
   z_register_subscription(z, rid, callback);
+  free(msg);
   // -- This will be refactored to use mvars
   return 0;
 }
@@ -171,6 +172,7 @@ z_declare_publisher(zenoh_t *z,  z_vle_t rid) {
   
   msg->payload.declare.declarations = decl;  
   z_send_msg(z->sock, &z->wbuf, msg);  
+  free(msg);
   // -- This will be refactored to use mvars
   return 0;
 #if 0

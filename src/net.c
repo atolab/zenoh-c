@@ -131,25 +131,50 @@ z_recv_vle(int sock) {
   return z_vle_decode(&iobuf);
 }
 
-z_message_p_result_t
-z_recv_msg(int sock, z_iobuf_t* buf) {   
+void
+z_recv_msg_na(int sock, z_iobuf_t* buf, z_message_p_result_t *r) {   
   z_iobuf_clear(buf);
-  Z_DEBUG(">> recv_msg\n"); 
-  z_message_p_result_t r;
-  z_message_p_result_init(&r);
-  r.tag = Z_ERROR_TAG;
+  Z_DEBUG(">> recv_msg\n");   
+  r->tag = Z_OK_TAG;
   z_vle_result_t r_vle = z_recv_vle(sock);  
-  ASSURE_RESULT(r_vle, r, Z_VLE_PARSE_ERROR)
+  ASSURE_P_RESULT(r_vle, r, Z_VLE_PARSE_ERROR)
   size_t len = r_vle.value.vle;  
   Z_DEBUG_VA(">> \t msg len = %zu\n", len); 
   if (z_iobuf_writable(buf) < len) {
-    r.tag = Z_ERROR_TAG;
-    r.value.error = Z_INSUFFICIENT_IOBUF_SIZE;
-    return r;
+    r->tag = Z_ERROR_TAG;
+    r->value.error = Z_INSUFFICIENT_IOBUF_SIZE;    
+    return;
   }
   z_recv_n(sock, buf, len);
   buf->r_pos = 0;
   buf->w_pos = len;
   Z_DEBUG(">> \t z_message_decode\n"); 
-  return z_message_decode(buf);  
+  z_message_decode_na(buf, r);  
+}
+
+z_message_p_result_t
+z_recv_msg(int sock, z_iobuf_t* buf) {   
+  z_message_p_result_t r;
+  z_message_p_result_init(&r);
+  z_recv_msg_na(sock, buf, &r);
+  return r;
+  // z_iobuf_clear(buf);
+  // Z_DEBUG(">> recv_msg\n"); 
+  // z_message_p_result_t r;
+  // z_message_p_result_init(&r);
+  // r.tag = Z_ERROR_TAG;
+  // z_vle_result_t r_vle = z_recv_vle(sock);  
+  // ASSURE_RESULT(r_vle, r, Z_VLE_PARSE_ERROR)
+  // size_t len = r_vle.value.vle;  
+  // Z_DEBUG_VA(">> \t msg len = %zu\n", len); 
+  // if (z_iobuf_writable(buf) < len) {
+  //   r.tag = Z_ERROR_TAG;
+  //   r.value.error = Z_INSUFFICIENT_IOBUF_SIZE;
+  //   return r;
+  // }
+  // z_recv_n(sock, buf, len);
+  // buf->r_pos = 0;
+  // buf->w_pos = len;
+  // Z_DEBUG(">> \t z_message_decode\n"); 
+  // return z_message_decode(buf);  
 }

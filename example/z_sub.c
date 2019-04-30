@@ -10,12 +10,12 @@ void listener(uint8_t mid, z_vle_t rid, z_iobuf_t data) {
     case Z_STREAM_DATA:      
       z_payload_header_decode_na(&data, &r);
       if (r.tag == Z_OK_TAG) {        
-        r_s = z_string_decode(&r.value.payload_header.payload);
+        r_s = z_string_decode(&r.value.payload_header.payload);        
         if (r_s.tag == Z_OK_TAG) {
           printf(">>: %s\n", r_s.value.string);
+          free(r_s.value.string);
         }
         z_iobuf_free(&r.value.payload_header.payload);
-        z_iobuf_free(&data);
       }
 
       break;
@@ -23,7 +23,9 @@ void listener(uint8_t mid, z_vle_t rid, z_iobuf_t data) {
       r_s = z_string_decode(&data);
       if (r_s.tag == Z_OK_TAG) {
         printf(">>: %s\n", r_s.value.string);
+        free(r_s.value.string);
       }
+      
       break;
     default:
       printf(">>> Got unsupported data message with id %d!\n", mid);
