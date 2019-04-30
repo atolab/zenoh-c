@@ -58,6 +58,6 @@ int main(int argc, char **argv) {
     printf("Unable to declare pub\n");
     return -1;
   }
-  sleep(60000);
+  sleep(60);
   return 0;
 }

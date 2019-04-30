@@ -3,6 +3,8 @@
 #include <string.h>
 #include <assert.h>
 
+z_list_t * z_list_empty = 0;
+
 inline z_vec_t z_vec_make(unsigned int capacity) {
   z_vec_t v;
   v.capacity_ = capacity;
@@ -45,8 +47,6 @@ void z_vec_set(z_vec_t* v, unsigned int i, void* e) {
   assert(i < v->capacity_);
   v->elem_[i] = e;
 }
-
-static z_list_t * z_list_empty = 0;
 
 z_list_t * z_list_of(void *x) {
   z_list_t *xs = (z_list_t *)malloc(sizeof(z_list_t));

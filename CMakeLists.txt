@@ -9,9 +9,10 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 # Use cmake .. -DCMAKE_BUILD_TYPE=Debug for debug / Release
-set(CC "gcc")
+set(CC "clang")
 set(CMAKE_CXX_FLAGS "-Wall -Wextra")
-set(CMAKE_CXX_FLAGS_DEBUG "-g -fsanitize=address")
+# set(CMAKE_CXX_FLAGS_DEBUG "-g -fsanitize=address")
+set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
