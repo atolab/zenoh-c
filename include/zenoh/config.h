@@ -16,8 +16,8 @@
  */ 
 #define ZENOH_DEBUG 2
 
-// #define ZENOH_MACOS 0 
-#define ZENOH_LINUX 1
+#define ZENOH_MACOS 1
+// #define ZENOH_LINUX 0
 // #define ZENOH_CONTIKI 0
 // #define ZENOH_MBED 0
 // #define ZENOH_WINDOWS 0

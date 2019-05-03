@@ -10,6 +10,7 @@
 #include <arpa/inet.h>
 #include <assert.h>
 
+#include "zenoh.h"
 #include "zenoh/net.h"
 
 
@@ -22,7 +23,7 @@ int open_tx_session(char *locator) {
   
   int port;
   sscanf(s_port, "%d", &port);    
-  int sock;
+  z_socket_t sock;
 
   Z_DEBUG_VA("Connecting to: %s:%d\n", addr, port);
 
@@ -31,7 +32,7 @@ int open_tx_session(char *locator) {
   sock = socket(PF_INET, SOCK_STREAM, 0);
 
 #if (ZENOH_MACOS == 1)
-  setsockopt(sock, SOL_SOCKET, SO_NOSIGPIPE, (void *)&set, sizeof(int));
+  setsockopt(sock, SOL_SOCKET, SO_NOSIGPIPE, (void *)0, sizeof(int));
 #endif
  
   if (sock < 0) {    
@@ -54,7 +55,7 @@ int open_tx_session(char *locator) {
   
 }
 
-int z_send_buf(int sock, z_iobuf_t* buf) {
+int z_send_buf(z_socket_t sock, z_iobuf_t* buf) {
   int len =  z_iobuf_readable(buf);
   uint8_t *ptr = buf->buf;  
   int n = len;
@@ -77,7 +78,7 @@ int z_send_buf(int sock, z_iobuf_t* buf) {
   return 0;
 }
 
-int z_recv_n(int sock, z_iobuf_t* buf, size_t len) {    
+int z_recv_n(z_socket_t sock, z_iobuf_t* buf, size_t len) {    
   uint8_t *ptr = buf->buf;  
   int n = len;
   int rb;
@@ -91,7 +92,7 @@ int z_recv_n(int sock, z_iobuf_t* buf, size_t len) {
 }
 
 size_t 
-z_send_msg(int sock, z_iobuf_t* buf, z_message_t* m) {
+z_send_msg(z_socket_t sock, z_iobuf_t* buf, z_message_t* m) {
   Z_DEBUG(">> send_msg\n");
   z_iobuf_clear(buf);
   Z_DEBUG(">> \t z_message_encode\n");
@@ -106,7 +107,7 @@ z_send_msg(int sock, z_iobuf_t* buf, z_message_t* m) {
 }
 
 z_vle_result_t
-z_recv_vle(int sock) {
+z_recv_vle(z_socket_t sock) {
   z_vle_result_t r;
   uint8_t buf[10];
   int n;  
@@ -132,7 +133,7 @@ z_recv_vle(int sock) {
 }
 
 void
-z_recv_msg_na(int sock, z_iobuf_t* buf, z_message_p_result_t *r) {   
+z_recv_msg_na(z_socket_t sock, z_iobuf_t* buf, z_message_p_result_t *r) {   
   z_iobuf_clear(buf);
   Z_DEBUG(">> recv_msg\n");   
   r->tag = Z_OK_TAG;
@@ -153,7 +154,7 @@ z_recv_msg_na(int sock, z_iobuf_t* buf, z_message_p_result_t *r) {
 }
 
 z_message_p_result_t
-z_recv_msg(int sock, z_iobuf_t* buf) {   
+z_recv_msg(z_socket_t sock, z_iobuf_t* buf) {   
   z_message_p_result_t r;
   z_message_p_result_init(&r);
   z_recv_msg_na(sock, buf, &r);

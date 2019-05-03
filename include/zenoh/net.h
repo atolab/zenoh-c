@@ -2,18 +2,26 @@
 #define ZENOH_C_NET_H_
 
 #include "zenoh/codec.h"
+#include "zenoh/config.h"
+
+#if (ZENOH_LINUX ==1) || (ZENOH_MACOS == 1) 
+typedef int z_socket_t;
+#elif (ZENOH_CONTIKI == 1)
+#include "contiki-net.h"
+typedef struct tcp_socket z_socket_t;
+#endif 
 
 int open_tx_session(char *locator);
 
-int z_send_buf(int sock, z_iobuf_t* buf);
+int z_send_buf(z_socket_t sock, z_iobuf_t* buf);
 
-int z_recv_n(int sock, z_iobuf_t* buf, size_t len);
+int z_recv_n(z_socket_t sock, z_iobuf_t* buf, size_t len);
 
-size_t z_send_msg(int sock, z_iobuf_t* buf, z_message_t* m);
+size_t z_send_msg(z_socket_t sock, z_iobuf_t* buf, z_message_t* m);
 
-z_vle_result_t z_recv_vle(int sock);
+z_vle_result_t z_recv_vle(z_socket_t sock);
 
-z_message_p_result_t z_recv_msg(int sock, z_iobuf_t* buf);
-void z_recv_msg_na(int sock, z_iobuf_t* buf, z_message_p_result_t *r);
+z_message_p_result_t z_recv_msg(z_socket_t sock, z_iobuf_t* buf);
+void z_recv_msg_na(z_socket_t sock, z_iobuf_t* buf, z_message_p_result_t *r);
 
 #endif /* ZENOH_C_NET_H_ */
