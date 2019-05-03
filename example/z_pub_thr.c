@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
   z_string_encode(&sdata, str);  
   
   while (1) {      
-    z_compact_data(&z, rid, sdata);    
+    z_compact_data(&z, rid, &sdata);    
   }
 
   return 0;
