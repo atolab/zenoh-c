@@ -5,10 +5,9 @@
 #include "zenoh/config.h"
 
 #if (ZENOH_LINUX ==1) || (ZENOH_MACOS == 1) 
-typedef int z_socket_t;
+#include "zenoh/unix/net.h"
 #elif (ZENOH_CONTIKI == 1)
-#include "contiki-net.h"
-typedef struct tcp_socket z_socket_t;
+#include "zenoh/contiki/net.h"
 #endif 
 
 int open_tx_session(char *locator);

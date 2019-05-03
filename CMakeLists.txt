@@ -9,7 +9,6 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 # Use cmake .. -DCMAKE_BUILD_TYPE=Debug for debug / Release
-set(CC "clang")
 set(CMAKE_CXX_FLAGS "-Wall -Wextra")
 # set(CMAKE_CXX_FLAGS_DEBUG "-g -fsanitize=address")
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
@@ -17,6 +16,8 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
+
+option (UNIX_TARGET "Use this for Linux, Macos, etc." ON)
 
 set(CMAKE_C_STANDARD 11)
 set (CMAKE_CXX_FLAGS "-Wall -Wunused -pipe -g")
@@ -27,7 +28,11 @@ include_directories(
         "${PROJECT_SOURCE_DIR}/include"                
 )
 
-file(GLOB Sources "src/*.c")
+if (UNIX_TARGET)
+file(GLOB Sources "src/*.c" "src/unix/*.c")
+
+endif(UNIX_TARGET)
+
 link_directories("${PROJECT_SOURCE_DIR}/build")
 
 add_library(zenohc SHARED ${Sources})
