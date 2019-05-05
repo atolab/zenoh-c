@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include "zenoh/config.h"
 #include "zenoh/collection.h"
 #include "zenoh/mvar.h"
 
@@ -19,6 +20,13 @@
 #define Z_DEBUG(x) 
 #define Z_DEBUG_VA(x, ...) 
 #define Z_ERROR(x, ...) 
+#endif 
+
+
+#if (ZENOH_LINUX ==1) || (ZENOH_MACOS == 1) 
+#include "zenoh/unix/types.h"
+#elif (ZENOH_CONTIKI == 1)
+#include "zenoh/contiki/types.h"
 #endif 
 
 typedef  unsigned long long  z_vle_t;
@@ -52,7 +60,7 @@ z_array_uint8_t z_iobuf_to_array(z_iobuf_t* buf);
 typedef void on_disconnect_t(void *z);
 
 typedef struct {
-  int sock;
+  z_socket_t sock;
   z_vle_t sn;
   z_vle_t cid;
   z_vle_t rid;

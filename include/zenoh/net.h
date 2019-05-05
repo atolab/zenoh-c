@@ -1,16 +1,10 @@
 #ifndef ZENOH_C_NET_H_
 #define ZENOH_C_NET_H_
 
-#include "zenoh/codec.h"
-#include "zenoh/config.h"
+#include "zenoh/types.h"
+#include "zenoh/result.h"
 
-#if (ZENOH_LINUX ==1) || (ZENOH_MACOS == 1) 
-#include "zenoh/unix/net.h"
-#elif (ZENOH_CONTIKI == 1)
-#include "zenoh/contiki/net.h"
-#endif 
-
-int open_tx_session(char *locator);
+z_socket_t open_tx_session(char *locator);
 
 int z_send_buf(z_socket_t sock, z_iobuf_t* buf);
 

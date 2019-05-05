@@ -1,4 +1,5 @@
 
+#include "zenoh/types.h"
 #include "zenoh/net.h"
 #include "zenoh/unix/recv_loop.h"
 #include "zenoh/recv_loop.h"

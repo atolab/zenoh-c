@@ -15,7 +15,7 @@ void default_on_disconnect(void *vz) {
     // Try to reconnect -- eventually we should scout here.
     // We should also re-do declarations.
     Z_DEBUG("Tring to reconnect...\n");
-    int sock = open_tx_session(strdup(z->locator));
+    z_socket_t sock = open_tx_session(strdup(z->locator));
     if (sock > 0) {  
       z->sock = sock;
       return;
