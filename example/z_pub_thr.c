@@ -20,12 +20,19 @@ int main(int argc, char **argv) {
     printf("Unable to declare pub for resource %llu\n", rid);
     return -1;
   }  
-  z_iobuf_t sdata = z_iobuf_make(256);
+
+  z_iobuf_t p_buf = z_iobuf_make(256);
+  z_iobuf_t ph_buf = z_iobuf_make(512);
   char *str = "- Hello World -!";  
-  z_string_encode(&sdata, str);  
+  z_string_encode(&p_buf, str);  
+
+  z_payload_header_t ph;
+  ph.flags = 0;
+  ph.payload = p_buf;
+  z_payload_header_encode(&ph_buf, &ph);
   
   while (1) {      
-    z_compact_data(&z, rid, sdata);    
+    z_stream_data(&z, rid, &ph_buf);    
   }
 
   return 0;

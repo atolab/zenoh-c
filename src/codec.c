@@ -397,29 +397,33 @@ z_payload_header_decode_na(z_iobuf_t *buf, z_payload_header_result_t *r) {
   if (flags & Z_SRC_ID) 
     z_iobuf_read_to_n(buf, r->value.payload_header.src_id, 16);
     
-  if (flags & Z_SRC_SN)  
+  if (flags & Z_SRC_SN) { 
     r_vle = z_vle_decode(buf);
     ASSURE_P_RESULT(r_vle, r, Z_VLE_PARSE_ERROR);
     r->value.payload_header.src_sn = r_vle.value.vle;
+  }
 
   if (flags & Z_BRK_ID) 
     z_iobuf_read_to_n(buf, r->value.payload_header.brk_id, 16);
 
-  if (flags & Z_BRK_SN)
+  if (flags & Z_BRK_SN) {
     r_vle = z_vle_decode(buf);
     ASSURE_P_RESULT(r_vle, r, Z_VLE_PARSE_ERROR);
     r->value.payload_header.brk_sn = r_vle.value.vle;
+  }
 
-  if (flags & Z_KIND)
+  if (flags & Z_KIND) {
     r_vle = z_vle_decode(buf);
     ASSURE_P_RESULT(r_vle, r, Z_VLE_PARSE_ERROR);
     r->value.payload_header.kind = r_vle.value.vle;
-  
-  if (flags & Z_ENCODING)
+  }
+
+  if (flags & Z_ENCODING) {
     r_vle = z_vle_decode(buf);
     ASSURE_P_RESULT(r_vle, r, Z_VLE_PARSE_ERROR);
     r->value.payload_header.encoding = r_vle.value.vle;
-
+  }
+  
   r->value.payload_header.flags = flags;
   r->value.payload_header.payload = z_iobuf_decode(buf);
   r->tag = Z_OK_TAG;
