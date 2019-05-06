@@ -13,8 +13,10 @@
 #include "zenoh.h"
 #include "zenoh/net.h"
 
-
-int open_tx_session(char *locator) {
+z_socket_result_t
+open_tx_session(char *locator) {
+  z_socket_result_t r;
+  r.tag = Z_OK_TAG;
   Z_DEBUG_VA("Connecting to: %s:\n", locator);
   char *tx = strtok(locator, "/");  
   assert(strcmp(tx, "tcp") == 0);
@@ -23,21 +25,25 @@ int open_tx_session(char *locator) {
   
   int port;
   sscanf(s_port, "%d", &port);    
-  z_socket_t sock;
+  
 
   Z_DEBUG_VA("Connecting to: %s:%d\n", addr, port);
 
   struct sockaddr_in serv_addr;  
   
-  sock = socket(PF_INET, SOCK_STREAM, 0);
+  r.value.socket = socket(PF_INET, SOCK_STREAM, 0);
+
+  if (r.value.socket < 0) {    
+    r.tag = Z_ERROR_TAG;
+    r.value.error = r.value.socket;
+    r.value.socket = 0;
+    return r;
+  }
 
 #if (ZENOH_MACOS == 1)
-  setsockopt(sock, SOL_SOCKET, SO_NOSIGPIPE, (void *)0, sizeof(int));
+  setsockopt(r.value.socket, SOL_SOCKET, SO_NOSIGPIPE, (void *)0, sizeof(int));
 #endif
- 
-  if (sock < 0) {    
-    return sock;
-  }
+  
 
   bzero(&serv_addr, sizeof(serv_addr));
 	serv_addr.sin_family = AF_INET;
@@ -45,13 +51,20 @@ int open_tx_session(char *locator) {
 
 	if(inet_pton(AF_INET, addr, &serv_addr.sin_addr)<=0)
 	{
-    return -1;
+    r.tag = Z_ERROR_TAG;
+    r.value.error = Z_INVALID_ADDRESS_ERROR;
+    r.value.socket = 0;
+    return r;
 	}
 	
-	if( connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
-    return -1;		
-	
-  return sock;
+	if( connect(r.value.socket, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
+    r.tag = Z_ERROR_TAG;
+    r.value.error = Z_TX_CONNECTION_ERROR;
+    r.value.socket = 0;
+    return r;
+  }
+    	
+  return r;
   
 }
 

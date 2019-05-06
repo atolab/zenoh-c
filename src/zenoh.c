@@ -15,9 +15,9 @@ void default_on_disconnect(void *vz) {
     // Try to reconnect -- eventually we should scout here.
     // We should also re-do declarations.
     Z_DEBUG("Tring to reconnect...\n");
-    z_socket_t sock = open_tx_session(strdup(z->locator));
-    if (sock > 0) {  
-      z->sock = sock;
+    z_socket_result_t r_sock = open_tx_session(strdup(z->locator));    
+    if (r_sock.tag == Z_OK_TAG) {  
+      z->sock = r_sock.value.socket;
       return;
     }
   }
@@ -30,15 +30,16 @@ z_open(char* locator, on_disconnect_t *on_disconnect) {
   r.value.zenoh.locator = strdup(locator);
   srand(clock());
 
-  int sock = open_tx_session(locator);
-  if (sock < 0) {
+  z_socket_result_t r_sock = open_tx_session(locator);    
+  if (r_sock.tag == Z_OK_TAG) {  
     r.tag = Z_ERROR_TAG;
     r.value.error = Z_IO_ERROR;
     return r;
   }
+  
 
   r.tag = Z_OK_TAG;  
-  r.value.zenoh.sock = sock;
+  r.value.zenoh.sock = r_sock.value.socket;
   r.value.zenoh.cid = 0;
   r.value.zenoh.sn = 0;
   r.value.zenoh.rbuf = z_iobuf_make(ZENOH_READ_BUF_LEN);  
@@ -61,11 +62,11 @@ z_open(char* locator, on_disconnect_t *on_disconnect) {
   msg.properties = 0;
 
   Z_DEBUG("Sending Open\n");
-  z_send_msg(sock, &r.value.zenoh.wbuf, &msg);
-  z_message_p_result_t r_msg = z_recv_msg(sock, &r.value.zenoh.rbuf);
+  z_send_msg(r_sock.value.socket, &r.value.zenoh.wbuf, &msg);
+  z_message_p_result_t r_msg = z_recv_msg(r_sock.value.socket, &r.value.zenoh.rbuf);
   ASSERT_P_RESULT(r_msg, "Failed to receive accept");
 
-  r.value.zenoh.sock = sock;
+  r.value.zenoh.sock = r_sock.value.socket;
   r.value.zenoh.pid = pid;  
   r.value.zenoh.declarations = z_list_empty;
   r.value.zenoh.subscriptions = z_list_empty;

@@ -13,6 +13,8 @@
 #define Z_IO_ERROR 0x08
 #define Z_RESOURCE_DECL_ERROR 0x09
 #define Z_PAYLOAD_HEADER_PARSE_ERROR 0x0a
+#define Z_TX_CONNECTION_ERROR 0x0b
+#define Z_INVALID_ADDRESS_ERROR 0x0c
 #define Z_UNEXPECTED_MESSAGE 0x7f
 
 
@@ -71,6 +73,7 @@ void z_ ## name ## _p_result_init(z_ ## name ## _p_result_t *r);
 Z_RESULT_DECLARE (z_vle_t, vle)
 Z_RESULT_DECLARE (z_array_uint8_t, array_uint8)
 Z_RESULT_DECLARE (char*, string)
+Z_RESULT_DECLARE (z_socket_t, socket)
 
 Z_RESULT_DECLARE (z_accept_t, accept)
 Z_RESULT_DECLARE (z_close_t, close)

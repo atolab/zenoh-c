@@ -4,7 +4,7 @@
 #include "zenoh/types.h"
 #include "zenoh/result.h"
 
-z_socket_t open_tx_session(char *locator);
+z_socket_result_t open_tx_session(char *locator);
 
 int z_send_buf(z_socket_t sock, z_iobuf_t* buf);
 
