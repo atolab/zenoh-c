@@ -31,7 +31,7 @@ z_open(char* locator, on_disconnect_t *on_disconnect) {
   srand(clock());
 
   z_socket_result_t r_sock = open_tx_session(locator);    
-  if (r_sock.tag == Z_OK_TAG) {  
+  if (r_sock.tag == Z_ERROR_TAG) {  
     r.tag = Z_ERROR_TAG;
     r.value.error = Z_IO_ERROR;
     return r;
