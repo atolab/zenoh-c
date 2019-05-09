@@ -14,15 +14,16 @@
 #include "zenoh/net.h"
 
 z_socket_result_t
-open_tx_session(char *locator) {
+open_tx_session(const char *locator) {
   z_socket_result_t r;
   r.tag = Z_OK_TAG;
+  char * l = strdup(locator);
   Z_DEBUG_VA("Connecting to: %s:\n", locator);
-  char *tx = strtok(locator, "/");  
+  char *tx = strtok(l, "/");  
   assert(strcmp(tx, "tcp") == 0);
   char *addr = strtok(NULL, ":");  
   char *s_port = strtok(NULL, ":");    
-  
+  free(l);
   int port;
   sscanf(s_port, "%d", &port);    
   

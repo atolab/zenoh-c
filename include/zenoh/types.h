@@ -29,6 +29,9 @@
 #include "zenoh/contiki/types.h"
 #endif 
 
+#define Z_INT_RES_ID 0
+#define Z_STR_RES_ID 1
+
 typedef  unsigned long long  z_vle_t;
 
 Z_ARRAY_DECLARE(uint8_t)
@@ -83,7 +86,17 @@ typedef struct {
   int z;
 } z_pub_t;
 
-typedef void subscriber_callback_t(uint8_t mid, z_vle_t rid, z_iobuf_t data);
+typedef union {  
+  z_vle_t rid;
+  char *rname;
+} z_res_id_t;
+
+typedef struct {
+  int kind;
+  z_res_id_t id; 
+} z_resource_id_t;
+
+typedef void subscriber_callback_t(uint8_t mid, z_resource_id_t rid, z_iobuf_t data);
 
 typedef struct {
   z_vle_t rid;

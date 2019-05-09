@@ -469,6 +469,41 @@ z_stream_data_decode(z_iobuf_t *buf, uint8_t header) {
   return r;
 }
 
+void
+z_write_data_encode(z_iobuf_t *buf, const z_write_data_t* m) {
+  z_vle_encode(buf, m->sn);
+  z_string_encode(buf, m->rname);
+  z_vle_t len = z_iobuf_readable(&m->payload_header);
+  z_vle_encode(buf, len);  
+  z_iobuf_write_n(buf, m->payload_header.buf, m->payload_header.r_pos, m->payload_header.w_pos);    
+}
+
+
+void z_write_data_decode_na(z_iobuf_t *buf, uint8_t header, z_write_data_result_t *r) {
+  r->tag = Z_OK_TAG;
+  z_string_result_t r_str;
+  z_vle_result_t r_vle = z_vle_decode(buf);
+  ASSURE_P_RESULT(r_vle, r, Z_VLE_PARSE_ERROR);
+  r->value.write_data.sn = r_vle.value.vle;
+
+  r_str = z_string_decode(buf);
+  ASSURE_P_RESULT(r_str, r, Z_VLE_PARSE_ERROR);
+  r->value.write_data.rname = r_str.value.string;
+
+  r_vle = z_vle_decode(buf);
+  ASSURE_P_RESULT(r_vle, r, Z_VLE_PARSE_ERROR);  
+  uint8_t *ph = z_iobuf_read_n(buf, r_vle.value.vle);
+  r->value.write_data.payload_header = z_iobuf_wrap(ph, r_vle.value.vle);
+  r->value.write_data.payload_header.w_pos = r_vle.value.vle;
+}
+
+z_write_data_result_t
+z_write_data_decode(z_iobuf_t *buf, uint8_t header) {
+  z_write_data_result_t r;
+  z_write_data_decode_na(buf, header, &r);
+  return r;
+}
+
 void 
 z_message_encode(z_iobuf_t* buf, const z_message_t* m) {
   z_iobuf_write(buf, m->header);
@@ -478,7 +513,10 @@ z_message_encode(z_iobuf_t* buf, const z_message_t* m) {
       z_compact_data_encode(buf, &m->payload.compact_data);
       break;    
     case Z_STREAM_DATA:
-      z_stream_data_encode(buf, &m->payload.stream_data);
+      z_stream_data_encode(buf, &m->payload.stream_data); 
+      break;
+    case Z_WRITE_DATA:
+      z_write_data_encode(buf, &m->payload.write_data);
       break;
     case Z_OPEN:
       z_open_encode(buf, &m->payload.open);
@@ -498,6 +536,7 @@ void
 z_message_decode_na(z_iobuf_t* buf, z_message_p_result_t* r) {
   z_compact_data_result_t r_cd;  
   z_stream_data_result_t r_sd;
+  z_write_data_result_t r_wd;
   z_accept_result_t r_a;
   z_close_result_t r_c;
   z_declare_result_t r_d;
@@ -520,6 +559,12 @@ z_message_decode_na(z_iobuf_t* buf, z_message_p_result_t* r) {
       ASSURE_P_RESULT(r_sd, r, Z_MESSAGE_PARSE_ERROR)
       r->value.message->payload.stream_data = r_sd.value.stream_data;
       break;
+    case Z_WRITE_DATA:
+      r->tag = Z_OK_TAG;
+      r_wd = z_write_data_decode(buf, h);
+      ASSURE_P_RESULT(r_wd, r, Z_MESSAGE_PARSE_ERROR)
+      r->value.message->payload.write_data = r_wd.value.write_data;
+      break;  
     case Z_ACCEPT:
       r->tag = Z_OK_TAG;
       r_a = z_accept_decode(buf, h);

@@ -105,7 +105,7 @@
 
 typedef struct {
   z_vle_t id;
-  char* name;
+  char *name;
 } z_property_t;
 
 /*
@@ -225,7 +225,7 @@ typedef struct  {
 } z_declare_t;
 
 
-/*------------------ Compact Message ------------------*/
+/*------------------ Compact Data Message ------------------*/
 typedef struct {  
   z_vle_t sn;
   z_vle_t rid;
@@ -252,6 +252,14 @@ typedef struct {
   z_iobuf_t payload_header;
 } z_stream_data_t;
 
+/*------------------ Write Data Message ------------------*/
+typedef struct {  
+  z_vle_t sn;
+  const char* rname;
+  z_iobuf_t payload_header;
+} z_write_data_t;
+
+
 /**
  *  On the wire this is represented as:
  *     |header|payload|properties|
@@ -267,6 +275,7 @@ typedef struct {
     z_declare_t declare;
     z_compact_data_t compact_data;
     z_stream_data_t stream_data;
+    z_write_data_t write_data;
     z_scout_t scout;
     z_hello_t hello;
   } payload;

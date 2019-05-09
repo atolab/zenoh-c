@@ -222,7 +222,19 @@ z_stream_data(zenoh_t *z, z_vle_t rid, const z_iobuf_t *payload_header) {
   }
 }
 
-int z_write_data(zenoh_t *z, const char* resource, const z_array_uint8_t *payload) { 
-  return 0;
+int z_write_data(zenoh_t *z, const char* resource, const z_iobuf_t *payload_header) { 
+  z_message_t msg;
+  msg.header = Z_WRITE_DATA;
+  msg.payload.write_data.rname = resource;      
+  msg.payload.stream_data.sn = z->sn++;
+  msg.payload.stream_data.payload_header = *payload_header;
+  if (z_send_msg(z->sock, &z->wbuf, &msg) == 0) 
+    return 0;
+  else
+  {
+    Z_DEBUG("Trying to reconnect....\n");
+    z->on_disconnect(z);
+    return z_send_msg(z->sock, &z->wbuf, &msg);
+  }
 }
 

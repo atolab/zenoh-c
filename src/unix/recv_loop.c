@@ -11,6 +11,7 @@ void* z_recv_loop(void* arg) {
     z_runtime_t *rt = (z_runtime_t*)z->runtime;
     z_message_p_result_t r;
     z_message_p_result_init(&r);
+    z_resource_id_t rid;    
     uint8_t mid;
     z_subscription_t *sub;
     while (rt->running) {
@@ -22,7 +23,9 @@ void* z_recv_loop(void* arg) {
                     Z_DEBUG_VA("Received message %d\n", Z_MID(r.value.message->header));          
                     sub = z_get_subscription(z, r.value.message->payload.stream_data.rid);
                     if (sub != 0) {
-                        sub->callback(mid, r.value.message->payload.stream_data.rid,
+                        rid.kind = Z_INT_RES_ID;
+                        rid.id.rid = r.value.message->payload.stream_data.rid;
+                        sub->callback(mid, rid,
                                     r.value.message->payload.stream_data.payload_header);                                              
                     } else {
                         Z_DEBUG_VA("No subscription found for resource %llu\n", r.value.message->payload.stream_data.rid);          
@@ -32,10 +35,26 @@ void* z_recv_loop(void* arg) {
                 case Z_COMPACT_DATA:                    
                     sub = z_get_subscription(z, r.value.message->payload.stream_data.rid);
                     if (sub != 0) {
-                        sub->callback(mid, r.value.message->payload.compact_data.rid,
+                        rid.kind = Z_INT_RES_ID;
+                        rid.id.rid = r.value.message->payload.stream_data.rid;
+                        sub->callback(mid, rid,
                                     r.value.message->payload.compact_data.payload);                        
                     } 
                     z_iobuf_free(&r.value.message->payload.compact_data.payload);
+                    break;
+                case Z_WRITE_DATA:          
+                    Z_DEBUG_VA("Unsupported %d\n", Z_MID(r.value.message->header));          
+                    // Z_DEBUG_VA("Received message %d\n", Z_MID(r.value.message->header));          
+                    // sub = z_get_subscription(z, r.value.message->payload.stream_data.rid);
+                    // if (sub != 0) {
+                    //     rid.kind = Z_INT_RES_ID;
+                    //     rid.id.rid = r.value.message->payload.stream_data.rid;
+                    //     sub->callback(mid, rid,
+                    //                 r.value.message->payload.stream_data.payload_header);                                              
+                    // } else {
+                    //     Z_DEBUG_VA("No subscription found for resource %llu\n", r.value.message->payload.stream_data.rid);          
+                    // }                     
+                    // z_iobuf_free(&r.value.message->payload.stream_data.payload_header);                        
                     break;                    
                 case Z_DECLARE:
                     break;

@@ -16,7 +16,6 @@ int z_declare_publisher(zenoh_t *z, z_vle_t rid);
 int z_stream_compact_data(zenoh_t *z, z_vle_t rid, const z_iobuf_t *payload);
 int z_stream_data(zenoh_t *z, z_vle_t rid, const z_iobuf_t *payload_header);
 
-int z_write_data(zenoh_t *z, const char* resource, const z_array_uint8_t *payload);
-
+int z_write_data(zenoh_t *z, const char* resource, const z_iobuf_t *payload_header);
 
 #endif /* ZENOH_C_H_DEFINED_ */

@@ -3,7 +3,7 @@
 #include "zenoh.h"
 #include "zenoh/recv_loop.h"
 
-void listener(uint8_t mid, z_vle_t rid, z_iobuf_t data) {  
+void listener(uint8_t mid, z_resource_id_t rid, z_iobuf_t data) {  
   z_payload_header_result_t r;
   z_string_result_t r_s;
   switch (mid) {
