@@ -9,7 +9,11 @@ int y_put(zenoh_t *z, const char *path, const z_iobuf_t *data, int encoding) {
   ph.encoding = encoding;
   ph.kind = Y_PUT;
   ph.payload = *data;
-  return z_write_data(z, path, &ph);
+  z_iobuf_t buf = z_iobuf_make(z_iobuf_readable(data) + 32 );
+  z_payload_header_encode(&buf, &ph);
+  int rv = z_write_data(z, path, &buf);
+  z_iobuf_free(&buf);
+  return rv;
 }
 
 int y_remove(zenoh_t *z, const char *path, int encoding) {
