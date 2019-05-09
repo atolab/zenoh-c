@@ -42,19 +42,18 @@ void* z_recv_loop(void* arg) {
                     } 
                     z_iobuf_free(&r.value.message->payload.compact_data.payload);
                     break;
-                case Z_WRITE_DATA:          
-                    Z_DEBUG_VA("Unsupported %d\n", Z_MID(r.value.message->header));          
-                    // Z_DEBUG_VA("Received message %d\n", Z_MID(r.value.message->header));          
-                    // sub = z_get_subscription(z, r.value.message->payload.stream_data.rid);
-                    // if (sub != 0) {
-                    //     rid.kind = Z_INT_RES_ID;
-                    //     rid.id.rid = r.value.message->payload.stream_data.rid;
-                    //     sub->callback(mid, rid,
-                    //                 r.value.message->payload.stream_data.payload_header);                                              
-                    // } else {
-                    //     Z_DEBUG_VA("No subscription found for resource %llu\n", r.value.message->payload.stream_data.rid);          
-                    // }                     
-                    // z_iobuf_free(&r.value.message->payload.stream_data.payload_header);                        
+                case Z_WRITE_DATA:                             
+                    Z_DEBUG_VA("Received message %d\n", Z_MID(r.value.message->header));          
+                    sub = z_get_subscription(z, r.value.message->payload.stream_data.rid);
+                    if (sub != 0) {
+                        rid.kind = Z_STR_RES_ID;
+                        rid.id.rname = r.value.message->payload.write_data.rname;
+                        sub->callback(mid, rid,
+                                    r.value.message->payload.stream_data.payload_header);                                              
+                    } else {
+                        Z_DEBUG_VA("No subscription found for resource %llu\n", r.value.message->payload.stream_data.rid);          
+                    }                     
+                    z_iobuf_free(&r.value.message->payload.stream_data.payload_header);                        
                     break;                    
                 case Z_DECLARE:
                     break;

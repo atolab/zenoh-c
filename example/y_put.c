@@ -27,8 +27,13 @@ int main(int argc, char **argv) {
   ph.payload = sdata;
   z_payload_header_encode(&phbuf, &ph);
   printf("Streaming Data...\n");
+  int i = 0;
   while (1) {    
-    y_put(&z, "/demo/hello", &sdata, Y_RAW_ENC);   
+    char *key = (char*)malloc(256);
+    sprintf(key, "/demo/hello/%d", i);
+    i = (i + 1)%100;
+    y_put(&z, key, &sdata, Y_RAW_ENC); 
+    free(key);  
     sleep(1);
   }
 
