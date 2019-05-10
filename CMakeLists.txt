@@ -63,5 +63,5 @@ target_link_libraries(z_pub_thr zenohc)
 target_link_libraries(z_sub_thr zenohc)
 target_link_libraries(z_data_struct zenohc)
 
-install (TARGETS zenohc  DESTINATION ${PROJECT_SOURCE_DIR}/lib)
+install (TARGETS zenohc  DESTINATION /usr/local/lib)
 install (TARGETS z_pub  DESTINATION ${PROJECT_SOURCE_DIR}/bin)
