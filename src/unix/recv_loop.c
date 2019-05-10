@@ -67,7 +67,7 @@ void* z_recv_loop(void* arg) {
                     }                     
                     break;
                 case Z_WRITE_DATA:                             
-                    Z_DEBUG_VA("Received message %d\n", Z_MID(r.value.message->header));          
+                    Z_DEBUG_VA("Received write-data message %d\n", Z_MID(r.value.message->header));          
                     sub = z_get_subscription_by_rname(z, r.value.message->payload.write_data.rname);
                     if (sub != 0) {
                         rid.kind = Z_STR_RES_ID;

@@ -21,15 +21,15 @@ open_tx_session(const char *locator) {
   Z_DEBUG_VA("Connecting to: %s:\n", locator);
   char *tx = strtok(l, "/");  
   assert(strcmp(tx, "tcp") == 0);
-  char *addr = strtok(NULL, ":");  
+  char *addr = strdup(strtok(NULL, ":"));  
   char *s_port = strtok(NULL, ":");    
-  free(l);
+  
   int port;
   sscanf(s_port, "%d", &port);    
   
 
   Z_DEBUG_VA("Connecting to: %s:%d\n", addr, port);
-
+  free(l);
   struct sockaddr_in serv_addr;  
   
   r.value.socket = socket(PF_INET, SOCK_STREAM, 0);
@@ -55,8 +55,12 @@ open_tx_session(const char *locator) {
     r.tag = Z_ERROR_TAG;
     r.value.error = Z_INVALID_ADDRESS_ERROR;
     r.value.socket = 0;
+    free(addr);
     return r;
-	}
+	} 
+  
+  free(addr);
+
 	
 	if( connect(r.value.socket, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
     r.tag = Z_ERROR_TAG;
