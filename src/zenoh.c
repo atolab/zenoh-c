@@ -105,7 +105,8 @@ z_declare_resource(zenoh_t *z, const char* resource) {
   Z_DEBUG(">>> Sending Declare...\n");
   z_send_msg(z->sock, &z->wbuf, &msg);
   // This will be refactored to use mvars
-  r_rid.value.vle = z->rid++;    
+  r_rid.value.vle = z->rid++;      
+  z_register_res_decl(z, r_rid.value.vle, resource);
   return r_rid;
 
 // -- This will be refactored to use mvars

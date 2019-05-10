@@ -84,16 +84,58 @@ z_array_uint8_t z_iobuf_to_array(z_iobuf_t* buf) {
   return a;
 }
 
+void z_register_res_decl(zenoh_t *z, z_vle_t rid, const char *rname) {
+  z_res_decl_t *rdecl = (z_res_decl_t *) malloc(sizeof(z_res_decl_t));
+  rdecl->rid = rid;
+  rdecl->r_name = strdup(rname);  
+  z->declarations = z_list_cons(z->declarations, rdecl);
+}
+
+z_res_decl_t *z_get_res_decl_by_rid(zenoh_t *z, z_vle_t rid) {
+  if (z->declarations == 0) {
+    printf(">>> Empty declaration set");
+    return 0;
+  }
+  else {
+    z_res_decl_t *decl = (z_res_decl_t *)z_list_head(z->declarations);
+    z_list_t *decls = z_list_tail(z->declarations);
+    while (decls != 0 && decl->rid != rid) {      
+      decl = z_list_head(decls);
+      decls = z_list_tail(decls);  
+    }    
+    if (decl->rid == rid) return decl;
+    else return 0;
+  }
+}
+z_res_decl_t *z_get_res_decl_by_rname(zenoh_t *z, const char *rname) {
+  if (z->declarations == 0) {
+    printf(">>> Empty declarations set");
+    return 0;
+  }
+  else {
+    z_res_decl_t *decl = (z_res_decl_t *)z_list_head(z->subscriptions);
+    z_list_t *decls = z_list_tail(z->declarations);
+    while (decls != 0 && strcmp(decl->r_name, rname) != 0) {      
+      decls = z_list_head(decls);
+      decls = z_list_tail(decls);  
+    }    
+    if (strcmp(decl->r_name, rname) == 0) return decl;
+    else return 0;
+  }
+}
 
 
-void z_register_subscription(zenoh_t *z, z_vle_t rid,  subscriber_callback_t *callback) {
+void z_register_subscription(zenoh_t *z, z_vle_t rid, subscriber_callback_t *callback) {
   z_subscription_t *sub = (z_subscription_t *) malloc(sizeof(z_subscription_t));
   sub->rid = rid;
+  z_res_decl_t *decl = z_get_res_decl_by_rid(z, rid);
+  assert(decl != 0);
+  sub->rname = strdup(decl->r_name);
   sub->callback = callback;
   z->subscriptions = z_list_cons(z->subscriptions, sub);
 }
 
-z_subscription_t *z_get_subscription(zenoh_t *z, z_vle_t rid) {
+z_subscription_t *z_get_subscription_by_rid(zenoh_t *z, z_vle_t rid) {
   if (z->subscriptions == 0) {
     printf(">>> Empty subscription set");
     return 0;
@@ -106,6 +148,23 @@ z_subscription_t *z_get_subscription(zenoh_t *z, z_vle_t rid) {
       subs = z_list_tail(subs);  
     }    
     if (sub->rid == rid) return sub;
+    else return 0;
+  }
+}
+
+z_subscription_t *z_get_subscription_by_rname(zenoh_t *z, const char *rname) {
+  if (z->subscriptions == 0) {
+    printf(">>> Empty subscription set");
+    return 0;
+  }
+  else {
+    z_subscription_t *sub = (z_subscription_t *)z_list_head(z->subscriptions);
+    z_list_t *subs = z_list_tail(z->subscriptions);
+    while (subs != 0 && strcmp(sub->rname, rname) != 0) {      
+      sub = z_list_head(subs);
+      subs = z_list_tail(subs);  
+    }    
+    if (strcmp(sub->rname, rname) == 0) return sub;
     else return 0;
   }
 }

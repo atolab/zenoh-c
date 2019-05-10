@@ -9,6 +9,8 @@
 #include "zenoh/mvar.h"
 
 #if (ZENOH_DEBUG == 2)
+#include <stdio.h>
+
 #define Z_DEBUG(x) printf(x)
 #define Z_DEBUG_VA(x, ...) printf(x, __VA_ARGS__) 
 #define Z_ERROR(x, ...) printf(x, __VA_ARGS__) 
@@ -78,6 +80,11 @@ typedef struct {
   void *runtime;
 } zenoh_t;
 
+typedef struct {   
+  z_vle_t rid;
+  const char* r_name;  
+} z_res_decl_t;
+
 typedef struct {
   int z;
 } z_sub_t;
@@ -88,7 +95,7 @@ typedef struct {
 
 typedef union {  
   z_vle_t rid;
-  char *rname;
+  const char *rname;
 } z_res_id_t;
 
 typedef struct {
@@ -96,15 +103,30 @@ typedef struct {
   z_res_id_t id; 
 } z_resource_id_t;
 
-typedef void subscriber_callback_t(uint8_t mid, z_resource_id_t rid, z_iobuf_t data);
-
 typedef struct {
+  unsigned int flags;
+  // TODO: Add support for timestamp
+  // unsigned long long timestamp;
+  unsigned short encoding;
+  unsigned short kind;  
+} z_data_info_t;
+
+typedef void subscriber_callback_t(z_resource_id_t rid, z_iobuf_t data, z_data_info_t info);
+
+typedef struct {  
+  char *rname;
   z_vle_t rid;
   subscriber_callback_t *callback;
 } z_subscription_t;
 
+void z_register_res_decl(zenoh_t *z, z_vle_t rid, const char *rname);
+z_res_decl_t *z_get_res_decl_by_rid(zenoh_t *z, z_vle_t rid);
+z_res_decl_t *z_get_res_decl_by_rname(zenoh_t *z, const char *rname);
+
+
 void z_register_subscription(zenoh_t *z, z_vle_t rid,  subscriber_callback_t *callback);
-z_subscription_t *z_get_subscription(zenoh_t *z, z_vle_t rid);
+z_subscription_t *z_get_subscription_by_rid(zenoh_t *z, z_vle_t rid);
+z_subscription_t *z_get_subscription_by_rname(zenoh_t *z, const char *rname);
 
 
 #endif /* ZENOH_C_TYPES_H_ */ 

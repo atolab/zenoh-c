@@ -2,36 +2,16 @@
 #include <unistd.h>
 #include "zenoh.h"
 #include "zenoh/recv_loop.h"
-
-void listener(uint8_t mid, z_resource_id_t rid, z_iobuf_t data) {  
-  z_payload_header_result_t r;
-  z_string_result_t r_s;
-  switch (mid) {
-    case Z_STREAM_DATA:      
-      z_payload_header_decode_na(&data, &r);
-      if (r.tag == Z_OK_TAG) {        
-        r_s = z_string_decode(&r.value.payload_header.payload);        
-        if (r_s.tag == Z_OK_TAG) {
-          printf(">>: %s\n", r_s.value.string);
-          free(r_s.value.string);
-        }
-        z_iobuf_free(&r.value.payload_header.payload);
-      }
-
-      break;
-    case Z_COMPACT_DATA:      
-      r_s = z_string_decode(&data);
-      if (r_s.tag == Z_OK_TAG) {
-        printf(">>: %s\n", r_s.value.string);
-        free(r_s.value.string);
-      }
-      
-      break;
-    default:
-      printf(">>> Got unsupported data message with id %d!\n", mid);
-      break;
+void listener(z_resource_id_t rid, z_iobuf_t data, z_data_info_t info) {    
+  z_string_result_t r_s = z_string_decode(&data);        
+  if (r_s.tag == Z_OK_TAG) {
+    if (rid.kind == Z_INT_RES_ID) 
+      printf(">>: (%llu, %s)\n", rid.id.rid, r_s.value.string);
+    else
+      printf(">>: (%s, %s)\n", rid.id.rname, r_s.value.string);
+    free(r_s.value.string);
   }
-  
+  z_iobuf_free(&data);
 }
 
 int main(int argc, char **argv) {

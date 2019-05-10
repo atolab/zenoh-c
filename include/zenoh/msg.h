@@ -150,10 +150,7 @@ typedef struct {
 } z_close_t; 
 
 /*------------------  Resource Declaration Message ------------------*/
-typedef struct {   
-  z_vle_t rid;
-  const char* r_name;  
-} z_res_decl_t;
+// in types.h
 
 /*------------------ Delcare Publisher ------------------*/
 typedef struct {   

@@ -31,7 +31,7 @@ int main(int argc, char **argv) {
   while (1) {    
     char *key = (char*)malloc(256);
     sprintf(key, "/demo/hello/%d", i);
-    i = (i + 1)%100;
+    i = (i + 1)%10;
     y_put(&z, key, &sdata, Y_RAW_ENC); 
     free(key);  
     sleep(1);
