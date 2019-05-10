@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
 
   z_start_recv_loop(&z);
   printf("Declaring Resource...\n");
-  y_subscribe(&z, "/demo/hello", listener);
+  y_subscribe(&z, "/demo/hello/*", listener);
   sleep(60000);
   return 0;
 }
