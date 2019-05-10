@@ -7,6 +7,7 @@
 #include "zenoh/config.h"
 #include "zenoh/collection.h"
 #include "zenoh/mvar.h"
+#include <regex.h>
 
 #if (ZENOH_DEBUG == 2)
 #include <stdio.h>
@@ -83,6 +84,7 @@ typedef struct {
 typedef struct {   
   z_vle_t rid;
   const char* r_name;  
+  regex_t re;
 } z_res_decl_t;
 
 typedef struct {
@@ -116,6 +118,7 @@ typedef void subscriber_callback_t(z_resource_id_t rid, z_iobuf_t data, z_data_i
 typedef struct {  
   char *rname;
   z_vle_t rid;
+  regex_t re;
   subscriber_callback_t *callback;
 } z_subscription_t;
 

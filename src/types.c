@@ -2,6 +2,76 @@
 #include <assert.h>
 #include <stdio.h>
 
+
+int count_occurences(const char *src, const char *tok) {
+  char *s = strdup(src);
+  char *token = strtok(s, tok);
+  int count = 0;
+  int len = strlen(src);
+  while (token != 0 && strlen(token) < len) {
+    count += 1;
+    token = strtok(NULL, tok);
+  }
+  return count;
+}
+
+char *replace_with(const char *src, const char *match, const char *rep) {
+  int n = count_occurences(src, match);
+  int a = strlen(match);
+  int b = strlen(rep);
+  int len = strlen(src);
+
+  len = len + (n * b) - (n * a);
+  char *r = (char *)malloc(len);
+  r[0] = '\0';
+  char *s = strdup(src);
+  char *token = strtok(s, match);
+
+  while (token != NULL) {
+    strcat(r, token);
+    strcat(r, rep);
+    token = strtok(NULL, match);
+  }
+  free(s);
+  return r;
+}
+
+char *resource_to_regex(const char *res) {
+  char *s_star = "*";    
+  char star = '*';
+  char *re_star = "([a-zA-Z0-9_-]+)";
+  char *re_2star = "([a-zA-Z0-9_-]+(/[a-zA-Z0-9_-])*)";
+
+  int n = count_occurences(res, s_star);  
+  int k = strlen(re_2star);  
+  int len = strlen(res);
+
+  int nlen = len + (n * (k-1));
+  char *r = (char *)malloc(nlen);
+
+  r[0] = '\0';
+  char *s = strdup(res);
+  char *token = strtok(s, s_star);
+
+  int idx = 0;
+  strcat(r, "^(");
+  while (token != NULL) {
+    idx += strlen(token)+1;
+    strcat(r, token);    
+    if (idx < len) {
+      if (res[idx] == star) {
+        idx += 1;
+        strcat(r, re_2star);
+      } else{        
+        strcat(r, re_star);      
+      }    
+    }
+    token = strtok(NULL, s_star);
+  }
+  strcat(r, ")$");
+  return r;
+}
+
 z_iobuf_t 
 z_iobuf_wrap(uint8_t *buf, unsigned int capacity) {
   z_iobuf_t iobuf;
@@ -88,6 +158,9 @@ void z_register_res_decl(zenoh_t *z, z_vle_t rid, const char *rname) {
   z_res_decl_t *rdecl = (z_res_decl_t *) malloc(sizeof(z_res_decl_t));
   rdecl->rid = rid;
   rdecl->r_name = strdup(rname);  
+  char *regex = resource_to_regex(rname);
+  regcomp(&rdecl->re, regex, REG_ICASE | REG_EXTENDED);
+  free(regex);
   z->declarations = z_list_cons(z->declarations, rdecl);
 }
 
@@ -115,11 +188,12 @@ z_res_decl_t *z_get_res_decl_by_rname(zenoh_t *z, const char *rname) {
   else {
     z_res_decl_t *decl = (z_res_decl_t *)z_list_head(z->subscriptions);
     z_list_t *decls = z_list_tail(z->declarations);
-    while (decls != 0 && strcmp(decl->r_name, rname) != 0) {      
+
+    while (decls != 0 && regexec(&decl->re, rname, 0, NULL, 0) != 0) {      
       decls = z_list_head(decls);
       decls = z_list_tail(decls);  
     }    
-    if (strcmp(decl->r_name, rname) == 0) return decl;
+    if (regexec(&decl->re, rname, 0, NULL, 0) == 0) return decl;
     else return 0;
   }
 }
@@ -131,6 +205,9 @@ void z_register_subscription(zenoh_t *z, z_vle_t rid, subscriber_callback_t *cal
   z_res_decl_t *decl = z_get_res_decl_by_rid(z, rid);
   assert(decl != 0);
   sub->rname = strdup(decl->r_name);
+  char *regex = resource_to_regex(decl->r_name);
+  regcomp(&sub->re, regex, REG_ICASE | REG_EXTENDED);
+  free(regex);
   sub->callback = callback;
   z->subscriptions = z_list_cons(z->subscriptions, sub);
 }
@@ -160,11 +237,11 @@ z_subscription_t *z_get_subscription_by_rname(zenoh_t *z, const char *rname) {
   else {
     z_subscription_t *sub = (z_subscription_t *)z_list_head(z->subscriptions);
     z_list_t *subs = z_list_tail(z->subscriptions);
-    while (subs != 0 && strcmp(sub->rname, rname) != 0) {      
+    while (subs != 0 && regexec(&sub->re, rname, 0, NULL, 0) != 0) {      
       sub = z_list_head(subs);
       subs = z_list_tail(subs);  
     }    
-    if (strcmp(sub->rname, rname) == 0) return sub;
+    if (regexec(&sub->re, rname, 0, NULL, 0) == 0) return sub;
     else return 0;
   }
 }
