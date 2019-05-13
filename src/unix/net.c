@@ -73,6 +73,50 @@ open_tx_session(const char *locator) {
   
 }
 
+size_t z_iovs_len(struct iovec* iov, int iovcnt) {
+  size_t len = 0;
+  for (int i = 0; i < iovcnt; ++i) 
+    len += iov[i].iov_len;
+  return len;
+}
+
+int z_compute_remaining(struct iovec* iov, int iovcnt, size_t sent) {  
+  size_t idx = 0;
+  int i = 0;
+  while (idx + iov[i].iov_len <= sent) {    
+    idx += sent;
+    i += 1;
+  } 
+  int j = 0; 
+  if (idx + iov[i].iov_len > sent) {
+    iov[0].iov_base = iov[i].iov_base + (sent - idx - iov[i].iov_len );
+    j = 1;
+    while (i < iovcnt) {
+      iov[j] = iov[i];
+      j++;
+      i++;
+    }
+  }
+  return j;
+}
+
+int z_send_iovec(z_socket_t sock, struct iovec* iov, int iovcnt) {
+  size_t len = 0;
+  for (int i = 0; i < iovcnt; ++i) 
+    len += iov[i].iov_len;
+  
+  size_t n = writev(sock, iov, iovcnt);
+  Z_DEBUG_VA("z_send_iovec sent %zu of %zu bytes \n", n, len);
+  while (n < len) {
+    iovcnt = z_compute_remaining(iov, iovcnt, n);
+    len = z_iovs_len(iov, iovcnt);    
+    n = writev(sock, iov, iovcnt);
+    Z_DEBUG_VA("z_send_iovec sent %zu of %zu bytes \n", n, len);
+    if (n < 0) 
+      return -1;    
+  }
+  return 0;
+}
 int z_send_buf(z_socket_t sock, z_iobuf_t* buf) {
   int len =  z_iobuf_readable(buf);
   uint8_t *ptr = buf->buf;  
@@ -118,10 +162,17 @@ z_send_msg(z_socket_t sock, z_iobuf_t* buf, z_message_t* m) {
   z_iobuf_t l_buf = z_iobuf_make(10);
   z_vle_t len =  z_iobuf_readable(buf);
   z_vle_encode(&l_buf, len); 
-  z_send_buf(sock, &l_buf);
-  z_iobuf_free(&l_buf);
-  Z_DEBUG_VA(">> Message encoded is %llu bytes", len);    
-  return z_send_buf(sock, buf);  
+  struct iovec iov[2];
+  iov[0].iov_len = z_iobuf_readable(&l_buf);
+  iov[0].iov_base = l_buf.buf;
+  iov[1].iov_len = len;
+  iov[1].iov_base = buf->buf;
+  
+  return z_send_iovec(sock, iov, 2);
+  // z_send_buf(sock, &l_buf);
+  // z_iobuf_free(&l_buf);
+  // Z_DEBUG_VA(">> Message encoded is %llu bytes", len);    
+  // return z_send_buf(sock, buf);  
 }
 
 z_vle_result_t
