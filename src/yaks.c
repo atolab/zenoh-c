@@ -6,6 +6,7 @@
 int y_put(zenoh_t *z, const char *path, const z_iobuf_t *data, int encoding) {
   z_payload_header_t ph;
   ph.flags = Z_ENCODING | Z_KIND;
+  Z_DEBUG_VA("Y_put with flags: 0x%x\n", ph.flags);
   ph.encoding = encoding;
   ph.kind = Y_PUT;
   ph.payload = *data;
@@ -21,6 +22,7 @@ int y_remove(zenoh_t *z, const char *path, int encoding) {
 }
 
 int y_subscribe(zenoh_t *z, const char *selector, subscriber_callback_t *callback) {
+  Z_DEBUG_VA(">>> Creating Yaks sub for %s\n", selector);
   z_vle_result_t r_rid  = z_declare_resource(z, selector);
   if (r_rid.tag == Z_ERROR_TAG)
     return -1;

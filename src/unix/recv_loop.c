@@ -72,11 +72,13 @@ void* z_recv_loop(void* arg) {
                     if (sub != 0) {
                         rid.kind = Z_STR_RES_ID;
                         rid.id.rname = r.value.message->payload.write_data.rname;
-                        z_payload_header_decode_na(&r.value.message->payload.write_data.payload_header, &r_ph);
+                        Z_DEBUG("Decoding Payload Header");
+                        z_payload_header_decode_na(&r.value.message->payload.write_data.payload_header, &r_ph);                    
                         if (r_ph.tag == Z_OK_TAG) {
                             info.flags = r_ph.value.payload_header.flags;                            
                             info.encoding = r_ph.value.payload_header.encoding;
                             info.kind = r_ph.value.payload_header.kind;
+                            Z_DEBUG("!!!Calling Listener!!!! \n");
                             sub->callback(rid, r_ph.value.payload_header.payload, info);
                         }                                                
                         else                         
@@ -86,11 +88,13 @@ void* z_recv_loop(void* arg) {
                     }                     
                     z_iobuf_free(&r.value.message->payload.write_data.payload_header);                        
                     break;                    
-                case Z_DECLARE:                    
+                case Z_DECLARE:       
+                    Z_DEBUG("Received declare message\n");
                     decls = r.value.message->payload.declare.declarations.elem; 
                     for (int i = 0; i < r.value.message->payload.declare.declarations.length; ++i) {
                         switch (Z_MID(decls[i].header)) {
                             case Z_RESOURCE_DECL: 
+                                Z_DEBUG("Received declare-resource message\n");
                                 z_register_res_decl(z, decls[i].payload.resource.rid,  decls[i].payload.resource.r_name);
                                 break;
                             case Z_PUBLISHER_DECL:

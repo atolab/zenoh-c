@@ -373,19 +373,32 @@ z_compact_data_decode(z_iobuf_t* buf, uint8_t header) {
 
 void z_payload_header_encode(z_iobuf_t *buf, const z_payload_header_t *ph) {
   uint8_t flags = ph->flags;
+  Z_DEBUG_VA("z_payload_header_encode flags = 0x%x\n", flags);
   z_iobuf_write(buf, flags);
-  if (flags & Z_SRC_ID) 
+  if (flags & Z_SRC_ID) {
+    Z_DEBUG("Encoding Z_SRC_ID\n");
     z_iobuf_write_n(buf, (uint8_t*)ph->src_id, 0, 16);
-  if (flags & Z_SRC_SN)
+  }
+  if (flags & Z_SRC_SN) {
+    Z_DEBUG("Encoding Z_SRC_SN\n");
     z_vle_encode(buf, ph->src_sn);    
-  if (flags & Z_BRK_ID) 
+  }
+  if (flags & Z_BRK_ID) {
+    Z_DEBUG("Encoding Z_BRK_ID\n");
     z_iobuf_write_n(buf, (uint8_t*)ph->brk_id, 0, 16);
-  if (flags & Z_BRK_SN)
+  }
+  if (flags & Z_BRK_SN) {
+    Z_DEBUG("Encoding Z_BRK_SN\n");
     z_vle_encode(buf, ph->brk_sn);
-  if (flags & Z_KIND)
+  }
+  if (flags & Z_KIND) {
+    Z_DEBUG("Encoding Z_KIND\n");
     z_vle_encode(buf, ph->kind);
-  if (flags & Z_ENCODING)
+  }    
+  if (flags & Z_ENCODING) {
+    Z_DEBUG("Encoding Z_ENCODING\n");
     z_vle_encode(buf, ph->encoding);
+  }
 
   z_iobuf_encode(buf, &ph->payload);
 }
@@ -394,31 +407,47 @@ void
 z_payload_header_decode_na(z_iobuf_t *buf, z_payload_header_result_t *r) {  
   z_vle_result_t r_vle;
   uint8_t flags = z_iobuf_read(buf);
-  if (flags & Z_SRC_ID) 
+  Z_DEBUG_VA("Payload header flags: 0x%x\n", flags);
+
+  if (flags & Z_SRC_ID) {
+    Z_DEBUG("Decoding Z_SRC_ID\n");
     z_iobuf_read_to_n(buf, r->value.payload_header.src_id, 16);
+  }
+
+  if (flags & Z_T_STAMP) {
+    Z_DEBUG("Skipping time-stamp\n");
+    z_vle_decode(buf);
+    buf->r_pos += 16;
+  }
     
   if (flags & Z_SRC_SN) { 
+    Z_DEBUG("Decoding Z_SRC_SN\n");
     r_vle = z_vle_decode(buf);
     ASSURE_P_RESULT(r_vle, r, Z_VLE_PARSE_ERROR);
     r->value.payload_header.src_sn = r_vle.value.vle;
   }
 
-  if (flags & Z_BRK_ID) 
+  if (flags & Z_BRK_ID) {
+    Z_DEBUG("Decoding Z_BRK_ID\n");
     z_iobuf_read_to_n(buf, r->value.payload_header.brk_id, 16);
+  }
 
   if (flags & Z_BRK_SN) {
+    Z_DEBUG("Decoding Z_BRK_SN\n");
     r_vle = z_vle_decode(buf);
     ASSURE_P_RESULT(r_vle, r, Z_VLE_PARSE_ERROR);
     r->value.payload_header.brk_sn = r_vle.value.vle;
   }
 
   if (flags & Z_KIND) {
+    Z_DEBUG("Decoding Z_KIND\n");
     r_vle = z_vle_decode(buf);
     ASSURE_P_RESULT(r_vle, r, Z_VLE_PARSE_ERROR);
     r->value.payload_header.kind = r_vle.value.vle;
   }
 
   if (flags & Z_ENCODING) {
+    Z_DEBUG("Decoding Z_ENCODING\n");
     r_vle = z_vle_decode(buf);
     ASSURE_P_RESULT(r_vle, r, Z_VLE_PARSE_ERROR);
     r->value.payload_header.encoding = r_vle.value.vle;
@@ -489,7 +518,7 @@ void z_write_data_decode_na(z_iobuf_t *buf, uint8_t header, z_write_data_result_
   r_str = z_string_decode(buf);
   ASSURE_P_RESULT(r_str, r, Z_VLE_PARSE_ERROR);
   r->value.write_data.rname = r_str.value.string;
-
+  Z_DEBUG_VA("Decoding write data for resource %s\n", r_str.value.string);
   r_vle = z_vle_decode(buf);
   ASSURE_P_RESULT(r_vle, r, Z_VLE_PARSE_ERROR);  
   uint8_t *ph = z_iobuf_read_n(buf, r_vle.value.vle);

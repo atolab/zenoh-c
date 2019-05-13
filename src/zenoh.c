@@ -23,6 +23,18 @@ void default_on_disconnect(void *vz) {
   }
 }
 
+zenoh_t*
+z_open_ptr(char* locator) {
+  z_zenoh_result_t  *rp = (z_zenoh_result_t*)malloc(sizeof(z_zenoh_result_t ));  
+  *rp = z_open(locator, 0);
+  if (rp->tag == Z_OK_TAG)
+    return &rp->value.zenoh;
+  else {
+    free (rp);
+    return 0;
+  }
+}
+
 
 z_zenoh_result_t 
 z_open(char* locator, on_disconnect_t *on_disconnect) {
