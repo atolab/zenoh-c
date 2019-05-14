@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 2.8)
 
 project(zenoh)
 set (zenoh_c_VERSION_MAJOR 0)
@@ -72,7 +72,7 @@ endif(UNIX_TARGET)
 link_directories("${PROJECT_SOURCE_DIR}/build")
 
 add_library(zenohc SHARED ${Sources})
-target_link_libraries(zenohc Threads::Threads)
+
 
 target_link_libraries(zenohc)
 add_executable(z_pub example/z_pub.c)
