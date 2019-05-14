@@ -184,9 +184,8 @@ z_recv_vle(z_socket_t sock) {
   int i = 0;
   do {
     n = recv(sock, &buf[i], 1, 0);
-    Z_DEBUG_VA(">> recv_vle [%d] : 0x%x\n", i, buf[i]);
-    i++;        
-  } while ((buf[i] > 0x7f) && (n != 0) && (i < 10));
+    Z_DEBUG_VA(">> recv_vle [%d] : 0x%x\n", i, buf[i]);    
+  } while ((buf[i++] > 0x7f) && (n != 0) && (i < 10));
 
   if (n == 0 || i > 10) {
     r.tag = Z_ERROR_TAG;

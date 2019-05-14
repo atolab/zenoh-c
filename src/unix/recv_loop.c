@@ -17,11 +17,9 @@ void* z_recv_loop(void* arg) {
     z_message_p_result_init(&r);
     z_resource_id_t rid;    
     uint8_t mid;
-    z_subscription_t *sub;
-    z_iobuf_t rbuf = z_iobuf_make(ZENOH_READ_BUF_LEN);
-    while (rt->running) {
-        z_iobuf_clear(&rbuf);
-        z_recv_msg_na(z->sock, &rbuf, &r);
+    z_subscription_t *sub;    
+    while (rt->running) {        
+        z_recv_msg_na(z->sock, &z->rbuf, &r);
         if (r.tag == Z_OK_TAG) {
             mid = Z_MID(r.value.message->header);
             switch (mid) {    
