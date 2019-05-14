@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 2.8.12)
 
 project(zenoh)
 set (zenoh_c_VERSION_MAJOR 0)
@@ -62,18 +62,18 @@ find_package(Threads REQUIRED)
 
 
 set(CMAKE_C_STANDARD 99)
-set(CMAKE_C_FLAGS_DEBUG "${ZENOH_DEBUG_OPT} ${ZENOH_PLATFORM_OPT} -Wall -Wunused -pipe -g -O0")
-set(CMAKE_C_FLAGS_RELEASE "${ZENOH_DEBUG_OPT} ${ZENOH_PLATFORM_OPT} -Wall -Wunused -pipe -O3")
+set(CMAKE_C_FLAGS_DEBUG "${ZENOH_DEBUG_OPT} ${ZENOH_PLATFORM_OPT} -std=c99 -Wall -Wunused -pipe -g -O0")
+set(CMAKE_C_FLAGS_RELEASE "${ZENOH_DEBUG_OPT} ${ZENOH_PLATFORM_OPT} -std=c99 -Wall -Wunused -pipe -O3")
 
 include_directories(
-  "${PROJECT_SOURCE_DIR}/include"                
+  "${PROJECT_SOURCE_DIR}/../include"                
 )
 
 if (UNIX_TARGET)
-  file(GLOB Sources "src/*.c" "src/unix/*.c")  
+  file(GLOB Sources "../src/*.c" "../src/unix/*.c")  
 endif(UNIX_TARGET)
 
-link_directories("${PROJECT_SOURCE_DIR}/build")
+link_directories("${PROJECT_SOURCE_DIR}/../build")
 
 add_library(zenohc SHARED ${Sources})
 
@@ -82,17 +82,17 @@ if (UNIX_TARGET)
 endif(UNIX_TARGET)
 
 target_link_libraries(zenohc)
-add_executable(z_pub example/z_pub.c)
-add_executable(y_put example/y_put.c)
-add_executable(y_put_thr example/y_put_thr.c)
-add_executable(z_wd_pub example/z_wd_pub.c)
-add_executable(z_sub example/z_sub.c)
-add_executable(y_sub example/y_sub.c)
-add_executable(y_sub_thr example/y_sub_thr.c)
-add_executable(z_pub_thr example/z_pub_thr.c)
-add_executable(z_sub_thr example/z_sub_thr.c)
+add_executable(z_pub ../example/z_pub.c)
+add_executable(y_put ../example/y_put.c)
+add_executable(y_put_thr ../example/y_put_thr.c)
+add_executable(z_wd_pub ../example/z_wd_pub.c)
+add_executable(z_sub ../example/z_sub.c)
+add_executable(y_sub ../example/y_sub.c)
+add_executable(y_sub_thr ../example/y_sub_thr.c)
+add_executable(z_pub_thr ../example/z_pub_thr.c)
+add_executable(z_sub_thr ../example/z_sub_thr.c)
 
-add_executable(z_data_struct example/z_data_struct.c)
+add_executable(z_data_struct ../example/z_data_struct.c)
 
 target_link_libraries(z_pub zenohc)
 target_link_libraries(y_put zenohc)
