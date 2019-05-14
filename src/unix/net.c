@@ -9,6 +9,7 @@
 #include <errno.h>
 #include <arpa/inet.h>
 #include <assert.h>
+#include <sys/uio.h>
 
 #include "zenoh.h"
 #include "zenoh/net.h"

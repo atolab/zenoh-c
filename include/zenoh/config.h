@@ -8,22 +8,6 @@
 #define ZENOH_DEFAULT_LEASE 10000
 
 
-/**
- * ZENOH_DEBUG :
- *  - 2 : ERROR + DEBUG
- *  - 1 : ERROR
- *  - 0 : NOTHING
- */ 
-#define ZENOH_DEBUG 1
-
-#define ZENOH_MACOS 1
-// #define ZENOH_LINUX 0
-// #define ZENOH_CONTIKI 0
-// #define ZENOH_MBED 0
-// #define ZENOH_WINDOWS 0
-
-
-
 #define ZENOH_TRANSPORT_TCP_IP 1
 // #define ZENOH_TRANSPORT_BLE 1
 

@@ -8,29 +8,65 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Debug)
 endif()
 
+option (UNIX_TARGET "Use this for Linux, Macos, etc." ON)
+option (CONTIKI "Use this for Contiki Cross compilation." OFF)
+
+# Configure the transport to use with the following variables
+set (ZENOH_TRANSPORT_TCP "ON")
+set (ZENOH_TRANSPORT_UDP "OFF")
+set (ZENOH_TRANSPORT_BLE "OFF")
+set (ZENOH_TRANSPORT_I2C "OFF")
+
+
 # Use cmake .. -DCMAKE_BUILD_TYPE=Debug for debug / Release
-set(CMAKE_CXX_FLAGS "-Wall -Wextra")
-# set(CMAKE_CXX_FLAGS_DEBUG "-g -fsanitize=address")
-set(CMAKE_CXX_FLAGS_DEBUG "-g")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+
+# Configure the debug level
+#
+# ZENOH_DEBUG :
+#   - 2 : ERROR + DEBUG
+#   - 1 : ERROR
+#   - 0 : NOTHING
+
+set(ZENOH_DEBUG_OPT "-DZENOH_DEBUG=1") 
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  message(STATUS "Configuring on/for Linux")
+  set(ZENOH_PLATFORM_OPT "-DZENOH_LINUX=1")
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+  message(STATUS "Configuring on/for macOS")
+  set(ZENOH_PLATFORM_OPT "-DZENOH_MACOS=1")
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+  message(STATUS "Configuring on/for Windows")
+  set(ZENOH_PLATFORM_OPT "-DZENOH_WIN=1")
+else()
+  message(STATUS "Configuring on/for ${CMAKE_SYSTEM_NAME}")
+endif()
+
+if (ZENOH_TRANSPORT_TCP STREQUAL "ON")
+  set (ZENOH_TRANSPORT_OPT "-DZENOH_TRANSPORT_TCP_IP=1")
+endif()
+if (ZENOH_TRANSPORT_UDP STREQUAL "ON")
+  set (ZENOH_TRANSPORT_OPT "${ZENOH_TRANSPORT_OPT} -DZENOH_TRANSPORT_UDP_IP=1")
+endif()
+if (ZENOH_TRANSPORT_BLE STREQUAL "ON")
+  set (ZENOH_TRANSPORT_OPT "${ZENOH_TRANSPORT_OPT} -DZENOH_TRANSPORT_BLE=1")
+endif()
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-option (UNIX_TARGET "Use this for Linux, Macos, etc." ON)
 
-set(CMAKE_C_STANDARD 11)
-set (CMAKE_CXX_FLAGS "-Wall -Wunused -pipe -g")
-set(CMAKE_C_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wunused -pipe -g -O0")
-set(CMAKE_C_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Wunused -pipe -g")
+
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_FLAGS_DEBUG "${ZENOH_DEBUG_OPT} ${ZENOH_PLATFORM_OPT} -Wall -Wunused -pipe -g -O0")
+set(CMAKE_C_FLAGS_RELEASE "${ZENOH_DEBUG_OPT} ${ZENOH_PLATFORM_OPT} -Wall -Wunused -pipe -O3")
 
 include_directories(
-        "${PROJECT_SOURCE_DIR}/include"                
+  "${PROJECT_SOURCE_DIR}/include"                
 )
 
 if (UNIX_TARGET)
-file(GLOB Sources "src/*.c" "src/unix/*.c")
-
+  file(GLOB Sources "src/*.c" "src/unix/*.c")
 endif(UNIX_TARGET)
 
 link_directories("${PROJECT_SOURCE_DIR}/build")
@@ -50,7 +86,6 @@ add_executable(z_pub_thr example/z_pub_thr.c)
 add_executable(z_sub_thr example/z_sub_thr.c)
 
 add_executable(z_data_struct example/z_data_struct.c)
-# target_link_directories(driver "${PROJECT_SOURCE_DIR}/build")
 
 target_link_libraries(z_pub zenohc)
 target_link_libraries(y_put zenohc)
