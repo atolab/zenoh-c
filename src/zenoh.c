@@ -75,6 +75,7 @@ z_open(char* locator, on_disconnect_t *on_disconnect) {
 
   Z_DEBUG("Sending Open\n");
   z_send_msg(r_sock.value.socket, &r.value.zenoh.wbuf, &msg);
+  z_iobuf_clear(&r.value.zenoh.rbuf);
   z_message_p_result_t r_msg = z_recv_msg(r_sock.value.socket, &r.value.zenoh.rbuf);
   ASSERT_P_RESULT(r_msg, "Failed to receive accept");
 
