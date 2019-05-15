@@ -1,10 +1,34 @@
-# zenoh-c
-C Client for zenoh
+# zenoh C Client API
 
-# Building
-To build the **zenoh-c** client API you need to have installed [libuv](http://libuv.org) and ideally the [Criterion](https://github.com/Snaipe/Criterion) test framework. 
+# Building 
+To build the **zenoh-c** client API you need to ensure that [cmake](https://cmake.org) is available on your platform -- if not please install it. 
 
-You also should define the environment variables LIB_UV_PATH LIB_CRITERION_PATH so that ${LIB_XXX_PATH}/include and ${LIB_XXX_PATH}/lib can be resolved.
+Once the [cmake](https://cmake.org) dependency is satisfied, just do the following for **CMake** version 3 and higher:
+
+  -- CMake version 3 and higher -- 
+
+  $ cd /path/to/zenoh-c
+  $ mkdir build
+  $ cd build
+  $ cmake -DCMAKE_BUILD_TYPE=Release ..
+  $ make 
+  $ make install # on linux use **sudo**
+
+For those that still have **CMake** version 2.8, do the following commands:
+
+  -- CMake version 3 and higher -- 
+
+  $ cd /path/to/zenoh-c
+  $ mkdir build
+  $ cd build
+  $ cmake -DCMAKE_BUILD_TYPE=Release ../cmake-2.8
+  $ make 
+  $ make install # on linux use **sudo**
+
+
+If you want to build with debug symbols configure with the option -DCMAKE_BUILD_TYPE=Debug.
+
+
 
 
 
