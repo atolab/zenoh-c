@@ -65,6 +65,8 @@ char *resource_to_regex(const char *res) {
       } else{        
         strcat(r, re_star);      
       }    
+    } else if (idx == len) {
+      strcat(r, re_star);
     }
     token = strtok(NULL, s_star);
   }
@@ -159,6 +161,7 @@ void z_register_res_decl(zenoh_t *z, z_vle_t rid, const char *rname) {
   rdecl->rid = rid;
   rdecl->r_name = strdup(rname);  
   char *regex = resource_to_regex(rname);
+  Z_DEBUG_VA(">>> Registering declaration %s as regex %s", rname, regex);
   regcomp(&rdecl->re, regex, REG_ICASE | REG_EXTENDED);
   free(regex);
   z->declarations = z_list_cons(z->declarations, rdecl);

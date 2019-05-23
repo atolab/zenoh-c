@@ -16,7 +16,7 @@ int main(int argc, char **argv) {
   zenoh_t z = r_z.value.zenoh;
 
   printf("Declaring Resource...\n");
-  z_vle_result_t r_rid = z_declare_resource(&z, "/demo/hello");
+  z_vle_result_t r_rid = z_declare_resource(&z, "/demo/hello/alpha");
   ASSERT_RESULT(r_rid, "Unable to register result")
   z_vle_t rid = r_rid.value.vle;
 
@@ -26,11 +26,11 @@ int main(int argc, char **argv) {
     return -1;
   }
   
-  z_iobuf_t sdata = z_iobuf_make(256);
+  z_iobuf_t sdata = z_iobuf_make(512);
   char *str = "Hello World!";  
   z_string_encode(&sdata, str);
   
-  z_iobuf_t phbuf = z_iobuf_make(256);
+  z_iobuf_t phbuf = z_iobuf_make(512);
   z_payload_header_t ph;
   ph.flags = 0;
   ph.payload = sdata;

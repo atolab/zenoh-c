@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
   z_payload_header_encode(&phbuf, &ph);
   printf("Streaming Data...\n");
   while (1) {    
-    z_write_data(&z, "/demo/hello", &phbuf);   
+    z_write_data(&z, "/demo/hello/1", &phbuf);   
     sleep(1);
   }
 

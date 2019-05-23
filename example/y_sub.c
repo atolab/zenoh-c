@@ -12,13 +12,19 @@ void listener(z_resource_id_t rid, z_iobuf_t data, z_data_info_t info) {
     else
       printf(">>: (%s, %s)\n", rid.id.rname, r_s.value.string);
     free(r_s.value.string);
+  } else {
+    printf(">>: Error decoding string\n");
   }
   z_iobuf_free(&data);
 }
 
 int main(int argc, char **argv) {
   char *locator = strdup("tcp/127.0.0.1:7447");
+  char *se = "/demo/hello/*";
   if (argc > 1) {
+    se = argv[1];  
+  } 
+  if (argc > 2) {
     locator = argv[1];
   }
 
@@ -28,8 +34,8 @@ int main(int argc, char **argv) {
   zenoh_t z = r_z.value.zenoh;
 
   z_start_recv_loop(&z);
-  printf("Declaring Resource...\n");
-  y_subscribe(&z, "/demo/hello/*", listener);
+  printf("Declaring Resource: %s\n", se);
+  y_subscribe(&z, se, listener);
   sleep(60000);
   return 0;
 }
