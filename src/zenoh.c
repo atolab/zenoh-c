@@ -143,6 +143,13 @@ z_declare_resource(zenoh_t *z, const char* resource) {
 #endif 
 }
 
+int z_declare_resource_ir(zenoh_t *z, const char* resource) {
+  z_vle_result_t r = z_declare_resource(z, resource);
+  if (r.tag == Z_OK_TAG)
+    return r.value.vle;
+  else 
+    return -1;
+}
 int
 z_declare_subscriber(zenoh_t *z, z_vle_t rid,  z_sub_mode_t sm, subscriber_callback_t *callback) {
   z_message_t *msg = (z_message_t *)malloc(sizeof(z_message_t));

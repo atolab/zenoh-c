@@ -14,6 +14,7 @@ z_open_ptr(char* locator);
 
 void z_close(zenoh_t* z);
 z_vle_result_t z_declare_resource(zenoh_t *z, const char* resource);
+int z_declare_resource_ir(zenoh_t *z, const char* resource);
 int z_declare_subscriber(zenoh_t *z, z_vle_t rid, z_sub_mode_t sm, subscriber_callback_t *callback);
 int z_declare_publisher(zenoh_t *z, z_vle_t rid);
 
