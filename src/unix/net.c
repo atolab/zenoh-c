@@ -169,7 +169,9 @@ z_send_msg(z_socket_t sock, z_iobuf_t* buf, z_message_t* m) {
   iov[1].iov_len = len;
   iov[1].iov_base = buf->buf;
   
-  return z_send_iovec(sock, iov, 2);
+  int rv = z_send_iovec(sock, iov, 2);
+  z_iobuf_free(&l_buf);
+  return rv;
   // z_send_buf(sock, &l_buf);
   // z_iobuf_free(&l_buf);
   // Z_DEBUG_VA(">> Message encoded is %llu bytes", len);    
