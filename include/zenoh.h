@@ -19,6 +19,7 @@ int z_declare_subscriber(zenoh_t *z, z_vle_t rid, z_sub_mode_t sm, subscriber_ca
 int z_declare_publisher(zenoh_t *z, z_vle_t rid);
 
 int z_stream_compact_data(zenoh_t *z, z_vle_t rid, const z_iobuf_t *payload);
+int z_stream_data_wo(zenoh_t *z, z_vle_t rid, const z_iobuf_t *data, uint8_t encoding, uint8_t kind);
 int z_stream_data(zenoh_t *z, z_vle_t rid, const z_iobuf_t *payload_header);
 
 int z_write_data(zenoh_t *z, const char* resource, const z_iobuf_t *payload_header);

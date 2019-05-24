@@ -243,6 +243,22 @@ z_stream_data(zenoh_t *z, z_vle_t rid, const z_iobuf_t *payload_header) {
   }
 }
 
+int 
+z_stream_data_wo(zenoh_t *z, z_vle_t rid, const z_iobuf_t *data, uint8_t encoding, uint8_t kind) {
+  z_payload_header_t ph;
+  ph.flags = Z_ENCODING | Z_KIND;
+  Z_DEBUG_VA("z_stream_data_wo with flags: 0x%x\n", ph.flags);
+  Z_DEBUG_VA("z_stream_data_wo data has r_pos = %d w_pos = %d capacity = %d\n", data->r_pos, data->w_pos, data->capacity);
+  ph.encoding = encoding;
+  ph.kind = kind;
+  ph.payload = *data;
+  z_iobuf_t buf = z_iobuf_make(z_iobuf_readable(data) + 32 );
+  z_payload_header_encode(&buf, &ph);
+  int rv = z_stream_data(z, rid, &buf);
+  z_iobuf_free(&buf);
+  return rv;
+}
+
 int z_write_data(zenoh_t *z, const char* resource, const z_iobuf_t *payload_header) { 
   z_message_t msg;
   msg.header = Z_WRITE_DATA;
