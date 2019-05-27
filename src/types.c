@@ -248,3 +248,28 @@ z_subscription_t *z_get_subscription_by_rname(zenoh_t *z, const char *rname) {
     else return 0;
   }
 }
+
+
+void z_register_query(zenoh_t *z, z_vle_t qid, reply_callback_t *callback) {
+  z_replywaiter_t *rw = (z_replywaiter_t *) malloc(sizeof(z_replywaiter_t));
+  rw->qid = qid;
+  rw->callback = callback;
+  z->replywaiters = z_list_cons(z->replywaiters, rw);
+}
+
+z_replywaiter_t *z_get_query(zenoh_t *z, z_vle_t qid) {
+  if (z->replywaiters == 0) {
+    printf(">>> No reply waiters");
+    return 0;
+  }
+  else {
+    z_replywaiter_t *rw = (z_replywaiter_t *)z_list_head(z->replywaiters);
+    z_list_t *rws = z_list_tail(z->replywaiters);
+    while (rws != 0 && rw->qid != qid) {      
+      rw = z_list_head(rws);
+      rws = z_list_tail(rws);  
+    }    
+    if (rw->qid == qid) return rw;
+    else return 0;
+  }
+}

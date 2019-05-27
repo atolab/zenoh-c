@@ -256,6 +256,24 @@ typedef struct {
   z_iobuf_t payload_header;
 } z_write_data_t;
 
+/*------------------ Query Message ------------------*/
+typedef struct {
+  z_array_uint8_t pid; 
+  z_vle_t qid;
+  const char* rname;
+  const char* predicate;
+} z_query_t;
+
+/*------------------ Reply Message ------------------*/
+typedef struct {
+  z_array_uint8_t qpid; 
+  z_vle_t qid;
+  z_iobuf_t stoid;
+  z_vle_t rsn;
+  const char* rname;
+  z_iobuf_t payload_header;
+} z_reply_t;
+
 
 /**
  *  On the wire this is represented as:
@@ -273,6 +291,8 @@ typedef struct {
     z_compact_data_t compact_data;
     z_stream_data_t stream_data;
     z_write_data_t write_data;
+    z_query_t query;
+    z_reply_t reply;
     z_scout_t scout;
     z_hello_t hello;
   } payload;

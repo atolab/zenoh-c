@@ -24,4 +24,6 @@ int z_stream_data(zenoh_t *z, z_vle_t rid, const z_iobuf_t *payload_header);
 
 int z_write_data(zenoh_t *z, const char* resource, const z_iobuf_t *payload_header);
 
+int z_query(zenoh_t *z, const char* resource, const char* predicate, reply_callback_t *callback);
+
 #endif /* ZENOH_C_H_DEFINED_ */
