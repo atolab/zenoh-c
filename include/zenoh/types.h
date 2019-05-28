@@ -35,6 +35,9 @@
 #define Z_INT_RES_ID 0
 #define Z_STR_RES_ID 1
 
+
+
+#ifndef ZENOH_C_SWIG
 typedef  unsigned long long  z_vle_t;
 
 Z_ARRAY_DECLARE(uint8_t)
@@ -62,7 +65,7 @@ uint8_t z_iobuf_get(z_iobuf_t* buf, unsigned int pos);
 void z_iobuf_clear(z_iobuf_t *buf);
 z_array_uint8_t z_iobuf_to_array(z_iobuf_t* buf);
 
-
+#endif /* ZENOH_C_SWIG */
 typedef void on_disconnect_t(void *z);
 
 typedef struct {
@@ -84,6 +87,7 @@ typedef struct {
 typedef struct {   
   z_vle_t rid;
   const char* r_name;  
+  char *regex_expr;
   regex_t re;
 } z_res_decl_t;
 

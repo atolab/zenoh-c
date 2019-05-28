@@ -4,35 +4,36 @@
 
 
 int count_occurences(const char *src, const char *tok) {
-  char *s = strdup(src);
-  char *token = strtok(s, tok);
-  int count = 0;
-  int len = strlen(src);
-  while (token != 0 && strlen(token) < len) {
-    count += 1;
-    token = strtok(NULL, tok);
-  }
+  char *s, *tofree, *token;
+  s = tofree = strdup(src);
+  
+  int count = 0;  
+  while ((token = strsep(&s, tok)) != NULL) 
+    count += 1;      
+  free(tofree);
   return count;
 }
 
 char *replace_with(const char *src, const char *match, const char *rep) {
   int n = count_occurences(src, match);
+  if (n == 0) 
+    return strdup(src);
+
   int a = strlen(match);
   int b = strlen(rep);
   int len = strlen(src);
 
-  len = len + (n * b) - (n * a);
+  len = len + (n * b) - (n * a) +1;
   char *r = (char *)malloc(len);
   r[0] = '\0';
-  char *s = strdup(src);
-  char *token = strtok(s, match);
+  char *s, *tofree, *token;
+  tofree = s = strdup(src);  
 
-  while (token != NULL) {
+  while ((token = strsep(&s, match)) != 0) {
     strcat(r, token);
-    strcat(r, rep);
-    token = strtok(NULL, match);
+    strcat(r, rep);    
   }
-  free(s);
+  free(tofree);
   return r;
 }
 
@@ -43,19 +44,22 @@ char *resource_to_regex(const char *res) {
   char *re_2star = "([a-zA-Z0-9_-]+(/[a-zA-Z0-9_-])*)";
 
   int n = count_occurences(res, s_star);  
+  if (n == 0) 
+    return strdup(res);
+
   int k = strlen(re_2star);  
   int len = strlen(res);
-
-  int nlen = len + (n * (k-1));
+  // count in for prefix and postfix;
+  int nlen = len + (n * k) + 8;
   char *r = (char *)malloc(nlen);
 
   r[0] = '\0';
-  char *s = strdup(res);
-  char *token = strtok(s, s_star);
-
+  char *s, *tofree, *token;
+  tofree = s = strdup(res);
+  
   int idx = 0;
   strcat(r, "^(");
-  while (token != NULL) {
+  while ((token = strsep(&s, s_star)) != 0) {
     idx += strlen(token)+1;
     strcat(r, token);    
     if (idx < len) {
@@ -67,10 +71,10 @@ char *resource_to_regex(const char *res) {
       }    
     } else if (idx == len) {
       strcat(r, re_star);
-    }
-    token = strtok(NULL, s_star);
+    }    
   }
   strcat(r, ")$");
+  free(tofree);
   return r;
 }
 
@@ -157,13 +161,15 @@ z_array_uint8_t z_iobuf_to_array(z_iobuf_t* buf) {
 }
 
 void z_register_res_decl(zenoh_t *z, z_vle_t rid, const char *rname) {
+  Z_DEBUG_VA(">>> Allocating res decl for (%llu,%s)\n", rid, rname);
   z_res_decl_t *rdecl = (z_res_decl_t *) malloc(sizeof(z_res_decl_t));
   rdecl->rid = rid;
-  rdecl->r_name = strdup(rname);  
-  char *regex = resource_to_regex(rname);
+  rdecl->r_name = strdup(rname);    
+  Z_DEBUG(">>> Converting resource to regex");
+  char *regex = resource_to_regex(rname);  
+  rdecl->regex_expr = regex;
   Z_DEBUG_VA(">>> Registering declaration %s as regex %s", rname, regex);
-  regcomp(&rdecl->re, regex, REG_ICASE | REG_EXTENDED);
-  free(regex);
+  regcomp(&rdecl->re, regex, REG_ICASE | REG_EXTENDED);  
   z->declarations = z_list_cons(z->declarations, rdecl);
 }
 
