@@ -68,6 +68,36 @@ uint8_t z_iobuf_get(z_iobuf_t* buf, unsigned int pos);
 void z_iobuf_clear(z_iobuf_t *buf);
 z_array_uint8_t z_iobuf_to_array(z_iobuf_t* buf);
 
+typedef struct {
+  unsigned int flags;
+  // TODO: Add support for timestamp
+  // unsigned long long timestamp;
+  unsigned short encoding;
+  unsigned short kind;  
+} z_data_info_t;
+
+typedef struct {
+  char kind;
+  z_iobuf_t stoid;
+  z_vle_t rsn;
+  const char* rname;
+  z_iobuf_t data;
+  z_data_info_t info;
+} z_reply_value_t;
+
+typedef union {  
+  z_vle_t rid;
+  const char *rname;
+} z_res_id_t;
+
+typedef struct {
+  int kind;
+  z_res_id_t id; 
+} z_resource_id_t;
+
+typedef void reply_callback_t(z_reply_value_t reply);
+
+typedef void subscriber_callback_t(z_resource_id_t rid, z_iobuf_t data, z_data_info_t info);
 #endif /* ZENOH_C_SWIG */
 typedef void on_disconnect_t(void *z);
 
@@ -104,25 +134,6 @@ typedef struct {
   int z;
 } z_pub_t;
 
-typedef union {  
-  z_vle_t rid;
-  const char *rname;
-} z_res_id_t;
-
-typedef struct {
-  int kind;
-  z_res_id_t id; 
-} z_resource_id_t;
-
-typedef struct {
-  unsigned int flags;
-  // TODO: Add support for timestamp
-  // unsigned long long timestamp;
-  unsigned short encoding;
-  unsigned short kind;  
-} z_data_info_t;
-
-typedef void subscriber_callback_t(z_resource_id_t rid, z_iobuf_t data, z_data_info_t info);
 
 typedef struct {  
   char *rname;
@@ -131,16 +142,6 @@ typedef struct {
   subscriber_callback_t *callback;
 } z_subscription_t;
 
-typedef struct {
-  char kind;
-  z_iobuf_t stoid;
-  z_vle_t rsn;
-  const char* rname;
-  z_iobuf_t data;
-  z_data_info_t info;
-} z_reply_value_t;
-
-typedef void reply_callback_t(z_reply_value_t reply);
 
 typedef struct {  
   z_vle_t qid;

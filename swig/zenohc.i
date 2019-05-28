@@ -27,6 +27,37 @@ extern void z_iobuf_clear(z_iobuf_t *buf);
 extern z_array_uint8_t z_iobuf_to_array(z_iobuf_t* buf);
 
 
+typedef struct {
+  unsigned int flags;
+  // TODO: Add support for timestamp
+  // unsigned long long timestamp;
+  unsigned short encoding;
+  unsigned short kind;  
+} z_data_info_t;
+
+typedef struct {
+  char kind;
+  z_iobuf_t stoid;
+  z_vle_t rsn;
+  const char* rname;
+  z_iobuf_t data;
+  z_data_info_t info;
+} z_reply_value_t;
+
+typedef union {  
+  z_vle_t rid;
+  const char *rname;
+} z_res_id_t;
+
+typedef struct {
+  int kind;
+  z_res_id_t id; 
+} z_resource_id_t;
+
+typedef void reply_callback_t(z_reply_value_t reply);
+
+typedef void subscriber_callback_t(z_resource_id_t rid, z_iobuf_t data, z_data_info_t info);
+
 #include "zenoh/config.h"
 #include "zenoh/types.h"
 #include "zenoh/msg.h"
@@ -47,6 +78,7 @@ extern int z_stream_compact_data(zenoh_t *z, z_vle_t rid, const z_iobuf_t *paylo
 extern int z_stream_data_wo(zenoh_t *z, z_vle_t rid, const z_iobuf_t *data, uint8_t encoding, uint8_t kind);
 
 extern int z_write_data(zenoh_t *z, const char* resource, const z_iobuf_t *payload_header);
+extern int z_query(zenoh_t *z, const char* resource, const char* predicate, reply_callback_t *callback);
 
 %}
 
@@ -77,6 +109,37 @@ extern void z_iobuf_clear(z_iobuf_t *buf);
 extern z_array_uint8_t z_iobuf_to_array(z_iobuf_t* buf);
 
 
+typedef struct {
+  unsigned int flags;
+  // TODO: Add support for timestamp
+  // unsigned long long timestamp;
+  unsigned short encoding;
+  unsigned short kind;  
+} z_data_info_t;
+
+typedef struct {
+  char kind;
+  z_iobuf_t stoid;
+  z_vle_t rsn;
+  const char* rname;
+  z_iobuf_t data;
+  z_data_info_t info;
+} z_reply_value_t;
+
+typedef union {  
+  z_vle_t rid;
+  const char *rname;
+} z_res_id_t;
+
+typedef struct {
+  int kind;
+  z_res_id_t id; 
+} z_resource_id_t;
+
+typedef void reply_callback_t(z_reply_value_t reply);
+
+typedef void subscriber_callback_t(z_resource_id_t rid, z_iobuf_t data, z_data_info_t info);
+
 #include "zenoh/config.h"
 #include "zenoh/types.h"
 #include "zenoh/msg.h"
@@ -97,3 +160,4 @@ extern int z_stream_compact_data(zenoh_t *z, z_vle_t rid, const z_iobuf_t *paylo
 extern int z_stream_data_wo(zenoh_t *z, z_vle_t rid, const z_iobuf_t *data, uint8_t encoding, uint8_t kind);
 
 extern int z_write_data(zenoh_t *z, const char* resource, const z_iobuf_t *payload_header);
+extern int z_query(zenoh_t *z, const char* resource, const char* predicate, reply_callback_t *callback);
