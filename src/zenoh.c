@@ -56,6 +56,7 @@ z_open(char* locator, on_disconnect_t *on_disconnect) {
   r.value.zenoh.sn = 0;
   r.value.zenoh.rbuf = z_iobuf_make(ZENOH_READ_BUF_LEN);  
   r.value.zenoh.wbuf = z_iobuf_make(ZENOH_WRITE_BUF_LEN);  
+  r.value.zenoh.qid = 0;
   r.value.zenoh.rid = 0;  
   r.value.zenoh.subscriptions = 0;
   r.value.zenoh.declarations = 0;
@@ -83,6 +84,7 @@ z_open(char* locator, on_disconnect_t *on_disconnect) {
   r.value.zenoh.pid = pid;  
   r.value.zenoh.declarations = z_list_empty;
   r.value.zenoh.subscriptions = z_list_empty;
+  r.value.zenoh.replywaiters = z_list_empty;
   r.value.zenoh.reply_msg_mvar = z_mvar_empty();
 
   if (on_disconnect != 0)
@@ -276,3 +278,20 @@ int z_write_data(zenoh_t *z, const char* resource, const z_iobuf_t *payload_head
   }
 }
 
+int z_query(zenoh_t *z, const char* resource, const char* predicate, reply_callback_t *callback) { 
+  z_message_t *msg = (z_message_t *)malloc(sizeof(z_message_t));
+  z_message_p_result_t r_msg;
+  z_message_p_result_init(&r_msg);
+
+  msg->header = Z_QUERY;
+  msg->payload.query.pid = z->pid;
+  msg->payload.query.qid = z->qid++;
+  msg->payload.query.rname = resource;
+  msg->payload.query.predicate = predicate;
+  
+  z_send_msg(z->sock, &z->wbuf, msg);  
+  z_register_query(z, msg->payload.query.qid, callback);
+  free(msg);
+  // -- This will be refactored to use mvars
+  return 0;
+}

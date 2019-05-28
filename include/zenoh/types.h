@@ -35,9 +35,12 @@
 #define Z_INT_RES_ID 0
 #define Z_STR_RES_ID 1
 
-
+#define Z_STORAGE_DATA 0
+#define Z_STORAGE_FINAL 1
+#define Z_REPLY_FINAL 2
 
 #ifndef ZENOH_C_SWIG
+
 typedef  unsigned long long  z_vle_t;
 
 Z_ARRAY_DECLARE(uint8_t)
@@ -76,10 +79,12 @@ typedef struct {
   z_iobuf_t wbuf;
   z_iobuf_t rbuf;
   z_array_uint8_t pid;
+  z_vle_t qid;
   char *locator;
   on_disconnect_t *on_disconnect;
   z_list_t *declarations;
   z_list_t *subscriptions;
+  z_list_t *replywaiters;
   z_mvar_t *reply_msg_mvar;
   void *runtime;
 } zenoh_t;
@@ -126,6 +131,22 @@ typedef struct {
   subscriber_callback_t *callback;
 } z_subscription_t;
 
+typedef struct {
+  char kind;
+  z_iobuf_t stoid;
+  z_vle_t rsn;
+  const char* rname;
+  z_iobuf_t data;
+  z_data_info_t info;
+} z_reply_value_t;
+
+typedef void reply_callback_t(z_reply_value_t reply);
+
+typedef struct {  
+  z_vle_t qid;
+  reply_callback_t *callback;
+} z_replywaiter_t;
+
 void z_register_res_decl(zenoh_t *z, z_vle_t rid, const char *rname);
 z_res_decl_t *z_get_res_decl_by_rid(zenoh_t *z, z_vle_t rid);
 z_res_decl_t *z_get_res_decl_by_rname(zenoh_t *z, const char *rname);
@@ -135,5 +156,7 @@ void z_register_subscription(zenoh_t *z, z_vle_t rid,  subscriber_callback_t *ca
 z_subscription_t *z_get_subscription_by_rid(zenoh_t *z, z_vle_t rid);
 z_subscription_t *z_get_subscription_by_rname(zenoh_t *z, const char *rname);
 
+void z_register_query(zenoh_t *z, z_vle_t qid, reply_callback_t *callback);
+z_replywaiter_t *z_get_query(zenoh_t *z, z_vle_t qid);
 
 #endif /* ZENOH_C_TYPES_H_ */ 

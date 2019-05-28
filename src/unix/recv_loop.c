@@ -18,6 +18,8 @@ void* z_recv_loop(void* arg) {
     z_resource_id_t rid;    
     uint8_t mid;
     z_subscription_t *sub;    
+    z_replywaiter_t *rw;    
+    z_reply_value_t rvalue; 
     while (rt->running) {        
         z_recv_msg_na(z->sock, &z->rbuf, &r);
         if (r.tag == Z_OK_TAG) {
@@ -88,6 +90,36 @@ void* z_recv_loop(void* arg) {
                     }                     
                     z_iobuf_free(&r.value.message->payload.write_data.payload_header);                        
                     break;                    
+                case Z_REPLY:
+                    Z_DEBUG("Received reply message\n");
+                    rw = z_get_query(z, r.value.message->payload.reply.qid);
+                    if (rw != 0) {
+                        if (r.value.message->header & Z_F_FLAG) {
+                            rvalue.stoid = r.value.message->payload.reply.stoid;
+                            rvalue.rsn = r.value.message->payload.reply.rsn;
+                            if (strlen(r.value.message->payload.reply.rname) != 0) {
+                                rvalue.rname = r.value.message->payload.reply.rname;
+                                z_payload_header_decode_na(&r.value.message->payload.reply.payload_header, &r_ph);
+                                if (r_ph.tag == Z_OK_TAG) {
+                                    rvalue.info.flags = r_ph.value.payload_header.flags;
+                                    rvalue.info.encoding = r_ph.value.payload_header.encoding;
+                                    rvalue.info.kind = r_ph.value.payload_header.kind;
+                                    rvalue.data = r_ph.value.payload_header.payload;
+                                }
+                                else {
+                                    Z_DEBUG("Unable to parse Reply Message Payload Header\n");
+                                    break;
+                                }
+                                rvalue.kind = Z_STORAGE_DATA;
+                            } else {
+                                rvalue.kind = Z_STORAGE_FINAL;
+                            }
+                        } else {
+                            rvalue.kind = Z_REPLY_FINAL;
+                        }
+                        rw->callback(rvalue);
+                    }
+                    break;
                 case Z_DECLARE:       
                     Z_DEBUG("Received declare message\n");
                     decls = r.value.message->payload.declare.declarations.elem; 
