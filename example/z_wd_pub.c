@@ -11,9 +11,9 @@ int main(int argc, char **argv) {
   }
 
   printf("Connecting to %s...\n", locator);
-  z_zenoh_result_t r_z = z_open(locator, 0);
+  z_zenoh_p_result_t r_z = z_open(locator, 0);
   ASSERT_RESULT(r_z, "Unable to open session with broker")
-  zenoh_t z = r_z.value.zenoh;
+  z_zenoh_t *z = r_z.value.zenoh;
 
   printf("Declaring Resource...\n");
   
@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
   z_payload_header_encode(&phbuf, &ph);
   printf("Streaming Data...\n");
   while (1) {    
-    z_write_data(&z, "/demo/hello/1", &phbuf);   
+    z_write_data(z, "/demo/hello/1", &phbuf);   
     sleep(1);
   }
 

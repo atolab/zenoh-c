@@ -32,7 +32,7 @@ z_vle_decode(z_iobuf_t* buf) {
 void 
 z_array_uint8_encode(z_iobuf_t* buf, const z_array_uint8_t* bs) {
   z_vle_encode(buf, bs->length);
-  z_iobuf_write_n(buf, bs->elem, 0,  bs->length);
+  z_iobuf_write_slice(buf, bs->elem, 0,  bs->length);
 }
 
 void
@@ -56,7 +56,7 @@ z_string_encode(z_iobuf_t* buf, const char* s) {
   size_t len = strlen(s);
   z_vle_encode(buf, len);
   // Note that this does not put the string terminator on the wire.
-  z_iobuf_write_n(buf, (uint8_t*)s, 0, len);
+  z_iobuf_write_slice(buf, (uint8_t*)s, 0, len);
 }
 
 z_string_result_t 
@@ -77,7 +77,7 @@ z_string_decode(z_iobuf_t* buf) {
 void z_iobuf_encode(z_iobuf_t *buf, const z_iobuf_t *bs) {
   z_vle_t len = z_iobuf_readable(bs);
   z_vle_encode(buf, len);
-  z_iobuf_write_n(buf, bs->buf, bs->r_pos, bs->w_pos);
+  z_iobuf_write_slice(buf, bs->buf, bs->r_pos, bs->w_pos);
 }
 
 z_iobuf_t z_iobuf_decode(z_iobuf_t *buf) {
@@ -377,7 +377,7 @@ void z_payload_header_encode(z_iobuf_t *buf, const z_payload_header_t *ph) {
   z_iobuf_write(buf, flags);
   if (flags & Z_SRC_ID) {
     Z_DEBUG("Encoding Z_SRC_ID\n");
-    z_iobuf_write_n(buf, (uint8_t*)ph->src_id, 0, 16);
+    z_iobuf_write_slice(buf, (uint8_t*)ph->src_id, 0, 16);
   }
   if (flags & Z_SRC_SN) {
     Z_DEBUG("Encoding Z_SRC_SN\n");
@@ -385,7 +385,7 @@ void z_payload_header_encode(z_iobuf_t *buf, const z_payload_header_t *ph) {
   }
   if (flags & Z_BRK_ID) {
     Z_DEBUG("Encoding Z_BRK_ID\n");
-    z_iobuf_write_n(buf, (uint8_t*)ph->brk_id, 0, 16);
+    z_iobuf_write_slice(buf, (uint8_t*)ph->brk_id, 0, 16);
   }
   if (flags & Z_BRK_SN) {
     Z_DEBUG("Encoding Z_BRK_SN\n");
@@ -471,7 +471,7 @@ z_stream_data_encode(z_iobuf_t *buf, const z_stream_data_t* m) {
   z_vle_encode(buf, m->rid);
   z_vle_t len = z_iobuf_readable(&m->payload_header);
   z_vle_encode(buf, len);  
-  z_iobuf_write_n(buf, m->payload_header.buf, m->payload_header.r_pos, m->payload_header.w_pos);
+  z_iobuf_write_slice(buf, m->payload_header.buf, m->payload_header.r_pos, m->payload_header.w_pos);
 }
 
 void z_stream_data_decode_na(z_iobuf_t *buf, uint8_t header, z_stream_data_result_t *r) {
@@ -504,7 +504,7 @@ z_write_data_encode(z_iobuf_t *buf, const z_write_data_t* m) {
   z_string_encode(buf, m->rname);
   z_vle_t len = z_iobuf_readable(&m->payload_header);
   z_vle_encode(buf, len);  
-  z_iobuf_write_n(buf, m->payload_header.buf, m->payload_header.r_pos, m->payload_header.w_pos);    
+  z_iobuf_write_slice(buf, m->payload_header.buf, m->payload_header.r_pos, m->payload_header.w_pos);    
 }
 
 

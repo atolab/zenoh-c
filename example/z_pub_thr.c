@@ -10,16 +10,12 @@ int main(int argc, char **argv) {
     locator = argv[1];
   }
 
-  z_zenoh_result_t r_z = z_open(locator, 0);
-  zenoh_t z = r_z.value.zenoh;
-
-  z_vle_result_t r_rid = z_declare_resource(&z, "/home1");
-  z_vle_t rid = r_rid.value.vle;
-
-  if (z_declare_publisher(&z, rid) != 0) {
-    printf("Unable to declare pub for resource %llu\n", rid);
-    return -1;
-  }  
+  z_zenoh_p_result_t r_z = z_open(locator, 0);
+  z_zenoh_t *z = r_z.value.zenoh;
+  
+  z_pub_p_result_t rp = z_declare_publisher(z, "/home1");
+  ASSERT_P_RESULT(rp, "Unable to declare publisher");
+  z_pub_t *pub = rp.value.pub;
 
   z_iobuf_t p_buf = z_iobuf_make(256);
   z_iobuf_t ph_buf = z_iobuf_make(512);
@@ -32,7 +28,7 @@ int main(int argc, char **argv) {
   z_payload_header_encode(&ph_buf, &ph);
   
   while (1) {      
-    z_stream_data(&z, rid, &ph_buf);    
+    z_stream_data(pub, &ph_buf);    
   }
 
   return 0;

@@ -15,10 +15,11 @@
 #include "zenoh/config.h"
 #include "zenoh/msg.h"
 
-int y_put(zenoh_t *z, const char *path, const z_iobuf_t *data, int encoding);
-int y_remove(zenoh_t *z, const char *path, int encoding);
+int y_put(z_zenoh_t *z, const char *path, const z_iobuf_t *data, int encoding);
+int y_remove(z_zenoh_t *z, const char *path, int encoding);
 
-int y_subscribe(zenoh_t *z, const char *selector, subscriber_callback_t *callback);
+z_sub_p_result_t 
+y_subscribe(z_zenoh_t *z, const char *selector, subscriber_callback_t *callback);
 
 
 #endif /* ZENOH_C_H_YAKS_DEFINED_ */

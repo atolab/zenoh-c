@@ -113,9 +113,15 @@ void z_iobuf_write(z_iobuf_t* iob, uint8_t b) {
   iob->buf[iob->w_pos++] = b; 
 }
 
-void z_iobuf_write_n(z_iobuf_t* iob, const uint8_t* bs, unsigned int offset, unsigned int length) {
+void z_iobuf_write_slice(z_iobuf_t* iob, const uint8_t* bs, unsigned int offset, unsigned int length) {
   assert(z_iobuf_writable(iob) >= length); 
   memcpy(iob->buf + iob->w_pos, bs + offset, length);
+  iob->w_pos += length;
+}
+
+void z_iobuf_write_bytes(z_iobuf_t* iob, const unsigned char *bs, unsigned int length) {
+  assert(z_iobuf_writable(iob) >= length); 
+  memcpy(iob->buf + iob->w_pos, bs, length);
   iob->w_pos += length;
 }
 
@@ -160,7 +166,15 @@ z_array_uint8_t z_iobuf_to_array(z_iobuf_t* buf) {
   return a;
 }
 
-void z_register_res_decl(zenoh_t *z, z_vle_t rid, const char *rname) {
+z_vle_t z_get_entity_id(z_zenoh_t *z) {
+  return z->eid++;
+}
+// @TODO: We need to properly generate ID to avoid dups.
+z_vle_t z_get_resource_id(z_zenoh_t *z, const char *rname) {
+  return z->rid++;
+}
+
+void z_register_res_decl(z_zenoh_t *z, z_vle_t rid, const char *rname) {
   Z_DEBUG_VA(">>> Allocating res decl for (%llu,%s)\n", rid, rname);
   z_res_decl_t *rdecl = (z_res_decl_t *) malloc(sizeof(z_res_decl_t));
   rdecl->rid = rid;
@@ -173,7 +187,7 @@ void z_register_res_decl(zenoh_t *z, z_vle_t rid, const char *rname) {
   z->declarations = z_list_cons(z->declarations, rdecl);
 }
 
-z_res_decl_t *z_get_res_decl_by_rid(zenoh_t *z, z_vle_t rid) {
+z_res_decl_t *z_get_res_decl_by_rid(z_zenoh_t *z, z_vle_t rid) {
   if (z->declarations == 0) {
     printf(">>> Empty declaration set");
     return 0;
@@ -189,7 +203,7 @@ z_res_decl_t *z_get_res_decl_by_rid(zenoh_t *z, z_vle_t rid) {
     else return 0;
   }
 }
-z_res_decl_t *z_get_res_decl_by_rname(zenoh_t *z, const char *rname) {
+z_res_decl_t *z_get_res_decl_by_rname(z_zenoh_t *z, const char *rname) {
   if (z->declarations == 0) {
     printf(">>> Empty declarations set");
     return 0;
@@ -208,7 +222,7 @@ z_res_decl_t *z_get_res_decl_by_rname(zenoh_t *z, const char *rname) {
 }
 
 
-void z_register_subscription(zenoh_t *z, z_vle_t rid, subscriber_callback_t *callback) {
+void z_register_subscription(z_zenoh_t *z, z_vle_t rid, subscriber_callback_t *callback) {
   z_subscription_t *sub = (z_subscription_t *) malloc(sizeof(z_subscription_t));
   sub->rid = rid;
   z_res_decl_t *decl = z_get_res_decl_by_rid(z, rid);
@@ -221,7 +235,7 @@ void z_register_subscription(zenoh_t *z, z_vle_t rid, subscriber_callback_t *cal
   z->subscriptions = z_list_cons(z->subscriptions, sub);
 }
 
-z_subscription_t *z_get_subscription_by_rid(zenoh_t *z, z_vle_t rid) {
+z_subscription_t *z_get_subscription_by_rid(z_zenoh_t *z, z_vle_t rid) {
   if (z->subscriptions == 0) {
     printf(">>> Empty subscription set");
     return 0;
@@ -238,7 +252,7 @@ z_subscription_t *z_get_subscription_by_rid(zenoh_t *z, z_vle_t rid) {
   }
 }
 
-z_subscription_t *z_get_subscription_by_rname(zenoh_t *z, const char *rname) {
+z_subscription_t *z_get_subscription_by_rname(z_zenoh_t *z, const char *rname) {
   if (z->subscriptions == 0) {
     printf(">>> Empty subscription set");
     return 0;
@@ -256,14 +270,14 @@ z_subscription_t *z_get_subscription_by_rname(zenoh_t *z, const char *rname) {
 }
 
 
-void z_register_query(zenoh_t *z, z_vle_t qid, reply_callback_t *callback) {
+void z_register_query(z_zenoh_t *z, z_vle_t qid, reply_callback_t *callback) {
   z_replywaiter_t *rw = (z_replywaiter_t *) malloc(sizeof(z_replywaiter_t));
   rw->qid = qid;
   rw->callback = callback;
   z->replywaiters = z_list_cons(z->replywaiters, rw);
 }
 
-z_replywaiter_t *z_get_query(zenoh_t *z, z_vle_t qid) {
+z_replywaiter_t *z_get_query(z_zenoh_t *z, z_vle_t qid) {
   if (z->replywaiters == 0) {
     printf(">>> No reply waiters");
     return 0;

@@ -49,21 +49,22 @@ typedef struct {
   unsigned int r_pos;
   unsigned int w_pos;
   unsigned int capacity;
-  uint8_t* buf;
+  unsigned char* buf;
 } z_iobuf_t;
 
 z_iobuf_t z_iobuf_make(unsigned int capacity);
-z_iobuf_t z_iobuf_wrap(uint8_t *buf, unsigned int capacity);
+z_iobuf_t z_iobuf_wrap(unsigned char *buf, unsigned int capacity);
 
 void z_iobuf_free(z_iobuf_t* buf);
 unsigned int z_iobuf_readable(const z_iobuf_t* buf);
 unsigned int z_iobuf_writable(const z_iobuf_t* buf);
-void z_iobuf_write(z_iobuf_t* buf, uint8_t b);
-void z_iobuf_write_n(z_iobuf_t* buf, const uint8_t *bs, unsigned int offset, unsigned int length);
+void z_iobuf_write(z_iobuf_t* buf, unsigned char b);
+void z_iobuf_write_slice(z_iobuf_t* buf, const uint8_t *bs, unsigned int offset, unsigned int length);
+void z_iobuf_write_bytes(z_iobuf_t* buf, const unsigned char *bs, unsigned int length);
 uint8_t z_iobuf_read(z_iobuf_t* buf);
 uint8_t* z_iobuf_read_n(z_iobuf_t* buf, unsigned int length);
-uint8_t* z_iobuf_read_to_n(z_iobuf_t* buf, uint8_t* dest, unsigned int length);
-void z_iobuf_put(z_iobuf_t* buf, uint8_t b, unsigned int pos);
+uint8_t* z_iobuf_read_to_n(z_iobuf_t* buf, unsigned char* dest, unsigned int length);
+void z_iobuf_put(z_iobuf_t* buf, unsigned char b, unsigned int pos);
 uint8_t z_iobuf_get(z_iobuf_t* buf, unsigned int pos);
 void z_iobuf_clear(z_iobuf_t *buf);
 z_array_uint8_t z_iobuf_to_array(z_iobuf_t* buf);
@@ -98,6 +99,7 @@ typedef struct {
 typedef void reply_callback_t(z_reply_value_t reply);
 
 typedef void subscriber_callback_t(z_resource_id_t rid, z_iobuf_t data, z_data_info_t info);
+
 #endif /* ZENOH_C_SWIG */
 typedef void on_disconnect_t(void *z);
 
@@ -106,6 +108,7 @@ typedef struct {
   z_vle_t sn;
   z_vle_t cid;
   z_vle_t rid;
+  z_vle_t eid;
   z_iobuf_t wbuf;
   z_iobuf_t rbuf;
   z_array_uint8_t pid;
@@ -117,7 +120,22 @@ typedef struct {
   z_list_t *replywaiters;
   z_mvar_t *reply_msg_mvar;
   void *runtime;
-} zenoh_t;
+} z_zenoh_t;
+
+
+#ifndef ZENOH_C_SWIG
+typedef struct {
+  z_zenoh_t *z;
+  z_vle_t rid;
+  z_vle_t id;
+} z_sub_t;
+
+typedef struct {
+  z_zenoh_t *z;
+  z_vle_t rid;
+  z_vle_t id;
+} z_pub_t;
+#endif /* ZENOH_C_SWIG */
 
 typedef struct {   
   z_vle_t rid;
@@ -125,14 +143,6 @@ typedef struct {
   char *regex_expr;
   regex_t re;
 } z_res_decl_t;
-
-typedef struct {
-  int z;
-} z_sub_t;
-
-typedef struct {
-  int z;
-} z_pub_t;
 
 
 typedef struct {  
@@ -148,16 +158,18 @@ typedef struct {
   reply_callback_t *callback;
 } z_replywaiter_t;
 
-void z_register_res_decl(zenoh_t *z, z_vle_t rid, const char *rname);
-z_res_decl_t *z_get_res_decl_by_rid(zenoh_t *z, z_vle_t rid);
-z_res_decl_t *z_get_res_decl_by_rname(zenoh_t *z, const char *rname);
+z_vle_t z_get_entity_id(z_zenoh_t *z);
+z_vle_t z_get_resource_id(z_zenoh_t *z, const char *rname);
+void z_register_res_decl(z_zenoh_t *z, z_vle_t rid, const char *rname);
+z_res_decl_t *z_get_res_decl_by_rid(z_zenoh_t *z, z_vle_t rid);
+z_res_decl_t *z_get_res_decl_by_rname(z_zenoh_t *z, const char *rname);
 
 
-void z_register_subscription(zenoh_t *z, z_vle_t rid,  subscriber_callback_t *callback);
-z_subscription_t *z_get_subscription_by_rid(zenoh_t *z, z_vle_t rid);
-z_subscription_t *z_get_subscription_by_rname(zenoh_t *z, const char *rname);
+void z_register_subscription(z_zenoh_t *z, z_vle_t rid,  subscriber_callback_t *callback);
+z_subscription_t *z_get_subscription_by_rid(z_zenoh_t *z, z_vle_t rid);
+z_subscription_t *z_get_subscription_by_rname(z_zenoh_t *z, const char *rname);
 
-void z_register_query(zenoh_t *z, z_vle_t qid, reply_callback_t *callback);
-z_replywaiter_t *z_get_query(zenoh_t *z, z_vle_t qid);
+void z_register_query(z_zenoh_t *z, z_vle_t qid, reply_callback_t *callback);
+z_replywaiter_t *z_get_query(z_zenoh_t *z, z_vle_t qid);
 
 #endif /* ZENOH_C_TYPES_H_ */ 

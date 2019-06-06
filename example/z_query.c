@@ -30,13 +30,13 @@ int main(int argc, char **argv) {
   }
 
   printf("Connecting to %s...\n", locator);
-  z_zenoh_result_t r_z = z_open(locator, 0);
+  z_zenoh_p_result_t r_z = z_open(locator, 0);
   ASSERT_RESULT(r_z, "Unable to open session with broker")
-  zenoh_t z = r_z.value.zenoh;
+  z_zenoh_t *z = r_z.value.zenoh;
 
-  z_start_recv_loop(&z);
+  z_start_recv_loop(z);
   printf("Send Query...\n");
-  if (z_query(&z, "/demo/**", "", reply_handler) != 0) {
+  if (z_query(z, "/demo/**", "", reply_handler) != 0) {
     printf("Unable to query\n");
     return -1;
   }

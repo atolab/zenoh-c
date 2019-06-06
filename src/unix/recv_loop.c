@@ -8,7 +8,7 @@
 
 
 void* z_recv_loop(void* arg) {
-    zenoh_t *z = (zenoh_t*)arg;
+    z_zenoh_t *z = (z_zenoh_t*)arg;
     z_runtime_t *rt = (z_runtime_t*)z->runtime;
     z_message_p_result_t r;
     z_payload_header_result_t r_ph;
@@ -163,7 +163,7 @@ void* z_recv_loop(void* arg) {
 }
 
 
-int z_start_recv_loop(zenoh_t* z) { 
+int z_start_recv_loop(z_zenoh_t* z) { 
     z_runtime_t *zr = (z_runtime_t*)malloc(sizeof(z_runtime_t));    
     bzero(zr, sizeof(z_runtime_t));
     z->runtime = zr;    
@@ -175,7 +175,7 @@ int z_start_recv_loop(zenoh_t* z) {
 }
 
 
-int z_stop_recv_loop(zenoh_t *z) { 
+int z_stop_recv_loop(z_zenoh_t *z) { 
     z_message_t c;
     c.header = Z_CLOSE;
     c.payload.close.pid = z->pid;

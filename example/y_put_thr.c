@@ -11,11 +11,10 @@ int main(int argc, char **argv) {
   }
 
   printf("Connecting to %s...\n", locator);
-  z_zenoh_result_t r_z = z_open(locator, 0);
+  z_zenoh_p_result_t r_z = z_open(locator, 0);
   ASSERT_RESULT(r_z, "Unable to open session with broker")
-  zenoh_t z = r_z.value.zenoh;
+  z_zenoh_t *z = r_z.value.zenoh;
 
-  printf("Declaring Resource...\n");
   
   z_iobuf_t sdata = z_iobuf_make(256);
   char *str = "Hello World!";  
@@ -28,7 +27,7 @@ int main(int argc, char **argv) {
   z_payload_header_encode(&phbuf, &ph);
   printf("Streaming Data...\n");
   while (1) {              
-    y_put(&z, "/perf/put/thr", &sdata, Y_RAW_ENC);     
+    y_put(z, "/perf/put/thr", &sdata, Y_RAW_ENC);     
   }
 
   return 0;

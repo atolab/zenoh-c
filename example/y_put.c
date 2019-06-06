@@ -12,9 +12,9 @@ int main(int argc, char **argv) {
   }
 
   printf("Connecting to %s\n", locator);
-  z_zenoh_result_t r_z = z_open(locator, 0);
+  z_zenoh_p_result_t r_z = z_open(locator, 0);
   ASSERT_RESULT(r_z, "Unable to open session with broker")
-  zenoh_t z = r_z.value.zenoh;
+  z_zenoh_t *z = r_z.value.zenoh;
   
   z_iobuf_t sdata = z_iobuf_make(512);
   char *str = "Hello World!";  
@@ -32,7 +32,7 @@ int main(int argc, char **argv) {
     char *key = (char*)malloc(256);
     sprintf(key, "/demo/hello/%d", i);
     i = (i + 1)%10;
-    y_put(&z, key, &sdata, Y_RAW_ENC); 
+    y_put(z, key, &sdata, Y_RAW_ENC); 
     free(key);  
     sleep(1);
   }

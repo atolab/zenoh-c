@@ -43,13 +43,13 @@ int main(int argc, char **argv) {
   }
 
   printf("Connecting to %s...\n", locator);
-  z_zenoh_result_t r_z = z_open(locator, 0);
+  z_zenoh_p_result_t r_z = z_open(locator, 0);
   ASSERT_RESULT(r_z, "Unable to open session with broker")
-  zenoh_t z = r_z.value.zenoh;
+  z_zenoh_t *z = r_z.value.zenoh;
 
-  z_start_recv_loop(&z);
+  z_start_recv_loop(z);
   printf("Declaring Resource...\n");
-  y_subscribe(&z, "/perf/put/thr", listener);
+  y_subscribe(z, "/perf/put/thr", listener);
   sleep(60000);
   return 0;
 }

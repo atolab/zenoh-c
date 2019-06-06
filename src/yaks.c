@@ -3,7 +3,7 @@
 
 
 
-int y_put(zenoh_t *z, const char *path, const z_iobuf_t *data, int encoding) {
+int y_put(z_zenoh_t *z, const char *path, const z_iobuf_t *data, int encoding) {
   z_payload_header_t ph;
   ph.flags = Z_ENCODING | Z_KIND;
   Z_DEBUG_VA("Y_put with flags: 0x%x\n", ph.flags);
@@ -17,16 +17,15 @@ int y_put(zenoh_t *z, const char *path, const z_iobuf_t *data, int encoding) {
   return rv;
 }
 
-int y_remove(zenoh_t *z, const char *path, int encoding) {
+int y_remove(z_zenoh_t *z, const char *path, int encoding) {
   return 0;
 }
 
-int y_subscribe(zenoh_t *z, const char *selector, subscriber_callback_t *callback) {
-  Z_DEBUG_VA(">>> Creating Yaks sub for %s\n", selector);
-  z_vle_result_t r_rid  = z_declare_resource(z, selector);
-  if (r_rid.tag == Z_ERROR_TAG)
-    return -1;
+z_sub_p_result_t 
+y_subscribe(z_zenoh_t *z, const char *selector, subscriber_callback_t *callback) {
+  Z_DEBUG_VA(">>> Creating Yaks sub for %s\n", selector);      
   z_sub_mode_t sm;
   sm.kind = Z_PUSH_MODE;
-  return z_declare_subscriber(z, r_rid.value.vle, sm, callback);  
+  return z_declare_subscriber(z, selector, sm, callback);
+  
 }

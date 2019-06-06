@@ -42,23 +42,18 @@ int main(int argc, char **argv) {
   }
 
   printf("Connecting to %s...\n", locator);
-  z_zenoh_result_t r_z = z_open(locator, 0);
+  z_zenoh_p_result_t r_z = z_open(locator, 0);
   ASSERT_RESULT(r_z, "Unable to open session with broker")
-  zenoh_t z = r_z.value.zenoh;
+  z_zenoh_t *z = r_z.value.zenoh;
 
-  z_start_recv_loop(&z);
-  printf("Declaring Resource...\n");
-  z_vle_result_t r_rid = z_declare_resource(&z, "/home1");
-  ASSERT_RESULT(r_rid, "Unable to register result")
-  z_vle_t rid = r_rid.value.vle;
+  z_start_recv_loop(z);  
 
   printf("Declaring Subscriber...\n");
   z_sub_mode_t sm;
   sm.kind = Z_PUSH_MODE;
-  if (z_declare_subscriber(&z, rid, sm, listener) != 0) {
-    printf("Unable to declare pub\n");
-    return -1;
-  }
+  z_sub_p_result_t r = z_declare_subscriber(z, "/home1", sm, listener);
+  ASSERT_P_RESULT(r, "Unable to declare pub\n");
+  
   sleep(60);
   return 0;
 }
