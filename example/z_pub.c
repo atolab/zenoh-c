@@ -22,18 +22,13 @@ int main(int argc, char **argv) {
   
   z_pub_t *pub = r.value.pub;
 
-  z_iobuf_t sdata = z_iobuf_make(512);
+  z_iobuf_t data = z_iobuf_make(512);
   char *str = "Hello World!";  
-  z_string_encode(&sdata, str);
-  
-  z_iobuf_t phbuf = z_iobuf_make(512);
-  z_payload_header_t ph;
-  ph.flags = 0;
-  ph.payload = sdata;
-  z_payload_header_encode(&phbuf, &ph);
+  z_string_encode(&data, str);
+  size_t len = z_iobuf_readable(&data);
   printf("Streaming Data...\n");
   while (1) {    
-    z_stream_data(pub, &phbuf);   
+    z_stream_data(pub, data.buf, len);   
     sleep(1);
   }
 

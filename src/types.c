@@ -78,15 +78,21 @@ char *resource_to_regex(const char *res) {
   return r;
 }
 
-z_iobuf_t 
-z_iobuf_wrap(uint8_t *buf, unsigned int capacity) {
+z_iobuf_t z_iobuf_wrap_wo(unsigned char *buf, unsigned int capacity, unsigned int rpos, unsigned int wpos) {
+  assert(rpos <= capacity && wpos <= capacity);
   z_iobuf_t iobuf;
-  iobuf.r_pos = 0;
-  iobuf.w_pos = 0; 
+  iobuf.r_pos = rpos;
+  iobuf.w_pos = wpos; 
   iobuf.capacity = capacity;
   iobuf.buf = buf;  
   return iobuf;
 }
+
+z_iobuf_t 
+z_iobuf_wrap(uint8_t *buf, unsigned int capacity) {
+  return z_iobuf_wrap_wo(buf, capacity, 0, 0);  
+}
+
 
 z_iobuf_t z_iobuf_make(unsigned int capacity) {
   return z_iobuf_wrap((uint8_t*)malloc(capacity), capacity);  
@@ -270,7 +276,7 @@ z_subscription_t *z_get_subscription_by_rname(z_zenoh_t *z, const char *rname) {
 }
 
 
-void z_register_query(z_zenoh_t *z, z_vle_t qid, reply_callback_t *callback) {
+void z_register_query(z_zenoh_t *z, z_vle_t qid, z_reply_callback_t *callback) {
   z_replywaiter_t *rw = (z_replywaiter_t *) malloc(sizeof(z_replywaiter_t));
   rw->qid = qid;
   rw->callback = callback;

@@ -23,19 +23,6 @@ void default_on_disconnect(void *vz) {
   }
 }
 
-// z_zenoh_t*
-// z_open_ptr(char* locator) {
-//   z_zenoh_result_t  *rp = (z_zenoh_result_t*)malloc(sizeof(z_zenoh_result_t ));  
-//   *rp = z_open(locator, 0);
-//   if (rp->tag == Z_OK_TAG)
-//     return &rp->value.zenoh;
-//   else {
-//     free (rp);
-//     return 0;
-//   }
-// }
-
-
 z_zenoh_p_result_t 
 z_open(char* locator, on_disconnect_t *on_disconnect) {
   z_zenoh_p_result_t r; 
@@ -189,12 +176,11 @@ z_declare_publisher(z_zenoh_t *z, const char *resource) {
   
 }
 
-int z_stream_compact_data(z_pub_t *pub, const z_iobuf_t *payload) { 
+int z_stream_compact_data(z_pub_t *pub, const unsigned char *data, size_t length) { 
   z_message_t msg;
-  msg.header = Z_COMPACT_DATA;
-  
+  msg.header = Z_COMPACT_DATA;  
   msg.payload.compact_data.rid = pub->rid;    
-  msg.payload.compact_data.payload = *payload;  
+  msg.payload.compact_data.payload = z_iobuf_wrap((unsigned char *)data, length);  
   msg.payload.compact_data.sn = pub->z->sn++;
   if (z_send_msg(pub->z->sock, &pub->z->wbuf, &msg) == 0) 
     return 0;
@@ -206,13 +192,23 @@ int z_stream_compact_data(z_pub_t *pub, const z_iobuf_t *payload) {
   }
 }
 
+
 int 
-z_stream_data_with_header(z_pub_t *pub, const z_iobuf_t *payload_header) {
+z_stream_data_wo(z_pub_t *pub, const unsigned char *data, size_t length, uint8_t encoding, uint8_t kind) {
+  z_payload_header_t ph;
+  ph.flags = Z_ENCODING | Z_KIND;
+  ph.encoding = encoding;
+  ph.kind = kind;
+  ph.payload = z_iobuf_wrap((unsigned char *)data, length);
+  z_iobuf_t buf = z_iobuf_make(length + 32 );
+  z_payload_header_encode(&buf, &ph);
+
   z_message_t msg;
   msg.header = Z_STREAM_DATA;
+  // No need to take ownership, avoid strdup.
   msg.payload.stream_data.rid = pub->rid;      
   msg.payload.stream_data.sn = pub->z->sn++;
-  msg.payload.stream_data.payload_header = *payload_header;
+  msg.payload.stream_data.payload_header = buf;
   if (z_send_msg(pub->z->sock, &pub->z->wbuf, &msg) == 0) 
     return 0;
   else
@@ -221,42 +217,30 @@ z_stream_data_with_header(z_pub_t *pub, const z_iobuf_t *payload_header) {
     pub->z->on_disconnect(pub->z);
     return z_send_msg(pub->z->sock, &pub->z->wbuf, &msg);
   }
-}
-
-
-int 
-z_stream_data_wo(z_pub_t *pub, const z_iobuf_t *data, uint8_t encoding, uint8_t kind) {
-  z_payload_header_t ph;
-  ph.flags = Z_ENCODING | Z_KIND;
-  ph.encoding = encoding;
-  ph.kind = kind;
-  ph.payload = *data;
-  z_iobuf_t buf = z_iobuf_make(z_iobuf_readable(data) + 32 );
-  z_payload_header_encode(&buf, &ph);
-  int rv = z_stream_data(pub, &buf);
+  
   z_iobuf_free(&buf);
-  return rv;
+  return 0;
 }
 
-int z_stream_data(z_pub_t *pub, const z_iobuf_t *data) {
-  return z_stream_data_wo(pub, data,  0, 0); 
+int z_stream_data(z_pub_t *pub, const unsigned char *data, size_t length) {
+  return z_stream_data_wo(pub, data, length, 0, 0); 
 }
 
-int z_write_data_wo(z_zenoh_t *z, const char* resource, const z_iobuf_t *payload, uint8_t encoding, uint8_t kind) { 
+int z_write_data_wo(z_zenoh_t *z, const char* resource, const unsigned char *payload, size_t length, uint8_t encoding, uint8_t kind) { 
   z_payload_header_t ph;
   ph.flags = Z_ENCODING | Z_KIND;
   ph.encoding = encoding;
   ph.kind = kind;
-  ph.payload = *payload;
-  z_iobuf_t buf = z_iobuf_make(z_iobuf_readable(payload) + 32 );
+  ph.payload = z_iobuf_wrap((unsigned char *)payload, length);
+  z_iobuf_t buf = z_iobuf_make(length + 32 );
   z_payload_header_encode(&buf, &ph);
 
   z_message_t msg;
   msg.header = Z_WRITE_DATA;
   // No need to take ownership, avoid strdup.
   msg.payload.write_data.rname = (char*) resource;      
-  msg.payload.stream_data.sn = z->sn++;
-  msg.payload.stream_data.payload_header = buf;
+  msg.payload.write_data.sn = z->sn++;
+  msg.payload.write_data.payload_header = buf;
   if (z_send_msg(z->sock, &z->wbuf, &msg) == 0) 
     return 0;
   else
@@ -267,10 +251,10 @@ int z_write_data_wo(z_zenoh_t *z, const char* resource, const z_iobuf_t *payload
   }
 }
 
-int z_write_data(z_zenoh_t *z, const char* resource, const z_iobuf_t *payload) {
-  return z_write_data_wo(z, resource, payload, 0, 0);
+int z_write_data(z_zenoh_t *z, const char* resource, const unsigned char *payload, size_t length) {
+  return z_write_data_wo(z, resource, payload, length, 0, 0);
 }
-int z_query(z_zenoh_t *z, const char* resource, const char* predicate, reply_callback_t *callback) { 
+int z_query(z_zenoh_t *z, const char* resource, const char* predicate, z_reply_callback_t *callback) { 
   z_message_t *msg = (z_message_t *)malloc(sizeof(z_message_t));
   z_message_p_result_t r_msg;
   z_message_p_result_init(&r_msg);

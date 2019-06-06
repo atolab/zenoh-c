@@ -17,18 +17,13 @@ int main(int argc, char **argv) {
 
   printf("Declaring Resource...\n");
   
-  z_iobuf_t sdata = z_iobuf_make(256);
+  z_iobuf_t data = z_iobuf_make(256);
   char *str = "Hello World!";  
-  z_string_encode(&sdata, str);
-  
-  z_iobuf_t phbuf = z_iobuf_make(256);
-  z_payload_header_t ph;
-  ph.flags = 0;
-  ph.payload = sdata;
-  z_payload_header_encode(&phbuf, &ph);
+  z_string_encode(&data, str);
+    
   printf("Streaming Data...\n");
   while (1) {    
-    z_write_data(z, "/demo/hello/1", &phbuf);   
+    z_write_data(z, "/demo/hello/1", data.buf, z_iobuf_readable(&data));   
     sleep(1);
   }
 

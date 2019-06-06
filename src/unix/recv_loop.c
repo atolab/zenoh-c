@@ -42,7 +42,7 @@ void* z_recv_loop(void* arg) {
                             info.flags = r_ph.value.payload_header.flags;                            
                             info.encoding = r_ph.value.payload_header.encoding;
                             info.kind = r_ph.value.payload_header.kind;
-                            sub->callback(rid, r_ph.value.payload_header.payload, info);
+                            sub->callback(rid, r_ph.value.payload_header.payload.buf, z_iobuf_readable(&r_ph.value.payload_header.payload),info);
                         }                
                         else                                                         
                             Z_DEBUG("Unable to parse StreamData Message Payload Header\n");          
@@ -64,8 +64,11 @@ void* z_recv_loop(void* arg) {
                             rid.id.rid = r.value.message->payload.stream_data.rid;
                         }
                         info.flags = 0;
-                        sub->callback(rid,
-                                    r.value.message->payload.compact_data.payload, info);                        
+                        sub->callback(
+                            rid,
+                            r.value.message->payload.compact_data.payload.buf, 
+                            z_iobuf_readable(&r.value.message->payload.compact_data.payload),
+                            info);                        
                     }                     
                     break;
                 case Z_WRITE_DATA:                             
@@ -81,7 +84,11 @@ void* z_recv_loop(void* arg) {
                             info.encoding = r_ph.value.payload_header.encoding;
                             info.kind = r_ph.value.payload_header.kind;
                             Z_DEBUG("!!!Calling Listener!!!! \n");
-                            sub->callback(rid, r_ph.value.payload_header.payload, info);
+                            sub->callback(
+                                rid, 
+                                r.value.message->payload.compact_data.payload.buf, 
+                                z_iobuf_readable(&r.value.message->payload.compact_data.payload), 
+                                info);
                         }                                                
                         else                         
                             Z_DEBUG("Unable to parse WriteData Message Payload Header\n");          
@@ -104,7 +111,8 @@ void* z_recv_loop(void* arg) {
                                     rvalue.info.flags = r_ph.value.payload_header.flags;
                                     rvalue.info.encoding = r_ph.value.payload_header.encoding;
                                     rvalue.info.kind = r_ph.value.payload_header.kind;
-                                    rvalue.data = r_ph.value.payload_header.payload;
+                                    rvalue.data = r_ph.value.payload_header.payload.buf;
+                                    rvalue.length = z_iobuf_readable(&r_ph.value.payload_header.payload);
                                 }
                                 else {
                                     Z_DEBUG("Unable to parse Reply Message Payload Header\n");

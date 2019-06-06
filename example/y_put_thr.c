@@ -16,18 +16,15 @@ int main(int argc, char **argv) {
   z_zenoh_t *z = r_z.value.zenoh;
 
   
-  z_iobuf_t sdata = z_iobuf_make(256);
+  z_iobuf_t data = z_iobuf_make(256);
   char *str = "Hello World!";  
-  z_string_encode(&sdata, str);
+  z_string_encode(&data, str);
+  size_t len = z_iobuf_readable(&data);
   
-  z_iobuf_t phbuf = z_iobuf_make(256);
-  z_payload_header_t ph;
-  ph.flags = 0;
-  ph.payload = sdata;
-  z_payload_header_encode(&phbuf, &ph);
+  
   printf("Streaming Data...\n");
   while (1) {              
-    y_put(z, "/perf/put/thr", &sdata, Y_RAW_ENC);     
+    y_put(z, "/perf/put/thr", data.buf, len, Y_RAW_ENC);     
   }
 
   return 0;

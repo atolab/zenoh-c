@@ -5,9 +5,11 @@
 
 void reply_handler(z_reply_value_t reply) {
   z_string_result_t r_s;
+  z_iobuf_t buf;
   switch (reply.kind) {
     case Z_STORAGE_DATA: 
-      r_s = z_string_decode(&reply.data);        
+      buf = z_iobuf_wrap(reply.data, reply.length);
+      r_s = z_string_decode(&buf);        
       if (r_s.tag == Z_OK_TAG) {
         printf("Received Storage Data. %s:%s\n", reply.rname, r_s.value.string);
       } else {

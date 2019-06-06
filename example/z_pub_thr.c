@@ -17,18 +17,14 @@ int main(int argc, char **argv) {
   ASSERT_P_RESULT(rp, "Unable to declare publisher");
   z_pub_t *pub = rp.value.pub;
 
-  z_iobuf_t p_buf = z_iobuf_make(256);
-  z_iobuf_t ph_buf = z_iobuf_make(512);
+  z_iobuf_t data = z_iobuf_make(256);  
   char *str = "- Hello World -!";  
-  z_string_encode(&p_buf, str);  
+  z_string_encode(&data, str);  
 
-  z_payload_header_t ph;
-  ph.flags = 0;
-  ph.payload = p_buf;
-  z_payload_header_encode(&ph_buf, &ph);
+  
   
   while (1) {      
-    z_stream_data(pub, &ph_buf);    
+    z_stream_data(pub, data.buf, z_iobuf_readable(&data));    
   }
 
   return 0;

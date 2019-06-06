@@ -15,7 +15,7 @@
 #include "zenoh/config.h"
 #include "zenoh/msg.h"
 
-int y_put(z_zenoh_t *z, const char *path, const z_iobuf_t *data, int encoding);
+int y_put(z_zenoh_t *z, const char *path, const unsigned char *data, size_t length, int encoding);
 int y_remove(z_zenoh_t *z, const char *path, int encoding);
 
 z_sub_p_result_t 

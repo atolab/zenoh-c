@@ -2,19 +2,8 @@
 #include "yaks.h"
 
 
-
-int y_put(z_zenoh_t *z, const char *path, const z_iobuf_t *data, int encoding) {
-  z_payload_header_t ph;
-  ph.flags = Z_ENCODING | Z_KIND;
-  Z_DEBUG_VA("Y_put with flags: 0x%x\n", ph.flags);
-  ph.encoding = encoding;
-  ph.kind = Y_PUT;
-  ph.payload = *data;
-  z_iobuf_t buf = z_iobuf_make(z_iobuf_readable(data) + 32 );
-  z_payload_header_encode(&buf, &ph);
-  int rv = z_write_data(z, path, &buf);
-  z_iobuf_free(&buf);
-  return rv;
+int y_put(z_zenoh_t *z, const char *path, const unsigned char *data, size_t length, int encoding) {  
+  return z_write_data_wo(z, path, data, length, encoding, Y_PUT);  
 }
 
 int y_remove(z_zenoh_t *z, const char *path, int encoding) {
