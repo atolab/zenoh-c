@@ -1,6 +1,7 @@
 %module zenohc 
 %{ 
 #define ZENOH_C_SWIG 1
+typedef unsigned char uint8_t;
 typedef  unsigned long long  z_vle_t;
 typedef struct { unsigned int length; uint8_t* elem; } z_array_uint8_t;
 
@@ -39,14 +40,14 @@ typedef struct {
   char kind;
   z_iobuf_t stoid;
   z_vle_t rsn;
-  const char* rname;
+  char* rname;
   z_iobuf_t data;
   z_data_info_t info;
 } z_reply_value_t;
 
 typedef union {  
   z_vle_t rid;
-  const char *rname;
+  char *rname;
 } z_res_id_t;
 
 typedef struct {
@@ -84,6 +85,8 @@ extern int z_query(zenoh_t *z, const char* resource, const char* predicate, repl
 
 #define ZENOH_C_SWIG 1
 typedef  unsigned long long  z_vle_t;
+typedef unsigned char uint8_t;
+
 typedef struct { unsigned int length; uint8_t* elem; } z_array_uint8_t;
 
 typedef struct {
@@ -121,14 +124,14 @@ typedef struct {
   char kind;
   z_iobuf_t stoid;
   z_vle_t rsn;
-  const char* rname;
+  char* rname;
   z_iobuf_t data;
   z_data_info_t info;
 } z_reply_value_t;
 
 typedef union {  
   z_vle_t rid;
-  const char *rname;
+  char *rname;
 } z_res_id_t;
 
 typedef struct {

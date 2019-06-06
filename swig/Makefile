@@ -1,7 +1,6 @@
-all:
-	swig -python zenohc.i
-
-	gcc -fpic zenohc_wrap.c\
+default:
+	swig   -o zenohc_wrap.c -python zenohc.i 
+	gcc -fpic python/wrap/zenohc_wrap.c\
 		-L /usr/local/lib\
 		-lzenohc\
 		-L /usr/local/Cellar/python/3.7.3/Frameworks/Python.framework/Versions/3.7/lib/python3.7/config-3.7m-darwin\
@@ -12,5 +11,41 @@ all:
 		-I ../include\
 		-I/usr/local/Cellar/python/3.7.3/Frameworks/Python.framework/Versions/3.7/include/python3.7m\
 
+python:
+	mkdir -p python &>/dev/null 
+	mkdir -p python/wrap &>/dev/null 
+	mkdir -p python/lib &>/dev/null 	
+	swig -outdir python/  -o python/wrap/zenohc_wrap.c -python zenohc.i 
+	
+
+	gcc -fpic python/wrap/zenohc_wrap.c\
+		-L /usr/local/lib\
+		-lzenohc\
+		-L /usr/local/Cellar/python/3.7.3/Frameworks/Python.framework/Versions/3.7/lib/python3.7/config-3.7m-darwin\
+		-lpython3.7\
+		-shared\
+		-o python/lib/_zenohc.so\
+	 	-DZENOH_MACOS=1\
+		-I ../include\
+		-I/usr/local/Cellar/python/3.7.3/Frameworks/Python.framework/Versions/3.7/include/python3.7m\
+
+java:
+	mkdir -p java/src &>/dev/null 
+	mkdir -p java/wrap &>/dev/null 
+	mkdir -p java/lib &>/dev/null 	
+	swig -outdir java/src -o java/wrap/zenohc_wrap.c -java zenohc.i 
+	
+
+	gcc -fpic java/wrap/zenohc_wrap.c\
+		-L /usr/local/lib\
+		-lzenohc\
+		-shared\
+		-o java/lib/_zenohc.so\
+	 	-DZENOH_MACOS=1\
+		-I ../include\
+		-I /Library/Java/JavaVirtualMachines/jdk1.8.0_131.jdk/Contents/Home/include\
+		-I /Library/Java/JavaVirtualMachines/jdk1.8.0_131.jdk/Contents/Home/include/darwin
+
+
 clean:
-	$(RM) -Rf __pycache__ *.so *.dylib *.c *.py
+	$(RM) -Rf __pycache__ *.so *.dylib *.c *.py *.java python java 

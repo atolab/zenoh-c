@@ -80,14 +80,14 @@ typedef struct {
   char kind;
   z_iobuf_t stoid;
   z_vle_t rsn;
-  const char* rname;
+  char* rname;
   z_iobuf_t data;
   z_data_info_t info;
 } z_reply_value_t;
 
 typedef union {  
   z_vle_t rid;
-  const char *rname;
+  char *rname;
 } z_res_id_t;
 
 typedef struct {
@@ -121,7 +121,7 @@ typedef struct {
 
 typedef struct {   
   z_vle_t rid;
-  const char* r_name;  
+  char* r_name;  
   char *regex_expr;
   regex_t re;
 } z_res_decl_t;

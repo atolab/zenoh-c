@@ -27,9 +27,7 @@ int main(int argc, char **argv) {
 
   z_start_recv_loop(&z);
   printf("Declaring Resource...\n");
-  z_vle_result_t r_rid = z_declare_resource(&z, "/demo/hello/hello");
-  r_rid = z_declare_resource(&z, "/demo/hello/hello/lello");
-  r_rid = z_declare_resource(&z, "/demo/hello/*");
+  z_vle_result_t r_rid = z_declare_resource(&z, "/demo/hello/*");
   ASSERT_RESULT(r_rid, "Unable to register result")
   z_vle_t rid = r_rid.value.vle;
 
