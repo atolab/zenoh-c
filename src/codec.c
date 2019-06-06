@@ -84,8 +84,8 @@ z_iobuf_t z_iobuf_decode(z_iobuf_t *buf) {
   z_vle_result_t r_len = z_vle_decode(buf);
   ASSERT_RESULT(r_len, "Unable to decode iobuf");
   uint8_t *bs = z_iobuf_read_n(buf, r_len.value.vle);
-  z_iobuf_t iob = z_iobuf_wrap(bs, r_len.value.vle);
-  iob.w_pos = r_len.value.vle;
+  printf("ziobuf_decode len: %zu", r_len.value.vle);
+  z_iobuf_t iob = z_iobuf_wrap_wo(bs, r_len.value.vle, 0, r_len.value.vle);
   return iob;
 }
 
@@ -487,7 +487,7 @@ void z_stream_data_decode_na(z_iobuf_t *buf, uint8_t header, z_stream_data_resul
   r_vle = z_vle_decode(buf);
   ASSURE_P_RESULT(r_vle, r, Z_VLE_PARSE_ERROR);  
   uint8_t *ph = z_iobuf_read_n(buf, r_vle.value.vle);
-  r->value.stream_data.payload_header = z_iobuf_wrap(ph, r_vle.value.vle);
+  r->value.stream_data.payload_header = z_iobuf_wrap_wo(ph, r_vle.value.vle, 0, r_vle.value.vle);
   r->value.stream_data.payload_header.w_pos = r_vle.value.vle;
 }
 
@@ -522,7 +522,7 @@ void z_write_data_decode_na(z_iobuf_t *buf, uint8_t header, z_write_data_result_
   r_vle = z_vle_decode(buf);
   ASSURE_P_RESULT(r_vle, r, Z_VLE_PARSE_ERROR);  
   uint8_t *ph = z_iobuf_read_n(buf, r_vle.value.vle);
-  r->value.write_data.payload_header = z_iobuf_wrap(ph, r_vle.value.vle);
+  r->value.write_data.payload_header = z_iobuf_wrap_wo(ph, r_vle.value.vle, 0, r_vle.value.vle);
   r->value.write_data.payload_header.w_pos = r_vle.value.vle;
 }
 
@@ -595,7 +595,7 @@ void z_reply_decode_na(z_iobuf_t *buf, uint8_t header, z_reply_result_t *r) {
     z_vle_result_t r_vle = z_vle_decode(buf);
     ASSURE_P_RESULT(r_vle, r, Z_VLE_PARSE_ERROR);  
     uint8_t *stoid = z_iobuf_read_n(buf, r_vle.value.vle);
-    r->value.reply.stoid = z_iobuf_wrap(stoid, r_vle.value.vle);
+    r->value.reply.stoid = z_iobuf_wrap_wo(stoid, r_vle.value.vle, 0, r_vle.value.vle);
     r->value.reply.stoid.w_pos = r_vle.value.vle;
 
     r_vle = z_vle_decode(buf);
@@ -609,7 +609,7 @@ void z_reply_decode_na(z_iobuf_t *buf, uint8_t header, z_reply_result_t *r) {
     r_vle = z_vle_decode(buf);
     ASSURE_P_RESULT(r_vle, r, Z_VLE_PARSE_ERROR); 
     uint8_t *ph = z_iobuf_read_n(buf, r_vle.value.vle);
-    r->value.reply.payload_header = z_iobuf_wrap(ph, r_vle.value.vle);
+    r->value.reply.payload_header = z_iobuf_wrap_wo(ph, r_vle.value.vle, 0, r_vle.value.vle);
     r->value.reply.payload_header.w_pos = r_vle.value.vle;
   }
 }
