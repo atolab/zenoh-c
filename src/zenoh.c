@@ -99,64 +99,6 @@ z_open(char* locator, on_disconnect_t *on_disconnect) {
 
 void z_close(z_zenoh_t* z) { }
 
-z_vle_result_t 
-z_declare_resource(z_zenoh_t *z, const char* resource) {
-  z_message_t msg;
-  z_message_p_result_t r_msg;
-  z_message_p_result_init(&r_msg);
-  z_vle_result_t r_rid;
-  r_rid.tag = Z_OK_TAG;
-  msg.header = Z_DECLARE;
-  msg.payload.declare.sn = z->sn++;
-  z_array_declaration_t decl = {2, (z_declaration_t*)malloc(2*sizeof(z_declaration_t))};
-
-  decl.elem[0].header = Z_RESOURCE_DECL;
-  // No need to take ownership for the resource name, we can
-  // avoid a strdup
-  decl.elem[0].payload.resource.r_name = (char*)resource;  
-  decl.elem[0].payload.resource.rid = z->rid;
-    
-  decl.elem[1].header = Z_COMMIT_DECL;
-  decl.elem[1].payload.commit.cid = z->cid++;
-  
-  msg.payload.declare.declarations = decl;
-  z_iobuf_clear(&z->wbuf);
-  Z_DEBUG(">>> Sending Declare...\n");
-  z_send_msg(z->sock, &z->wbuf, &msg);
-  // This will be refactored to use mvars  
-  r_rid.value.vle = z->rid++;      
-  Z_DEBUG(">>> Registering Resource...\n");
-  z_register_res_decl(z, r_rid.value.vle, resource);
-  return r_rid;
-
-// -- This will be refactored to use mvars
-#if 0
-  Z_DEBUG(">>> Waiting for message...\n");
-  r_msg = z_recv_msg(z->sock, &z->rbuf);
-  ASSERT_P_RESULT(r_msg, "Failed to receive accept");
-  if (Z_MID(r_msg.value.message->header) == Z_DECLARE) {    
-    r_rid.value.vle = z->rid++;    
-  } 
-  else if (Z_MID(r_msg.value.message->header) == Z_CLOSE) {
-    r_rid.tag = Z_ERROR_TAG;
-    r_rid.value.error = r_msg.value.message->payload.close.reason;
-  }
-
-  else {
-    r_rid.tag = Z_ERROR_TAG;
-    r_rid.value.error = Z_RESOURCE_DECL_ERROR;
-  }
-  return r_rid;
-#endif 
-}
-
-int z_declare_resource_ir(z_zenoh_t *z, const char* resource) {
-  z_vle_result_t r = z_declare_resource(z, resource);
-  if (r.tag == Z_OK_TAG)
-    return r.value.vle;
-  else 
-    return -1;
-}
 z_sub_p_result_t
 z_declare_subscriber(z_zenoh_t *z, const char *resource,  z_sub_mode_t sm, subscriber_callback_t *callback) {
   z_sub_p_result_t r;
@@ -265,7 +207,7 @@ int z_stream_compact_data(z_pub_t *pub, const z_iobuf_t *payload) {
 }
 
 int 
-z_stream_data(z_pub_t *pub, const z_iobuf_t *payload_header) {
+z_stream_data_with_header(z_pub_t *pub, const z_iobuf_t *payload_header) {
   z_message_t msg;
   msg.header = Z_STREAM_DATA;
   msg.payload.stream_data.rid = pub->rid;      
@@ -281,12 +223,11 @@ z_stream_data(z_pub_t *pub, const z_iobuf_t *payload_header) {
   }
 }
 
+
 int 
 z_stream_data_wo(z_pub_t *pub, const z_iobuf_t *data, uint8_t encoding, uint8_t kind) {
   z_payload_header_t ph;
   ph.flags = Z_ENCODING | Z_KIND;
-  Z_DEBUG_VA("z_stream_data_wo with flags: 0x%x\n", ph.flags);
-  Z_DEBUG_VA("z_stream_data_wo data has r_pos = %d w_pos = %d capacity = %d\n", data->r_pos, data->w_pos, data->capacity);
   ph.encoding = encoding;
   ph.kind = kind;
   ph.payload = *data;
@@ -297,13 +238,25 @@ z_stream_data_wo(z_pub_t *pub, const z_iobuf_t *data, uint8_t encoding, uint8_t 
   return rv;
 }
 
-int z_write_data(z_zenoh_t *z, const char* resource, const z_iobuf_t *payload_header) { 
+int z_stream_data(z_pub_t *pub, const z_iobuf_t *data) {
+  return z_stream_data_wo(pub, data,  0, 0); 
+}
+
+int z_write_data_wo(z_zenoh_t *z, const char* resource, const z_iobuf_t *payload, uint8_t encoding, uint8_t kind) { 
+  z_payload_header_t ph;
+  ph.flags = Z_ENCODING | Z_KIND;
+  ph.encoding = encoding;
+  ph.kind = kind;
+  ph.payload = *payload;
+  z_iobuf_t buf = z_iobuf_make(z_iobuf_readable(payload) + 32 );
+  z_payload_header_encode(&buf, &ph);
+
   z_message_t msg;
   msg.header = Z_WRITE_DATA;
   // No need to take ownership, avoid strdup.
   msg.payload.write_data.rname = (char*) resource;      
   msg.payload.stream_data.sn = z->sn++;
-  msg.payload.stream_data.payload_header = *payload_header;
+  msg.payload.stream_data.payload_header = buf;
   if (z_send_msg(z->sock, &z->wbuf, &msg) == 0) 
     return 0;
   else
@@ -314,6 +267,9 @@ int z_write_data(z_zenoh_t *z, const char* resource, const z_iobuf_t *payload_he
   }
 }
 
+int z_write_data(z_zenoh_t *z, const char* resource, const z_iobuf_t *payload) {
+  return z_write_data_wo(z, resource, payload, 0, 0);
+}
 int z_query(z_zenoh_t *z, const char* resource, const char* predicate, reply_callback_t *callback) { 
   z_message_t *msg = (z_message_t *)malloc(sizeof(z_message_t));
   z_message_p_result_t r_msg;
