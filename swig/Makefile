@@ -1,3 +1,4 @@
+JDK_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_181.jdk/Contents/Home
 default:
 	swig   -o zenohc_wrap.c -python zenohc.i 
 	gcc -fpic python/wrap/zenohc_wrap.c\
@@ -45,8 +46,8 @@ java:
 		-o java/_zenohc.so\
 	 	-DZENOH_MACOS=1\
 		-I ../include\
-		-I /Library/Java/JavaVirtualMachines/jdk1.8.0_131.jdk/Contents/Home/include\
-		-I /Library/Java/JavaVirtualMachines/jdk1.8.0_131.jdk/Contents/Home/include/darwin
+		-I ${JDK_HOME}/include\
+		-I ${JDK_HOME}/include/darwin
 
 
 clean:

@@ -101,7 +101,8 @@ void* z_recv_loop(void* arg) {
                     rw = z_get_query(z, r.value.message->payload.reply.qid);
                     if (rw != 0) {
                         if (r.value.message->header & Z_F_FLAG) {
-                            rvalue.stoid = r.value.message->payload.reply.stoid;
+                            rvalue.stoid = r.value.message->payload.reply.stoid.buf;
+                            rvalue.stoid_length = z_iobuf_readable(&r.value.message->payload.reply.stoid);
                             rvalue.rsn = r.value.message->payload.reply.rsn;
                             if (strlen(r.value.message->payload.reply.rname) != 0) {
                                 rvalue.rname = r.value.message->payload.reply.rname;
@@ -111,7 +112,7 @@ void* z_recv_loop(void* arg) {
                                     rvalue.info.encoding = r_ph.value.payload_header.encoding;
                                     rvalue.info.kind = r_ph.value.payload_header.kind;
                                     rvalue.data = r_ph.value.payload_header.payload.buf;
-                                    rvalue.length = z_iobuf_readable(&r_ph.value.payload_header.payload);
+                                    rvalue.data_length = z_iobuf_readable(&r_ph.value.payload_header.payload);
                                 }
                                 else {
                                     Z_DEBUG("Unable to parse Reply Message Payload Header\n");

@@ -71,14 +71,15 @@ enum result_kind {
   Z_ERROR_TAG    
 };
 
-Z_RESULT_DECLARE (z_vle_t, vle)
-Z_RESULT_DECLARE (z_array_uint8_t, array_uint8)
-Z_RESULT_DECLARE (char*, string)
 Z_P_RESULT_DECLARE(z_zenoh_t, zenoh)
 Z_P_RESULT_DECLARE(z_sub_t, sub)
 Z_P_RESULT_DECLARE(z_pub_t, pub)
 
 #endif /* ZENOH_C_SWIG */
+
+Z_RESULT_DECLARE (z_vle_t, vle)
+Z_RESULT_DECLARE (z_array_uint8_t, array_uint8)
+Z_RESULT_DECLARE (char*, string)
 
 Z_RESULT_DECLARE (z_socket_t, socket)
 

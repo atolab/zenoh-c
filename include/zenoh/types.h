@@ -40,11 +40,22 @@
 #define Z_REPLY_FINAL 2
 
 #ifndef ZENOH_C_SWIG
-
 typedef  size_t  z_vle_t;
+/*------------------ Temporal Properties ------------------*/
+typedef struct {
+    z_vle_t origin;
+    z_vle_t period;
+    z_vle_t duration;
+} z_temporal_property_t;
+
+typedef struct {  
+  uint8_t kind;
+  z_temporal_property_t tprop;
+} z_sub_mode_t;
+
+#endif /* ZENOH_C_SWIG  */
 
 Z_ARRAY_DECLARE(uint8_t)
-
 typedef struct {
   unsigned int r_pos;
   unsigned int w_pos;
@@ -70,6 +81,8 @@ uint8_t z_iobuf_get(z_iobuf_t* buf, unsigned int pos);
 void z_iobuf_clear(z_iobuf_t *buf);
 z_array_uint8_t z_iobuf_to_array(z_iobuf_t* buf);
 
+#ifndef ZENOH_C_SWIG
+
 typedef struct {
   unsigned int flags;
   // TODO: Add support for timestamp
@@ -80,11 +93,12 @@ typedef struct {
 
 typedef struct {
   char kind;
-  z_iobuf_t stoid;
+  unsigned char *stoid; 
+  size_t stoid_length; 
   z_vle_t rsn;
   char* rname;
   unsigned char *data;
-  size_t length;
+  size_t data_length;
   z_data_info_t info;
 } z_reply_value_t;
 

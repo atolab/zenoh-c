@@ -162,17 +162,6 @@ typedef struct {
   z_vle_t rid;    
 } z_storage_decl_t;
 
-/*------------------ Temporal Properties ------------------*/
-typedef struct {
-    z_vle_t origin;
-    z_vle_t period;
-    z_vle_t duration;
-} z_temporal_property_t;
-
-typedef struct {  
-  uint8_t kind;
-  z_temporal_property_t tprop;
-} z_sub_mode_t;
 
 /*------------------ Declare Subscriber Message ------------------*/
 typedef struct {   
