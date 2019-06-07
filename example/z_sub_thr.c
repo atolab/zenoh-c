@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
   printf("Declaring Subscriber...\n");
   z_sub_mode_t sm;
   sm.kind = Z_PUSH_MODE;
-  z_sub_p_result_t r = z_declare_subscriber(z, "/home1", sm, listener);
+  z_sub_p_result_t r = z_declare_subscriber(z, "/test/thr", sm, listener);
   ASSERT_P_RESULT(r, "Unable to declare pub\n");
   
   sleep(60);

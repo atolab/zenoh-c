@@ -27,7 +27,7 @@ set (ZENOH_TRANSPORT_I2C "OFF")
 #   - 1 : ERROR
 #   - 0 : NOTHING
 
-set(ZENOH_DEBUG_OPT "-DZENOH_DEBUG=2") 
+set(ZENOH_DEBUG_OPT "-DZENOH_DEBUG=1") 
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
   message(STATUS "Configuring on/for Linux")

@@ -199,7 +199,7 @@ z_stream_data_wo(z_pub_t *pub, const unsigned char *data, size_t length, uint8_t
   ph.flags = Z_ENCODING | Z_KIND;
   ph.encoding = encoding;
   ph.kind = kind;
-  ph.payload = z_iobuf_wrap((unsigned char *)data, length);
+  ph.payload = z_iobuf_wrap_wo((unsigned char *)data, length, 0, length);
   z_iobuf_t buf = z_iobuf_make(length + 32 );
   z_payload_header_encode(&buf, &ph);
 
@@ -209,16 +209,19 @@ z_stream_data_wo(z_pub_t *pub, const unsigned char *data, size_t length, uint8_t
   msg.payload.stream_data.rid = pub->rid;      
   msg.payload.stream_data.sn = pub->z->sn++;
   msg.payload.stream_data.payload_header = buf;
-  if (z_send_msg(pub->z->sock, &pub->z->wbuf, &msg) == 0) 
+  if (z_send_msg(pub->z->sock, &pub->z->wbuf, &msg) == 0) {
+    z_iobuf_free(&buf);
     return 0;
+  }
   else
   {
     Z_DEBUG("Trying to reconnect....\n");
     pub->z->on_disconnect(pub->z);
-    return z_send_msg(pub->z->sock, &pub->z->wbuf, &msg);
+    int rv = z_send_msg(pub->z->sock, &pub->z->wbuf, &msg);
+    z_iobuf_free(&buf);
+    return rv;
   }
-  
-  z_iobuf_free(&buf);
+    
   return 0;
 }
 
@@ -241,14 +244,18 @@ int z_write_data_wo(z_zenoh_t *z, const char* resource, const unsigned char *pay
   msg.payload.write_data.rname = (char*) resource;      
   msg.payload.write_data.sn = z->sn++;
   msg.payload.write_data.payload_header = buf;
-  if (z_send_msg(z->sock, &z->wbuf, &msg) == 0) 
+  if (z_send_msg(z->sock, &z->wbuf, &msg) == 0) {
+    z_iobuf_free(&buf);
     return 0;
-  else
-  {
+  }
+  else { 
     Z_DEBUG("Trying to reconnect....\n");
     z->on_disconnect(z);
-    return z_send_msg(z->sock, &z->wbuf, &msg);
+    int rv = z_send_msg(z->sock, &z->wbuf, &msg);
+    z_iobuf_free(&buf);
+    return rv;    
   }
+  
 }
 
 int z_write_data(z_zenoh_t *z, const char* resource, const unsigned char *payload, size_t length) {

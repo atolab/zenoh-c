@@ -23,7 +23,7 @@ z_vle_decode(z_iobuf_t* buf) {
     c = z_iobuf_read(buf);
     Z_DEBUG_VA("vle c = 0x%x\n",c);
     r.value.vle = r.value.vle | ((c & 0x7f) << i);
-    Z_DEBUG_VA("current vle  = %llu\n",r.value.vle);
+    Z_DEBUG_VA("current vle  = %zu\n",r.value.vle);
     i += 7;
   } while (c > 0x7f); 
   return r;
@@ -84,7 +84,6 @@ z_iobuf_t z_iobuf_decode(z_iobuf_t *buf) {
   z_vle_result_t r_len = z_vle_decode(buf);
   ASSERT_RESULT(r_len, "Unable to decode iobuf");
   uint8_t *bs = z_iobuf_read_n(buf, r_len.value.vle);
-  printf("ziobuf_decode len: %zu", r_len.value.vle);
   z_iobuf_t iob = z_iobuf_wrap_wo(bs, r_len.value.vle, 0, r_len.value.vle);
   return iob;
 }

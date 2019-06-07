@@ -181,7 +181,7 @@ z_vle_t z_get_resource_id(z_zenoh_t *z, const char *rname) {
 }
 
 void z_register_res_decl(z_zenoh_t *z, z_vle_t rid, const char *rname) {
-  Z_DEBUG_VA(">>> Allocating res decl for (%llu,%s)\n", rid, rname);
+  Z_DEBUG_VA(">>> Allocating res decl for (%zu,%s)\n", rid, rname);
   z_res_decl_t *rdecl = (z_res_decl_t *) malloc(sizeof(z_res_decl_t));
   rdecl->rid = rid;
   rdecl->r_name = strdup(rname);    

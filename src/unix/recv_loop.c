@@ -41,14 +41,14 @@ void* z_recv_loop(void* arg) {
                         if (r_ph.tag == Z_OK_TAG) {
                             info.flags = r_ph.value.payload_header.flags;                            
                             info.encoding = r_ph.value.payload_header.encoding;
-                            info.kind = r_ph.value.payload_header.kind;
-                            sub->callback(rid, r_ph.value.payload_header.payload.buf, z_iobuf_readable(&r_ph.value.payload_header.payload),info);
+                            info.kind = r_ph.value.payload_header.kind;                     
+                            sub->callback(rid, r_ph.value.payload_header.payload.buf, z_iobuf_readable(&r_ph.value.payload_header.payload), info);
                         }                
                         else                                                         
                             Z_DEBUG("Unable to parse StreamData Message Payload Header\n");          
                         
                     } else {
-                        Z_DEBUG_VA("No subscription found for resource %llu\n", r.value.message->payload.stream_data.rid);          
+                        Z_DEBUG_VA("No subscription found for resource %zu\n", r.value.message->payload.stream_data.rid);          
                     }                     
                     z_iobuf_free(&r.value.message->payload.stream_data.payload_header);                        
                     break;
@@ -82,12 +82,11 @@ void* z_recv_loop(void* arg) {
                         if (r_ph.tag == Z_OK_TAG) {
                             info.flags = r_ph.value.payload_header.flags;                            
                             info.encoding = r_ph.value.payload_header.encoding;
-                            info.kind = r_ph.value.payload_header.kind;
-                            Z_DEBUG("!!!Calling Listener!!!! \n");
+                            info.kind = r_ph.value.payload_header.kind;                                                                                                                
                             sub->callback(
                                 rid, 
-                                r.value.message->payload.compact_data.payload.buf, 
-                                z_iobuf_readable(&r.value.message->payload.compact_data.payload), 
+                                r_ph.value.payload_header.payload.buf, 
+                                z_iobuf_readable(&r_ph.value.payload_header.payload), 
                                 info);
                         }                                                
                         else                         
