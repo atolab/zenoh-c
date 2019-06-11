@@ -1,18 +1,6 @@
 JDK_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_181.jdk/Contents/Home
-default:
-	swig   -o zenohc_wrap.c -python zenohc.i 
-	gcc -fpic python/wrap/zenohc_wrap.c\
-		-L /usr/local/lib\
-		-lzenohc\
-		-L /usr/local/Cellar/python/3.7.3/Frameworks/Python.framework/Versions/3.7/lib/python3.7/config-3.7m-darwin\
-		-lpython3.7\
-		-shared\
-		-o _zenohc.so\
-	 	-DZENOH_MACOS=1\
-		-I ../include\
-		-I/usr/local/Cellar/python/3.7.3/Frameworks/Python.framework/Versions/3.7/include/python3.7m\
 
-# 
+#
 # At some point we can enable fast dispatch with: -fastdispatch
 #
 python:

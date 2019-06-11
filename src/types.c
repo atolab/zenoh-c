@@ -243,7 +243,6 @@ void z_register_subscription(z_zenoh_t *z, z_vle_t rid, subscriber_callback_t *c
 
 z_subscription_t *z_get_subscription_by_rid(z_zenoh_t *z, z_vle_t rid) {
   if (z->subscriptions == 0) {
-    printf(">>> Empty subscription set");
     return 0;
   }
   else {
@@ -260,7 +259,6 @@ z_subscription_t *z_get_subscription_by_rid(z_zenoh_t *z, z_vle_t rid) {
 
 z_subscription_t *z_get_subscription_by_rname(z_zenoh_t *z, const char *rname) {
   if (z->subscriptions == 0) {
-    printf(">>> Empty subscription set");
     return 0;
   }
   else {
@@ -272,6 +270,26 @@ z_subscription_t *z_get_subscription_by_rname(z_zenoh_t *z, const char *rname) {
     }    
     if (regexec(&sub->re, rname, 0, NULL, 0) == 0) return sub;
     else return 0;
+  }
+}
+
+z_list_t *
+z_get_subscriptions_by_rname(z_zenoh_t *z, const char *rname) {
+  z_list_t *subs = z_list_empty;
+  if (z->subscriptions == 0) {    
+    return subs;
+  }  
+  else {
+    z_subscription_t *sub = (z_subscription_t *)z_list_head(z->subscriptions);
+    z_list_t *subs = z_list_tail(z->subscriptions);
+    while (subs != 0) {      
+      if (regexec(&sub->re, rname, 0, NULL, 0)) 
+        z_list_cons(subs, sub);
+      
+      sub = z_list_head(subs);
+      subs = z_list_tail(subs);  
+    }    
+    return subs;
   }
 }
 

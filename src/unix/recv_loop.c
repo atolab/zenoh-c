@@ -18,6 +18,7 @@ void* z_recv_loop(void* arg) {
     z_resource_id_t rid;    
     uint8_t mid;
     z_subscription_t *sub;    
+    z_list_t *subs = z_list_empty;
     z_replywaiter_t *rw;    
     z_reply_value_t rvalue; 
     while (rt->running) {        
@@ -43,6 +44,7 @@ void* z_recv_loop(void* arg) {
                             info.encoding = r_ph.value.payload_header.encoding;
                             info.kind = r_ph.value.payload_header.kind;                     
                             sub->callback(rid, r_ph.value.payload_header.payload.buf, z_iobuf_readable(&r_ph.value.payload_header.payload), info);
+                            free(r_ph.value.payload_header.payload.buf);
                         }                
                         else                                                         
                             Z_DEBUG("Unable to parse StreamData Message Payload Header\n");          
@@ -68,12 +70,13 @@ void* z_recv_loop(void* arg) {
                             rid,
                             r.value.message->payload.compact_data.payload.buf, 
                             z_iobuf_readable(&r.value.message->payload.compact_data.payload),
-                            info);                        
+                            info);                 
+                            free(r.value.message->payload.compact_data.payload.buf);       
                     }                     
                     break;
                 case Z_WRITE_DATA:                             
-                    Z_DEBUG_VA("Received write-data message %d\n", Z_MID(r.value.message->header));          
-                    sub = z_get_subscription_by_rname(z, r.value.message->payload.write_data.rname);
+                    Z_DEBUG_VA("Received write-data message %d\n", Z_MID(r.value.message->header)); 
+                    subs = z_get_subscriptions_by_rname(z, r.value.message->payload.write_data.rname);                             
                     if (sub != 0) {
                         rid.kind = Z_STR_RES_ID;
                         rid.id.rname = r.value.message->payload.write_data.rname;
@@ -82,12 +85,17 @@ void* z_recv_loop(void* arg) {
                         if (r_ph.tag == Z_OK_TAG) {
                             info.flags = r_ph.value.payload_header.flags;                            
                             info.encoding = r_ph.value.payload_header.encoding;
-                            info.kind = r_ph.value.payload_header.kind;                                                                                                                
-                            sub->callback(
-                                rid, 
-                                r_ph.value.payload_header.payload.buf, 
-                                z_iobuf_readable(&r_ph.value.payload_header.payload), 
-                                info);
+                            info.kind = r_ph.value.payload_header.kind;     
+                            while (subs != z_list_empty) {
+                                sub = (z_subscription_t *) z_list_head(subs);                                                                                                           
+                                sub->callback(
+                                    rid, 
+                                    r_ph.value.payload_header.payload.buf, 
+                                    z_iobuf_readable(&r_ph.value.payload_header.payload), 
+                                    info);
+                                subs = z_list_tail(subs);
+                            }
+                            free(r_ph.value.payload_header.payload.buf);
                         }                                                
                         else                         
                             Z_DEBUG("Unable to parse WriteData Message Payload Header\n");          
@@ -140,6 +148,7 @@ void* z_recv_loop(void* arg) {
                             case Z_PUBLISHER_DECL:
                                 break;
                             case Z_SUBSCRIBER_DECL:
+                                // decls[i].payload.sub.rid                                
                                 break;
                             case Z_COMMIT_DECL:
                                 break;

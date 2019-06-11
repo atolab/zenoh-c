@@ -110,3 +110,33 @@ void z_list_free(z_list_t *xs) {
   }
 }
 
+z_i_map_t *z_i_map_empty = 0;
+
+z_i_map_t *z_i_map_make(unsigned int capacity) {
+  z_i_map_t *map;
+  map->elems = (z_list_t *)malloc(capacity * sizeof(z_list_t));
+  memset(map->elems, 0, capacity * sizeof(z_list_t));
+  map->capacity = capacity;
+  map->n = 0;
+  
+  return map;
+}
+
+void z_i_map_set(z_i_map_t *map, int k, void *v) {
+  unsigned int idx = k % map->capacity;
+  z_list_t *elems = map->elems[idx];
+
+}
+void *z_i_map_get(z_i_map_t *map, int k) {
+  unsigned int idx = k % map->capacity;
+
+}
+void *z_i_map_remove(z_i_map_t *map, int k) {
+
+}
+unsigned int z_i_map_capacity(z_i_map_t *map) {
+  return map->capacity;
+}
+unsigned int z_i_map_size(z_i_map_t *map) {
+  return map->n;
+}

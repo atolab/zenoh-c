@@ -5,7 +5,7 @@
 #include <sys/time.h>
 
 
-#define N 50000
+#define N 1000
 
 volatile unsigned long long int count = 0;
 volatile struct timeval start;
@@ -18,7 +18,7 @@ void print_stats(volatile struct timeval *start, volatile struct timeval *stop) 
   printf("%f msgs/sec\n", thpt);
 }
 
-void listener(z_resource_id_t rid, unsigned char *data, size_t length, z_data_info_t info) {      
+void listener(z_resource_id_t rid, const unsigned char *data, size_t length, z_data_info_t info) {      
   struct timeval tv;
   if (count == 0) {
     gettimeofday(&tv, 0);
@@ -31,8 +31,7 @@ void listener(z_resource_id_t rid, unsigned char *data, size_t length, z_data_in
     stop = tv;
     print_stats(&start, &stop);
     count = 0;
-  }    
-  free(data);
+  }      
 }
 
 int main(int argc, char **argv) {

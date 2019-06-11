@@ -13,7 +13,7 @@ int main(int argc, char **argv) {
   size_t len = atoi(argv[1]);  
   printf("Running throughput test for payload of %zu bytes\n", len);
   if (argc > 2) {
-    locator = argv[1];
+    locator = argv[2];
   }  
 
   z_iobuf_t data = z_iobuf_make(len + 8);

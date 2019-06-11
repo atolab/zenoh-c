@@ -93,11 +93,11 @@ typedef struct {
 
 typedef struct {
   char kind;
-  unsigned char *stoid; 
+  const unsigned char *stoid; 
   size_t stoid_length; 
   z_vle_t rsn;
-  char* rname;
-  unsigned char *data;
+  const char* rname;
+  const unsigned char *data;
   size_t data_length;
   z_data_info_t info;
 } z_reply_value_t;
@@ -114,7 +114,7 @@ typedef struct {
 
 typedef void z_reply_callback_t(z_reply_value_t reply);
 
-typedef void subscriber_callback_t(z_resource_id_t rid, unsigned char *data, size_t length, z_data_info_t info);
+typedef void subscriber_callback_t(z_resource_id_t rid, const unsigned char *data, size_t length, z_data_info_t info);
 
 #endif /* ZENOH_C_SWIG */
 typedef void on_disconnect_t(void *z);
@@ -184,6 +184,7 @@ z_res_decl_t *z_get_res_decl_by_rname(z_zenoh_t *z, const char *rname);
 void z_register_subscription(z_zenoh_t *z, z_vle_t rid,  subscriber_callback_t *callback);
 z_subscription_t *z_get_subscription_by_rid(z_zenoh_t *z, z_vle_t rid);
 z_subscription_t *z_get_subscription_by_rname(z_zenoh_t *z, const char *rname);
+z_list_t * z_get_subscriptions_by_rname(z_zenoh_t *z, const char *rname);
 
 void z_register_query(z_zenoh_t *z, z_vle_t qid, z_reply_callback_t *callback);
 z_replywaiter_t *z_get_query(z_zenoh_t *z, z_vle_t qid);

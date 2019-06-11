@@ -177,6 +177,17 @@ z_declare_publisher(z_zenoh_t *z, const char *resource) {
 }
 
 int z_stream_compact_data(z_pub_t *pub, const unsigned char *data, size_t length) { 
+  z_subscription_t *sub = z_get_subscription_by_rid(pub->z, pub->rid);
+  if (sub != 0) {
+    z_resource_id_t rid;
+    rid.kind = Z_STR_RES_ID;
+    rid.id.rname = sub->rname;
+    z_data_info_t info;
+    info.flags = Z_ENCODING | Z_KIND;
+    info.encoding = 0;
+    info.kind = 0;  
+    sub->callback(rid, data, length, info);
+  }
   z_message_t msg;
   msg.header = Z_COMPACT_DATA;  
   msg.payload.compact_data.rid = pub->rid;    
@@ -195,6 +206,17 @@ int z_stream_compact_data(z_pub_t *pub, const unsigned char *data, size_t length
 
 int 
 z_stream_data_wo(z_pub_t *pub, const unsigned char *data, size_t length, uint8_t encoding, uint8_t kind) {
+  z_subscription_t *sub = z_get_subscription_by_rid(pub->z, pub->rid);
+  if (sub != 0) {
+    z_resource_id_t rid;
+    rid.kind = Z_STR_RES_ID;
+    rid.id.rname = sub->rname;
+    z_data_info_t info;
+    info.flags = Z_ENCODING | Z_KIND;
+    info.encoding = encoding;
+    info.kind = kind;  
+    sub->callback(rid, data, length, info);
+  }
   z_payload_header_t ph;
   ph.flags = Z_ENCODING | Z_KIND;
   ph.encoding = encoding;
@@ -230,6 +252,20 @@ int z_stream_data(z_pub_t *pub, const unsigned char *data, size_t length) {
 }
 
 int z_write_data_wo(z_zenoh_t *z, const char* resource, const unsigned char *payload, size_t length, uint8_t encoding, uint8_t kind) { 
+  z_list_t *subs = z_get_subscriptions_by_rname(z, resource);
+  z_subscription_t *sub;
+  z_resource_id_t rid;
+  rid.kind = Z_STR_RES_ID;
+  rid.id.rname = (char *)resource;
+  z_data_info_t info;
+  info.flags = Z_ENCODING | Z_KIND;
+  info.encoding = encoding;
+  info.kind = kind;  
+  while (subs != 0) {
+    sub = z_list_head(subs);
+    sub->callback(rid, payload, length, info);
+    subs = z_list_tail(subs);
+  }
   z_payload_header_t ph;
   ph.flags = Z_ENCODING | Z_KIND;
   ph.encoding = encoding;

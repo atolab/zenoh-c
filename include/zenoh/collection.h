@@ -46,9 +46,10 @@ typedef struct z_list  {
   struct z_list *tail;
 } z_list_t;
 
-extern z_list_t * z_list_empty;
+z_list_t * z_list_empty;
 z_list_t * z_list_of(void *x);
 z_list_t * z_list_cons(z_list_t *xs, void *x);
+z_list_t * z_list_remove(z_list_t *xs, void* e);
 void * z_list_head(z_list_t *xs);
 z_list_t * z_list_tail(z_list_t *xs);
 unsigned int z_list_len(z_list_t *xs);
@@ -58,5 +59,24 @@ unsigned int z_list_len(z_list_t *xs);
 z_list_t * z_list_drop_elem(z_list_t *xs, unsigned int position);
 void z_list_free(z_list_t *xs);
 
+/*-------- Int Map --------*/
+typedef struct {
+  int key;
+  void *value;
+} z_i_map_entry_t;
+
+typedef struct {
+  z_list_t *elems;
+  unsigned int capacity;
+  unsigned int n;  
+} z_i_map_t;
+
+extern z_i_map_t *z_i_map_empty;
+z_i_map_t *z_i_map_make(unsigned int capacity);
+void z_i_map_set(z_i_map_t *map, int k, void *v);
+void *z_i_map_get(z_i_map_t *map, int k);
+void *z_i_map_remove(z_i_map_t *map, int k);
+unsigned int z_i_map_capacity(z_i_map_t *map);
+unsigned int z_i_map_size(z_i_map_t *map);
 
 #endif /* ZENOH_C_VECTOR_H */

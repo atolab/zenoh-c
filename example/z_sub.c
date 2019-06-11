@@ -2,8 +2,8 @@
 #include <unistd.h>
 #include "zenoh.h"
 #include "zenoh/recv_loop.h"
-void listener(z_resource_id_t rid, unsigned char *data, size_t length, z_data_info_t info) {    
-  z_iobuf_t buf = z_iobuf_wrap_wo(data, length, 0, length);
+void listener(z_resource_id_t rid, const unsigned char *data, size_t length, z_data_info_t info) {    
+  z_iobuf_t buf = z_iobuf_wrap_wo((unsigned char *)data, length, 0, length);
   z_string_result_t r_s = z_string_decode(&buf);        
   if (r_s.tag == Z_OK_TAG) {
     if (rid.kind == Z_INT_RES_ID) 
@@ -12,7 +12,6 @@ void listener(z_resource_id_t rid, unsigned char *data, size_t length, z_data_in
       printf(">>: (%s, %s)\n", rid.id.rname, r_s.value.string);
     free(r_s.value.string);
   }
-  free(data);
 }
 
 int main(int argc, char **argv) {
