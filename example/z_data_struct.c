@@ -9,6 +9,6 @@ int main(int argc, char** arg) {
     printf("list len = %u\n", z_list_len(xs));
     xs = z_list_drop_elem(xs, 1);
     printf("list len = %u\n", z_list_len(xs));
-    z_list_free(xs);
+    z_list_free(&xs);
     return 0;
 }

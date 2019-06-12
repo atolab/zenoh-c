@@ -57,7 +57,7 @@ unsigned int z_list_len(z_list_t *xs);
  * Drops the element at the specified position. 
  */
 z_list_t * z_list_drop_elem(z_list_t *xs, unsigned int position);
-void z_list_free(z_list_t *xs);
+void z_list_free(z_list_t **xs);
 
 /*-------- Int Map --------*/
 typedef struct {
@@ -66,13 +66,14 @@ typedef struct {
 } z_i_map_entry_t;
 
 typedef struct {
-  z_list_t *elems;
+  z_list_t **elems;
   unsigned int capacity;
   unsigned int n;  
 } z_i_map_t;
 
 extern z_i_map_t *z_i_map_empty;
 z_i_map_t *z_i_map_make(unsigned int capacity);
+void z_i_map_free(z_i_map_t **map);
 void z_i_map_set(z_i_map_t *map, int k, void *v);
 void *z_i_map_get(z_i_map_t *map, int k);
 void *z_i_map_remove(z_i_map_t *map, int k);

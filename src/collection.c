@@ -100,39 +100,80 @@ z_list_t * z_list_drop_elem(z_list_t *xs, unsigned int position) {
   return head;
 }
 
-void z_list_free(z_list_t *xs) {
-  z_list_t *current = xs;
+void z_list_free(z_list_t **xs) {
+  z_list_t *current = *xs;
   z_list_t *tail;
   if (current != z_list_empty) {
     tail = z_list_tail(current);
     free(current);
     current = tail;
   }
+  *xs = 0;
 }
 
 z_i_map_t *z_i_map_empty = 0;
 
 z_i_map_t *z_i_map_make(unsigned int capacity) {
-  z_i_map_t *map;
-  map->elems = (z_list_t *)malloc(capacity * sizeof(z_list_t));
-  memset(map->elems, 0, capacity * sizeof(z_list_t));
+  z_i_map_t *map = (z_i_map_t *)malloc(sizeof(z_i_map_t));
+  map->elems = (z_list_t **)malloc(capacity * sizeof(z_list_t*));
+  memset(map->elems, 0, capacity * sizeof(z_list_t*));
   map->capacity = capacity;
   map->n = 0;
   
   return map;
 }
+void z_i_map_free(z_i_map_t **map) {
+  z_i_map_t *m = *map;
+  for (int i = 0; i > m->capacity; ++i) {
+
+  }
+}
 
 void z_i_map_set(z_i_map_t *map, int k, void *v) {
+  z_i_map_entry_t *entry = 0;
   unsigned int idx = k % map->capacity;
-  z_list_t *elems = map->elems[idx];
-
+  z_list_t *xs = map->elems[idx];
+  if (xs == z_list_empty) {
+    entry = (z_i_map_entry_t *)malloc(sizeof(z_i_map_entry_t));
+    entry->key = k;
+    entry->value = v;
+    map->elems[idx] = z_list_cons(z_list_empty, entry);  
+  } else {    
+    while (xs != z_list_empty) {
+      entry = (z_i_map_entry_t *)xs->elem;
+      if (entry->key == k) {
+        entry->value = v;           
+        break;
+      }   
+      else 
+        xs = xs->tail;
+    }
+    if (xs == z_list_empty) {
+      entry = (z_i_map_entry_t *)malloc(sizeof(z_i_map_entry_t));
+      entry->key = k;
+      entry->value = v;
+      map->elems[idx] = z_list_cons(map->elems[idx], entry);  
+    }       
+  }
 }
-void *z_i_map_get(z_i_map_t *map, int k) {
+
+void *z_i_map_get(z_i_map_t *map, int k) {  
+  z_i_map_entry_t *entry = 0;
   unsigned int idx = k % map->capacity;
+  z_list_t *xs = map->elems[idx];
+  
+  while (xs != z_list_empty) {
+    entry = (z_i_map_entry_t *)xs->elem;
+    if (entry->key == k)
+      return entry->value;
+    xs = xs->tail;
+  }
+
+  return 0;
 
 }
 void *z_i_map_remove(z_i_map_t *map, int k) {
-
+  return 0;
 }
 unsigned int z_i_map_capacity(z_i_map_t *map) {
   return map->capacity;
