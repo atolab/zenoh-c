@@ -169,6 +169,7 @@ void z_i_map_set(z_i_map_t *map, int k, void *v) {
     entry->key = k;
     entry->value = v;
     map->elems[idx] = z_list_cons(z_list_empty, entry);  
+    map->n++;
   } else {    
     while (xs != z_list_empty) {
       entry = (z_i_map_entry_t *)xs->elem;
@@ -184,6 +185,7 @@ void z_i_map_set(z_i_map_t *map, int k, void *v) {
       entry->key = k;
       entry->value = v;
       map->elems[idx] = z_list_cons(map->elems[idx], entry);  
+      map->n++;
     }       
   }
 }
@@ -213,7 +215,9 @@ void z_i_map_remove(z_i_map_t *map, int k) {
   unsigned int idx = k % map->capacity;
   z_i_map_entry_t e;
   e.key = k;
+  unsigned int l = z_list_len(map->elems[idx]);
   map->elems[idx] = z_list_remove(map->elems[idx], key_predicate, &e);  
+  map->n -= l - z_list_len(map->elems[idx]);
 }
 unsigned int z_i_map_capacity(z_i_map_t *map) {
   return map->capacity;

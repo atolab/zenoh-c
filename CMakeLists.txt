@@ -93,7 +93,7 @@ add_executable(y_sub_thr example/y_sub_thr.c)
 add_executable(z_pub_thr example/z_pub_thr.c)
 add_executable(z_sub_thr example/z_sub_thr.c)
 
-add_executable(z_data_struct example/z_data_struct.c)
+add_executable(z_data_struct test/z_data_struct.c)
 
 target_link_libraries(z_pub zenohc)
 target_link_libraries(y_put zenohc)
