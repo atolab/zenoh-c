@@ -100,6 +100,37 @@ z_list_t * z_list_drop_elem(z_list_t *xs, unsigned int position) {
   return head;
 }
 
+z_list_t *z_list_remove(z_list_t *xs, z_list_predicate predicate, void *arg) {
+  z_list_t *prev = xs;
+  z_list_t *current = xs;  
+  if (xs == z_list_empty) 
+    return xs;
+  while (current != z_list_empty) {
+    // head removal
+    if (predicate(current->elem, arg) == 1) {
+      if (xs == current) {        
+        xs = xs->tail;
+        free (current);
+        return xs;        
+      } 
+      // tail removal
+      else if (current->elem == z_list_empty) {        
+        prev->tail = z_list_empty;
+        free(current);
+      } 
+      // middle removal
+      else {
+        prev->tail = current->tail;
+        free(current);
+      }
+      break;
+    }
+    prev = current;
+    current = current->tail;
+  }
+  return xs;
+}
+
 void z_list_free(z_list_t **xs) {
   z_list_t *current = *xs;
   z_list_t *tail;
@@ -172,8 +203,17 @@ void *z_i_map_get(z_i_map_t *map, int k) {
   return 0;
 
 }
-void *z_i_map_remove(z_i_map_t *map, int k) {
+int key_predicate(void *current, void *desired) {
+  z_i_map_entry_t * c = (z_i_map_entry_t *)current;
+  z_i_map_entry_t * d = (z_i_map_entry_t *)desired;
+  if (c->key == d->key) return 1;
   return 0;
+}
+void z_i_map_remove(z_i_map_t *map, int k) {
+  unsigned int idx = k % map->capacity;
+  z_i_map_entry_t e;
+  e.key = k;
+  map->elems[idx] = z_list_remove(map->elems[idx], key_predicate, &e);  
 }
 unsigned int z_i_map_capacity(z_i_map_t *map) {
   return map->capacity;

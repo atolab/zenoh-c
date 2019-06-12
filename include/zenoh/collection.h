@@ -41,6 +41,7 @@ void z_vec_set(z_vec_t* sv, unsigned int i, void* e);
 
 /*-------- Linked List --------*/
 
+typedef int (*z_list_predicate)(void *, void *);
 typedef struct z_list  {
   void *elem;
   struct z_list *tail;
@@ -49,10 +50,11 @@ typedef struct z_list  {
 z_list_t * z_list_empty;
 z_list_t * z_list_of(void *x);
 z_list_t * z_list_cons(z_list_t *xs, void *x);
-z_list_t * z_list_remove(z_list_t *xs, void* e);
 void * z_list_head(z_list_t *xs);
 z_list_t * z_list_tail(z_list_t *xs);
 unsigned int z_list_len(z_list_t *xs);
+z_list_t * z_list_remove(z_list_t *xs, z_list_predicate p, void *arg);
+
 /**
  * Drops the element at the specified position. 
  */
@@ -76,7 +78,7 @@ z_i_map_t *z_i_map_make(unsigned int capacity);
 void z_i_map_free(z_i_map_t **map);
 void z_i_map_set(z_i_map_t *map, int k, void *v);
 void *z_i_map_get(z_i_map_t *map, int k);
-void *z_i_map_remove(z_i_map_t *map, int k);
+void z_i_map_remove(z_i_map_t *map, int k);
 unsigned int z_i_map_capacity(z_i_map_t *map);
 unsigned int z_i_map_size(z_i_map_t *map);
 
