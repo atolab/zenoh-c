@@ -75,6 +75,7 @@ z_open(char* locator, on_disconnect_t *on_disconnect) {
   r.value.zenoh->subscriptions = z_list_empty;
   r.value.zenoh->replywaiters = z_list_empty;
   r.value.zenoh->reply_msg_mvar = z_mvar_empty();
+  r.value.zenoh->remote_subs = z_i_map_make(DEFAULT_I_MAP_CAPACITY); 
 
   if (on_disconnect != 0)
     r.value.zenoh->on_disconnect = on_disconnect;  
@@ -188,19 +189,22 @@ int z_stream_compact_data(z_pub_t *pub, const unsigned char *data, size_t length
     info.kind = 0;  
     sub->callback(rid, data, length, info);
   }
-  z_message_t msg;
-  msg.header = Z_COMPACT_DATA;  
-  msg.payload.compact_data.rid = pub->rid;    
-  msg.payload.compact_data.payload = z_iobuf_wrap((unsigned char *)data, length);  
-  msg.payload.compact_data.sn = pub->z->sn++;
-  if (z_send_msg(pub->z->sock, &pub->z->wbuf, &msg) == 0) 
-    return 0;
-  else
-  {
-    Z_DEBUG("Trying to reconnect....\n");
-    pub->z->on_disconnect(pub->z);
-    return z_send_msg(pub->z->sock, &pub->z->wbuf, &msg);
+  if (z_matching_remote_sub(pub->z, pub->rid) == 1) {
+    z_message_t msg;
+    msg.header = Z_COMPACT_DATA;  
+    msg.payload.compact_data.rid = pub->rid;    
+    msg.payload.compact_data.payload = z_iobuf_wrap((unsigned char *)data, length);  
+    msg.payload.compact_data.sn = pub->z->sn++;
+    if (z_send_msg(pub->z->sock, &pub->z->wbuf, &msg) == 0) 
+      return 0;
+    else
+    {
+      Z_DEBUG("Trying to reconnect....\n");
+      pub->z->on_disconnect(pub->z);
+      return z_send_msg(pub->z->sock, &pub->z->wbuf, &msg);
+    }
   }
+  return 0;
 }
 
 
@@ -217,31 +221,35 @@ z_stream_data_wo(z_pub_t *pub, const unsigned char *data, size_t length, uint8_t
     info.kind = kind;  
     sub->callback(rid, data, length, info);
   }
-  z_payload_header_t ph;
-  ph.flags = Z_ENCODING | Z_KIND;
-  ph.encoding = encoding;
-  ph.kind = kind;
-  ph.payload = z_iobuf_wrap_wo((unsigned char *)data, length, 0, length);
-  z_iobuf_t buf = z_iobuf_make(length + 32 );
-  z_payload_header_encode(&buf, &ph);
+  if (z_matching_remote_sub(pub->z, pub->rid) == 1) {
+    z_payload_header_t ph;
+    ph.flags = Z_ENCODING | Z_KIND;
+    ph.encoding = encoding;
+    ph.kind = kind;
+    ph.payload = z_iobuf_wrap_wo((unsigned char *)data, length, 0, length);
+    z_iobuf_t buf = z_iobuf_make(length + 32 );
+    z_payload_header_encode(&buf, &ph);
 
-  z_message_t msg;
-  msg.header = Z_STREAM_DATA;
-  // No need to take ownership, avoid strdup.
-  msg.payload.stream_data.rid = pub->rid;      
-  msg.payload.stream_data.sn = pub->z->sn++;
-  msg.payload.stream_data.payload_header = buf;
-  if (z_send_msg(pub->z->sock, &pub->z->wbuf, &msg) == 0) {
-    z_iobuf_free(&buf);
-    return 0;
-  }
-  else
-  {
-    Z_DEBUG("Trying to reconnect....\n");
-    pub->z->on_disconnect(pub->z);
-    int rv = z_send_msg(pub->z->sock, &pub->z->wbuf, &msg);
-    z_iobuf_free(&buf);
-    return rv;
+    z_message_t msg;
+    msg.header = Z_STREAM_DATA;
+    // No need to take ownership, avoid strdup.
+    msg.payload.stream_data.rid = pub->rid;      
+    msg.payload.stream_data.sn = pub->z->sn++;
+    msg.payload.stream_data.payload_header = buf;
+    if (z_send_msg(pub->z->sock, &pub->z->wbuf, &msg) == 0) {
+      z_iobuf_free(&buf);
+      return 0;
+    }
+    else
+    {
+      Z_DEBUG("Trying to reconnect....\n");
+      pub->z->on_disconnect(pub->z);
+      int rv = z_send_msg(pub->z->sock, &pub->z->wbuf, &msg);
+      z_iobuf_free(&buf);
+      return rv;
+    }
+  } else {
+    printf("No remote subscription matching for rid = %zu\n", pub->rid);
   }
     
   return 0;

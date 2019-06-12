@@ -1,6 +1,8 @@
 #ifndef ZENOH_C_VECTOR_H
 #define ZENOH_C_VECTOR_H
 
+#define DEFAULT_I_MAP_CAPACITY 64
+
 #define Z_ARRAY_DECLARE(T) \
 typedef struct { \
   unsigned int length; \

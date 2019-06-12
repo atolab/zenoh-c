@@ -134,6 +134,7 @@ typedef struct {
   z_list_t *declarations;
   z_list_t *subscriptions;
   z_list_t *replywaiters;
+  z_i_map_t *remote_subs;
   z_mvar_t *reply_msg_mvar;
   void *runtime;
 } z_zenoh_t;
@@ -176,7 +177,7 @@ typedef struct {
 
 z_vle_t z_get_entity_id(z_zenoh_t *z);
 z_vle_t z_get_resource_id(z_zenoh_t *z, const char *rname);
-void z_register_res_decl(z_zenoh_t *z, z_vle_t rid, const char *rname);
+int z_register_res_decl(z_zenoh_t *z, z_vle_t rid, const char *rname);
 z_res_decl_t *z_get_res_decl_by_rid(z_zenoh_t *z, z_vle_t rid);
 z_res_decl_t *z_get_res_decl_by_rname(z_zenoh_t *z, const char *rname);
 
@@ -185,6 +186,8 @@ void z_register_subscription(z_zenoh_t *z, z_vle_t rid,  subscriber_callback_t *
 z_subscription_t *z_get_subscription_by_rid(z_zenoh_t *z, z_vle_t rid);
 z_subscription_t *z_get_subscription_by_rname(z_zenoh_t *z, const char *rname);
 z_list_t * z_get_subscriptions_by_rname(z_zenoh_t *z, const char *rname);
+
+int z_matching_remote_sub(z_zenoh_t *z, z_vle_t rid);
 
 void z_register_query(z_zenoh_t *z, z_vle_t qid, z_reply_callback_t *callback);
 z_replywaiter_t *z_get_query(z_zenoh_t *z, z_vle_t qid);

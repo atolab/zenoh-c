@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include "zenoh.h"
+#include "zenoh/recv_loop.h"
 
 
 
@@ -14,6 +15,8 @@ int main(int argc, char **argv) {
   z_zenoh_p_result_t r_z = z_open(locator, 0);
   ASSERT_RESULT(r_z, "Unable to open session with broker")
   z_zenoh_t *z = r_z.value.zenoh;
+  z_start_recv_loop(z);  
+
 
   
   printf("Declaring Publisher...\n");

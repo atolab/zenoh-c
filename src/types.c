@@ -175,27 +175,44 @@ z_array_uint8_t z_iobuf_to_array(z_iobuf_t* buf) {
 z_vle_t z_get_entity_id(z_zenoh_t *z) {
   return z->eid++;
 }
-// @TODO: We need to properly generate ID to avoid dups.
+
 z_vle_t z_get_resource_id(z_zenoh_t *z, const char *rname) {
-  return z->rid++;
+  z_res_decl_t *rd_brn = z_get_res_decl_by_rname(z, rname);
+  if (rd_brn == 0) {
+    z_vle_t rid = z->rid++;
+    while (z_get_res_decl_by_rid(z, rid) != 0) {
+      rid++;
+    }
+    z->rid = rid;
+    return rid;
+  }
+  else return rd_brn->rid;
 }
 
-void z_register_res_decl(z_zenoh_t *z, z_vle_t rid, const char *rname) {
+int z_register_res_decl(z_zenoh_t *z, z_vle_t rid, const char *rname) {
   Z_DEBUG_VA(">>> Allocating res decl for (%zu,%s)\n", rid, rname);
-  z_res_decl_t *rdecl = (z_res_decl_t *) malloc(sizeof(z_res_decl_t));
-  rdecl->rid = rid;
-  rdecl->r_name = strdup(rname);    
-  Z_DEBUG(">>> Converting resource to regex");
-  char *regex = resource_to_regex(rname);  
-  rdecl->regex_expr = regex;
-  Z_DEBUG_VA(">>> Registering declaration %s as regex %s", rname, regex);
-  regcomp(&rdecl->re, regex, REG_ICASE | REG_EXTENDED);  
-  z->declarations = z_list_cons(z->declarations, rdecl);
+  z_res_decl_t *rd_bid = z_get_res_decl_by_rid(z, rid);
+  z_res_decl_t *rd_brn = z_get_res_decl_by_rname(z, rname);
+
+  if (rd_bid == 0 && rd_brn == 0) {  
+    z_res_decl_t *rdecl = (z_res_decl_t *) malloc(sizeof(z_res_decl_t));
+    rdecl->rid = rid;
+    rdecl->r_name = strdup(rname);    
+    Z_DEBUG(">>> Converting resource to regex\n");
+    char *regex = resource_to_regex(rname);  
+    rdecl->regex_expr = regex;
+    Z_DEBUG_VA(">>> Registering declaration %s as regex %s\n", rname, regex);
+    regcomp(&rdecl->re, regex, REG_ICASE | REG_EXTENDED);  
+    z->declarations = z_list_cons(z->declarations, rdecl);   
+    return 0;
+  } 
+  else if (rd_bid == rd_brn) 
+    return 0;
+  else return 1;  
 }
 
 z_res_decl_t *z_get_res_decl_by_rid(z_zenoh_t *z, z_vle_t rid) {
   if (z->declarations == 0) {
-    printf(">>> Empty declaration set");
     return 0;
   }
   else {
@@ -209,6 +226,7 @@ z_res_decl_t *z_get_res_decl_by_rid(z_zenoh_t *z, z_vle_t rid) {
     else return 0;
   }
 }
+
 z_res_decl_t *z_get_res_decl_by_rname(z_zenoh_t *z, const char *rname) {
   if (z->declarations == 0) {
     printf(">>> Empty declarations set");
@@ -276,23 +294,27 @@ z_subscription_t *z_get_subscription_by_rname(z_zenoh_t *z, const char *rname) {
 z_list_t *
 z_get_subscriptions_by_rname(z_zenoh_t *z, const char *rname) {
   z_list_t *subs = z_list_empty;
-  if (z->subscriptions == 0) {    
+  if (z->subscriptions == 0) {
     return subs;
   }  
   else {
-    z_subscription_t *sub = (z_subscription_t *)z_list_head(z->subscriptions);
-    z_list_t *subs = z_list_tail(z->subscriptions);
-    while (subs != 0) {      
-      if (regexec(&sub->re, rname, 0, NULL, 0)) 
-        z_list_cons(subs, sub);
-      
-      sub = z_list_head(subs);
-      subs = z_list_tail(subs);  
-    }    
-    return subs;
+    z_subscription_t *sub = 0;
+    z_list_t *subs = z->subscriptions;
+    z_list_t *xs = z_list_empty;
+    do {      
+      sub = (z_subscription_t *)z_list_head(subs);
+      subs = z_list_tail(subs);            
+      if (regexec(&sub->re, rname, 0, NULL, 0) == 0) {        
+        xs = z_list_cons(xs, sub);
+      }       
+    } while (subs != 0);          
+    return xs;
   }
 }
 
+int z_matching_remote_sub(z_zenoh_t *z, z_vle_t rid) {
+  return z_i_map_get(z->remote_subs, rid) != 0 ? 1 : 0;   
+}
 
 void z_register_query(z_zenoh_t *z, z_vle_t qid, z_reply_callback_t *callback) {
   z_replywaiter_t *rw = (z_replywaiter_t *) malloc(sizeof(z_replywaiter_t));

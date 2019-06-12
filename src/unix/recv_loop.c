@@ -21,13 +21,14 @@ void* z_recv_loop(void* arg) {
     z_list_t *subs = z_list_empty;
     z_replywaiter_t *rw;    
     z_reply_value_t rvalue; 
+    z_res_decl_t *rd;
     while (rt->running) {        
         z_recv_msg_na(z->sock, &z->rbuf, &r);
         if (r.tag == Z_OK_TAG) {
             mid = Z_MID(r.value.message->header);
             switch (mid) {    
                 case Z_STREAM_DATA:          
-                    Z_DEBUG_VA("Received message %d\n", Z_MID(r.value.message->header));          
+                    Z_DEBUG_VA("Received Z_STREAM_DATA message %d\n", Z_MID(r.value.message->header));          
                     sub = z_get_subscription_by_rid(z, r.value.message->payload.stream_data.rid);
                     if (sub != 0) {
                         z_res_decl_t *decl = z_get_res_decl_by_rid(z, r.value.message->payload.stream_data.rid);
@@ -54,7 +55,8 @@ void* z_recv_loop(void* arg) {
                     }                     
                     z_iobuf_free(&r.value.message->payload.stream_data.payload_header);                        
                     break;
-                case Z_COMPACT_DATA:                    
+                case Z_COMPACT_DATA:              
+                    Z_DEBUG_VA("Received Z_COMPACT_DATA message %d\n", Z_MID(r.value.message->header));                
                     sub = z_get_subscription_by_rid(z, r.value.message->payload.stream_data.rid);
                     if (sub != 0) {                        
                         z_res_decl_t *decl = z_get_res_decl_by_rid(z, r.value.message->payload.stream_data.rid);
@@ -75,9 +77,9 @@ void* z_recv_loop(void* arg) {
                     }                     
                     break;
                 case Z_WRITE_DATA:                             
-                    Z_DEBUG_VA("Received write-data message %d\n", Z_MID(r.value.message->header)); 
+                    Z_DEBUG_VA("Received Z_WRITE_DATA message %d\n", Z_MID(r.value.message->header)); 
                     subs = z_get_subscriptions_by_rname(z, r.value.message->payload.write_data.rname);                             
-                    if (sub != 0) {
+                    if (subs != 0) {
                         rid.kind = Z_STR_RES_ID;
                         rid.id.rname = r.value.message->payload.write_data.rname;
                         Z_DEBUG("Decoding Payload Header");
@@ -105,7 +107,7 @@ void* z_recv_loop(void* arg) {
                     z_iobuf_free(&r.value.message->payload.write_data.payload_header);                        
                     break;                    
                 case Z_REPLY:
-                    Z_DEBUG("Received reply message\n");
+                    Z_DEBUG("Received Z_REPLY message\n");
                     rw = z_get_query(z, r.value.message->payload.reply.qid);
                     if (rw != 0) {
                         if (r.value.message->header & Z_F_FLAG) {
@@ -137,7 +139,7 @@ void* z_recv_loop(void* arg) {
                     }
                     break;
                 case Z_DECLARE:       
-                    Z_DEBUG("Received declare message\n");
+                    Z_DEBUG("Received Z_DECLARE message\n");
                     decls = r.value.message->payload.declare.declarations.elem; 
                     for (int i = 0; i < r.value.message->payload.declare.declarations.length; ++i) {
                         switch (Z_MID(decls[i].header)) {
@@ -147,8 +149,11 @@ void* z_recv_loop(void* arg) {
                                 break;
                             case Z_PUBLISHER_DECL:
                                 break;
-                            case Z_SUBSCRIBER_DECL:
-                                // decls[i].payload.sub.rid                                
+                            case Z_SUBSCRIBER_DECL:             
+                                Z_DEBUG_VA("Registering remote subscription for resource: %zu\n", decls[i].payload.sub.rid);
+                                rd = z_get_res_decl_by_rid(z, decls[i].payload.sub.rid);
+                                if (rd != 0) 
+                                    z_i_map_set(z->remote_subs, decls[i].payload.sub.rid, rd);                                
                                 break;
                             case Z_COMMIT_DECL:
                                 break;
