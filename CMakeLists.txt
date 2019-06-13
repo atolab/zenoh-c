@@ -95,6 +95,7 @@ add_executable(z_sub_thr example/z_sub_thr.c)
 
 add_executable(z_data_struct test/z_data_struct.c)
 add_executable(z_mvar_test test/z_mvar_test.c)
+add_executable(z_rname_test test/z_rname_test.c)
 
 target_link_libraries(z_pub zenohc)
 target_link_libraries(y_put zenohc)
@@ -108,6 +109,7 @@ target_link_libraries(z_pub_thr zenohc)
 target_link_libraries(z_sub_thr zenohc)
 target_link_libraries(z_data_struct zenohc)
 target_link_libraries(z_mvar_test zenohc)
+target_link_libraries(z_rname_test zenohc)
 
 
 install (TARGETS zenohc  DESTINATION ${INSTALL_NAME_DIR})
