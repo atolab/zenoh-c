@@ -24,7 +24,7 @@ void default_on_disconnect(void *vz) {
 }
 
 z_zenoh_p_result_t 
-z_open(char* locator, on_disconnect_t *on_disconnect) {
+z_open(char* locator, on_disconnect_t *on_disconnect, const z_vec_t* ps) {
   z_zenoh_p_result_t r; 
   
   r.value.zenoh = (z_zenoh_t *)malloc(sizeof(z_zenoh_t));
@@ -61,7 +61,7 @@ z_open(char* locator, on_disconnect_t *on_disconnect) {
   msg.payload.open.version = ZENOH_PROTO_VERSION;
   msg.payload.open.pid = pid;
   msg.payload.open.lease = ZENOH_DEFAULT_LEASE;
-  msg.properties = 0;
+  msg.properties = ps;
 
   Z_DEBUG("Sending Open\n");
   z_send_msg(r_sock.value.socket, &r.value.zenoh->wbuf, &msg);

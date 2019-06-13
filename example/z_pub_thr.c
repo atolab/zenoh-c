@@ -22,7 +22,7 @@ int main(int argc, char **argv) {
     z_iobuf_write(&data, i%10);
   
   
-  z_zenoh_p_result_t r_z = z_open(locator, 0);
+  z_zenoh_p_result_t r_z = z_open(locator, 0, 0);
   z_zenoh_t *z = r_z.value.zenoh;
   
   z_pub_p_result_t rp = z_declare_publisher(z, "/test/thr");

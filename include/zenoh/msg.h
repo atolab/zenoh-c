@@ -271,7 +271,7 @@ typedef struct {
  *  convention for alignement purposes.
  */
 typedef struct {
-  z_vec_t* properties;  
+  const z_vec_t* properties;  
   union {
     z_open_t open;
     z_accept_t accept;
