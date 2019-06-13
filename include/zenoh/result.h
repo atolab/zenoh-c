@@ -80,6 +80,7 @@ Z_P_RESULT_DECLARE(z_pub_t, pub)
 Z_RESULT_DECLARE (z_vle_t, vle)
 Z_RESULT_DECLARE (z_array_uint8_t, array_uint8)
 Z_RESULT_DECLARE (char*, string)
+Z_RESULT_DECLARE(z_property_t, property)
 
 Z_RESULT_DECLARE (z_socket_t, socket)
 

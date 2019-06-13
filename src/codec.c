@@ -88,6 +88,28 @@ z_iobuf_t z_iobuf_decode(z_iobuf_t *buf) {
   return iob;
 }
 
+void z_property_encode(z_iobuf_t* buf, const z_property_t* m) {
+  z_vle_encode(buf, m->id);
+  z_array_uint8_encode(buf, &m->value);
+}
+
+void z_property_decode_na(z_iobuf_t* buf, uint8_t header, z_property_result_t *r) {
+  z_vle_result_t r_vle;
+  z_array_uint8_result_t r_a8;
+  r->tag = Z_OK_TAG;
+  r_vle = z_vle_decode(buf);
+  ASSURE_P_RESULT(r_vle, r, Z_VLE_PARSE_ERROR);
+  z_array_uint8_decode_na(buf, &r_a8);
+  ASSURE_P_RESULT(r_a8, r, Z_ARRAY_PARSE_ERROR);
+  r->value.property.id = r_vle.value.vle;
+  r->value.property.value = r_a8.value.array_uint8;
+}
+z_property_result_t z_property_decode(z_iobuf_t* buf, uint8_t header) {
+  z_property_result_t r;
+  z_property_decode_na(buf, header, &r);
+  return r;  
+}
+
 void 
 z_open_encode(z_iobuf_t* buf, const z_open_t* m) {
   z_iobuf_write(buf, m->version);  

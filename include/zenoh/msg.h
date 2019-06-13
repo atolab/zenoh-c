@@ -105,14 +105,14 @@
 
 typedef struct {
   z_vle_t id;
-  char *name;
+  z_array_uint8_t value;
 } z_property_t;
 
 /*
  * Creates a new property with the given id and name. Notice that the ownership
  * for the name remains with the caller.
  */ 
-z_property_t* z_property_make(z_vle_t id, const char* name);
+z_property_t* z_property_make(z_vle_t id, z_array_uint8_t value);
 void z_property_free(z_property_t** p);
 
 #define HAS_PROPERTIES (m) (m.properties != 0) 
