@@ -34,7 +34,10 @@ void z_vec_free(z_vec_t* v) {
 inline unsigned int z_vec_length(const z_vec_t* v) { return v->length_; }
 
 void z_vec_append(z_vec_t* v, void* e) {
-  assert(v->length_ < v->capacity_); 
+  if (v->length_ == v->capacity_) {
+    v->capacity_ = v->capacity_ + v->capacity_;
+    v->elem_ = realloc(v->elem_, v->capacity_);
+  } 
   v->elem_[v->length_] = e;
   v->length_ = v->length_ + 1;
 }
