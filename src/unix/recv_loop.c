@@ -16,36 +16,50 @@ void* z_recv_loop(void* arg) {
     z_declaration_t * decls;
     z_message_p_result_init(&r);
     z_resource_id_t rid;    
-    uint8_t mid;
-    z_subscription_t *sub;    
-    z_list_t *subs = z_list_empty;
+    uint8_t mid;    
+    z_list_t *subs;
+    z_list_t *lit;
+    z_subscription_t *sub;
     z_replywaiter_t *rw;    
     z_reply_value_t rvalue; 
     z_res_decl_t *rd;
-    while (rt->running) {        
+    const char *rname;
+    while (rt->running) {
+        rname = 0;       
+        subs = z_list_empty;
+        lit = z_list_empty;
+
         z_recv_msg_na(z->sock, &z->rbuf, &r);
         if (r.tag == Z_OK_TAG) {
             mid = Z_MID(r.value.message->header);
             switch (mid) {    
                 case Z_STREAM_DATA:          
                     Z_DEBUG_VA("Received Z_STREAM_DATA message %d\n", Z_MID(r.value.message->header));          
-                    sub = z_get_subscription_by_rid(z, r.value.message->payload.stream_data.rid);
-                    if (sub != 0) {
-                        z_res_decl_t *decl = z_get_res_decl_by_rid(z, r.value.message->payload.stream_data.rid);
-                        if (decl != 0) {
-                            rid.kind = Z_STR_RES_ID;
-                            rid.id.rname = decl->r_name;
-                        } else {
-                            rid.kind = Z_INT_RES_ID;
-                            rid.id.rid = r.value.message->payload.stream_data.rid;
-                        }
+                    rname = z_get_resource_name(z, r.value.message->payload.stream_data.rid);
+                    if (rname != 0) {
+                        subs = z_get_subscriptions_by_rname(z, rname);
+                        rid.kind = Z_STR_RES_ID;
+                        rid.id.rname = (char *)rname;
+                    } else {
+                        subs = z_get_subscriptions_by_rid(z, r.value.message->payload.stream_data.rid);
+                        rid.kind = Z_INT_RES_ID;
+                        rid.id.rid = r.value.message->payload.stream_data.rid;
+                    }
+                    
+                    if (subs != 0) {                                                
                         z_payload_header_decode_na(&r.value.message->payload.stream_data.payload_header, &r_ph);
                         if (r_ph.tag == Z_OK_TAG) {
                             info.flags = r_ph.value.payload_header.flags;                            
                             info.encoding = r_ph.value.payload_header.encoding;
-                            info.kind = r_ph.value.payload_header.kind;                     
-                            sub->callback(rid, r_ph.value.payload_header.payload.buf, z_iobuf_readable(&r_ph.value.payload_header.payload), info);
+                            info.kind = r_ph.value.payload_header.kind; 
+                            lit = subs;                    
+                            while (lit != z_list_empty) {
+                                sub = z_list_head(lit);
+                                sub->callback(rid, r_ph.value.payload_header.payload.buf, z_iobuf_readable(&r_ph.value.payload_header.payload), info);
+                                lit = z_list_tail(lit);
+                            }
                             free(r_ph.value.payload_header.payload.buf);
+                            z_list_free(&subs);
                         }                
                         else                                                         
                             Z_DEBUG("Unable to parse StreamData Message Payload Header\n");          
@@ -57,23 +71,31 @@ void* z_recv_loop(void* arg) {
                     break;
                 case Z_COMPACT_DATA:              
                     Z_DEBUG_VA("Received Z_COMPACT_DATA message %d\n", Z_MID(r.value.message->header));                
-                    sub = z_get_subscription_by_rid(z, r.value.message->payload.stream_data.rid);
-                    if (sub != 0) {                        
-                        z_res_decl_t *decl = z_get_res_decl_by_rid(z, r.value.message->payload.stream_data.rid);
-                        if (decl != 0) {
-                            rid.kind = Z_STR_RES_ID;
-                            rid.id.rname = decl->r_name;
-                        } else {
-                            rid.kind = Z_INT_RES_ID;
-                            rid.id.rid = r.value.message->payload.stream_data.rid;
-                        }
+                    rname = z_get_resource_name(z, r.value.message->payload.stream_data.rid);
+                    if (rname != 0) {
+                        subs = z_get_subscriptions_by_rname(z, rname);
+                        rid.kind = Z_STR_RES_ID;
+                        rid.id.rname = (char *)rname;
+                    } else {
+                        subs = z_get_subscriptions_by_rid(z, r.value.message->payload.stream_data.rid);
+                        rid.kind = Z_INT_RES_ID;
+                        rid.id.rid = r.value.message->payload.stream_data.rid;
+                    }
+                    
+                    if (sub != 0) {                                                                    
                         info.flags = 0;
-                        sub->callback(
-                            rid,
-                            r.value.message->payload.compact_data.payload.buf, 
-                            z_iobuf_readable(&r.value.message->payload.compact_data.payload),
-                            info);                 
-                            free(r.value.message->payload.compact_data.payload.buf);       
+                        lit = subs; 
+                        while (lit != z_list_empty) {
+                            sub = z_list_head(lit);
+                            sub->callback(
+                                rid,
+                                r.value.message->payload.compact_data.payload.buf, 
+                                z_iobuf_readable(&r.value.message->payload.compact_data.payload),
+                                info);                     
+                            lit = z_list_tail(lit);
+                        }                        
+                        free(r.value.message->payload.compact_data.payload.buf);       
+                        z_list_free(&subs);
                     }                     
                     break;
                 case Z_WRITE_DATA:                             

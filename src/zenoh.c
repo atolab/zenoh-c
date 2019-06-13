@@ -178,16 +178,33 @@ z_declare_publisher(z_zenoh_t *z, const char *resource) {
 }
 
 int z_stream_compact_data(z_pub_t *pub, const unsigned char *data, size_t length) { 
-  z_subscription_t *sub = z_get_subscription_by_rid(pub->z, pub->rid);
-  if (sub != 0) {
-    z_resource_id_t rid;
+  const char *rname = z_get_resource_name(pub->z, pub->rid);
+  z_resource_id_t rid;
+  z_subscription_t *sub;
+  z_list_t *subs = z_list_empty;
+  z_list_t *xs;
+  if (rname != 0) {
+    subs = z_get_subscriptions_by_rname(pub->z, rname);
     rid.kind = Z_STR_RES_ID;
-    rid.id.rname = sub->rname;
+    rid.id.rname = (char *)rname;
+  } else {
+    subs = z_get_subscriptions_by_rid(pub->z, pub->rid);
+    rid.kind = Z_INT_RES_ID;
+    rid.id.rid = pub->rid;
+  }
+    
+  if (subs != z_list_empty) {
     z_data_info_t info;
     info.flags = Z_ENCODING | Z_KIND;
     info.encoding = 0;
     info.kind = 0;  
-    sub->callback(rid, data, length, info);
+    xs = subs;
+    while (xs != z_list_empty) {
+      sub = z_list_head(xs);
+      sub->callback(rid, data, length, info);
+      xs = z_list_tail(xs);
+    }
+    z_list_free(&subs);  
   }
   if (z_matching_remote_sub(pub->z, pub->rid) == 1) {
     z_message_t msg;
@@ -210,16 +227,33 @@ int z_stream_compact_data(z_pub_t *pub, const unsigned char *data, size_t length
 
 int 
 z_stream_data_wo(z_pub_t *pub, const unsigned char *data, size_t length, uint8_t encoding, uint8_t kind) {
-  z_subscription_t *sub = z_get_subscription_by_rid(pub->z, pub->rid);
-  if (sub != 0) {
-    z_resource_id_t rid;
+  const char *rname = z_get_resource_name(pub->z, pub->rid);
+  z_resource_id_t rid;
+  z_subscription_t *sub;
+  z_list_t *subs = z_list_empty;
+  z_list_t *xs;
+  if (rname != 0) {
+    subs = z_get_subscriptions_by_rname(pub->z, rname);
     rid.kind = Z_STR_RES_ID;
-    rid.id.rname = sub->rname;
+    rid.id.rname = (char *)rname;
+  } else {
+    subs = z_get_subscriptions_by_rid(pub->z, pub->rid);
+    rid.kind = Z_INT_RES_ID;
+    rid.id.rid = pub->rid;
+  }
+
+  if (subs != 0) {    
     z_data_info_t info;
     info.flags = Z_ENCODING | Z_KIND;
     info.encoding = encoding;
     info.kind = kind;  
-    sub->callback(rid, data, length, info);
+    xs = subs;
+    while (xs != z_list_empty) {
+      sub = z_list_head(xs);
+      sub->callback(rid, data, length, info);
+      xs = z_list_tail(xs);
+    }
+    z_list_free(&subs);    
   }
   if (z_matching_remote_sub(pub->z, pub->rid) == 1) {
     z_payload_header_t ph;

@@ -183,8 +183,8 @@ z_res_decl_t *z_get_res_decl_by_rname(z_zenoh_t *z, const char *rname);
 
 
 void z_register_subscription(z_zenoh_t *z, z_vle_t rid,  subscriber_callback_t *callback);
-z_subscription_t *z_get_subscription_by_rid(z_zenoh_t *z, z_vle_t rid);
-z_subscription_t *z_get_subscription_by_rname(z_zenoh_t *z, const char *rname);
+const char * z_get_resource_name(z_zenoh_t *z, z_vle_t rid);
+z_list_t * z_get_subscriptions_by_rid(z_zenoh_t *z, z_vle_t rid);
 z_list_t * z_get_subscriptions_by_rname(z_zenoh_t *z, const char *rname);
 
 int z_matching_remote_sub(z_zenoh_t *z, z_vle_t rid);

@@ -259,37 +259,53 @@ void z_register_subscription(z_zenoh_t *z, z_vle_t rid, subscriber_callback_t *c
   z->subscriptions = z_list_cons(z->subscriptions, sub);
 }
 
-z_subscription_t *z_get_subscription_by_rid(z_zenoh_t *z, z_vle_t rid) {
-  if (z->subscriptions == 0) {
-    return 0;
+const char *z_get_resource_name(z_zenoh_t *z, z_vle_t rid) {
+  z_list_t *ds = z->declarations;
+  z_res_decl_t *d;
+  while (ds != z_list_empty) {
+    d = z_list_head(ds);
+    if (d->rid == rid) {
+      return d->r_name;
+    }
+    ds = z_list_tail(ds);
+  }
+  return 0;
+}
+z_list_t *z_get_subscriptions_by_rid(z_zenoh_t *z, z_vle_t rid) {
+  if (z->subscriptions == z_list_empty) {
+    return z_list_empty;
   }
   else {
-    z_subscription_t *sub = (z_subscription_t *)z_list_head(z->subscriptions);
-    z_list_t *subs = z_list_tail(z->subscriptions);
-    while (subs != 0 && sub->rid != rid) {      
+    z_list_t *subs = z->subscriptions;
+    z_list_t *msubs = z_list_empty;
+    z_subscription_t *sub;
+    
+    while (subs != z_list_empty) {      
       sub = z_list_head(subs);
+      if (sub->rid == rid) {
+        z_list_cons(msubs, sub);
+      }
       subs = z_list_tail(subs);  
     }    
-    if (sub->rid == rid) return sub;
-    else return 0;
+    return msubs;    
   }
 }
 
-z_subscription_t *z_get_subscription_by_rname(z_zenoh_t *z, const char *rname) {
-  if (z->subscriptions == 0) {
-    return 0;
-  }
-  else {
-    z_subscription_t *sub = (z_subscription_t *)z_list_head(z->subscriptions);
-    z_list_t *subs = z_list_tail(z->subscriptions);
-    while (subs != 0 && regexec(&sub->re, rname, 0, NULL, 0) != 0) {      
-      sub = z_list_head(subs);
-      subs = z_list_tail(subs);  
-    }    
-    if (regexec(&sub->re, rname, 0, NULL, 0) == 0) return sub;
-    else return 0;
-  }
-}
+// z_subscription_t *z_get_subscription_by_rname(z_zenoh_t *z, const char *rname) {
+//   if (z->subscriptions == 0) {
+//     return 0;
+//   }
+//   else {
+//     z_subscription_t *sub = (z_subscription_t *)z_list_head(z->subscriptions);
+//     z_list_t *subs = z_list_tail(z->subscriptions);
+//     while (subs != 0 && regexec(&sub->re, rname, 0, NULL, 0) != 0) {      
+//       sub = z_list_head(subs);
+//       subs = z_list_tail(subs);  
+//     }    
+//     if (regexec(&sub->re, rname, 0, NULL, 0) == 0) return sub;
+//     else return 0;
+//   }
+// }
 
 z_list_t *
 z_get_subscriptions_by_rname(z_zenoh_t *z, const char *rname) {
