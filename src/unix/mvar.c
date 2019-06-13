@@ -2,6 +2,8 @@
 #include <string.h>
 #include <pthread.h>
 #include "zenoh/mvar.h"
+#include <stdlib.h>
+#include <stdio.h>
 
 typedef struct {
     void *elem;
@@ -34,34 +36,38 @@ z_mvar_t *z_mvar_of(void *e) {
 
 void * z_mvar_get(z_mvar_t *zmv) {
     z_posix_mvar_t * mv = (z_posix_mvar_t *)zmv;
-    do {
-        pthread_mutex_lock(&mv->mtx);
-
-        if (mv->full) {
+    int lock = 1;
+    do {        
+        if (lock ==1)
+            pthread_mutex_lock(&mv->mtx);        
+        if (mv->full) {            
             mv->full = 0;
             void *e = mv->elem;
-            mv->elem = 0;
+            mv->elem = 0;                                
             pthread_mutex_unlock(&mv->mtx);
-            pthread_cond_signal(&mv->can_put);        
+            pthread_cond_signal(&mv->can_put);                    
             return e;
         } else {
             pthread_cond_wait(&mv->can_get, &mv->mtx);
+            lock = 0;
         }
     } while (1);
 } 
 
 void z_mvar_put(z_mvar_t * zmv, void *e) {
     z_posix_mvar_t * mv = (z_posix_mvar_t *)zmv;
-
-    do {
-        pthread_mutex_lock(&mv->mtx);
+    int lock = 1;
+    do {        
+        if (lock == 1)
+            pthread_mutex_lock(&mv->mtx);
         if (mv->full) {
             pthread_cond_wait(&mv->can_put, &mv->mtx);
+            lock = 0;
         } else {
             mv->elem = e;
-            mv->full = 1;
-            pthread_mutex_unlock(&mv->mtx);
-            pthread_cond_signal(&mv->can_get);
+            mv->full = 1;                        
+            pthread_cond_signal(&mv->can_get);                 
+            pthread_mutex_unlock(&mv->mtx);       
             return;            
         }
     } while (1);
