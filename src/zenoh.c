@@ -57,7 +57,7 @@ z_open(char* locator, on_disconnect_t *on_disconnect, const z_vec_t* ps) {
 
   z_message_t msg;
 
-  msg.header = Z_P_FLAG | Z_OPEN;
+  msg.header = ps == 0 ? Z_OPEN : Z_OPEN | Z_P_FLAG;
   msg.payload.open.version = ZENOH_PROTO_VERSION;
   msg.payload.open.pid = pid;
   msg.payload.open.lease = ZENOH_DEFAULT_LEASE;
@@ -84,6 +84,40 @@ z_open(char* locator, on_disconnect_t *on_disconnect, const z_vec_t* ps) {
   
   return r;
 }
+
+z_zenoh_t * 
+z_open_wup(char* locator, const char * uname, const char *passwd) {
+  z_zenoh_p_result_t r;
+  z_property_t user;
+  z_property_t password;
+  z_vec_t ps = z_vec_make(2);
+  Z_ARRAY_S_MAKE(uint8_t, uid, 256);
+  Z_ARRAY_S_MAKE(uint8_t, pwd, 256);
+  if (uname != 0) {
+    uid.elem = (uint8_t *)uname; 
+    uid.length = strlen(uname);
+    pwd.elem = (uint8_t *)passwd; 
+    pwd.length = strlen(passwd);
+  
+    user.id = Z_USER_KEY;
+    user.value = uid;
+  
+    password.id = Z_PASSWD_KEY;
+    password.value = pwd;
+  
+    z_vec_append(&ps, &user);
+    z_vec_append(&ps, &password);
+
+    r = z_open(locator, 0, &ps);
+  } else {
+    r = z_open(locator, 0, 0);
+  }
+  if (r.tag == Z_ERROR_TAG)
+    return 0;
+  
+  return r.value.zenoh;
+}
+
 
 void z_close(z_zenoh_t* z) { }
 

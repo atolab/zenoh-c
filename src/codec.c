@@ -682,11 +682,12 @@ z_message_encode(z_iobuf_t* buf, const z_message_t* m) {
       z_declare_encode(buf, &m->payload.declare);
       break;
     default:
-      Z_ERROR("WARNING: Trying to encode message with unknown ID(%d)", mid); 
+      Z_ERROR("WARNING: Trying to encode message with unknown ID(%d)\n", mid); 
       return;
   }
-  if (m->header & Z_P_FLAG ) 
+  if (m->header & Z_P_FLAG ) {
     z_properties_encode(buf, m->properties);  
+  }
 }
 
 void
