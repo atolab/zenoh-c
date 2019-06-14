@@ -68,6 +68,7 @@ z_open(char* locator, on_disconnect_t *on_disconnect, const z_vec_t* ps) {
   z_iobuf_clear(&r.value.zenoh->rbuf);
   z_message_p_result_t r_msg = z_recv_msg(r_sock.value.socket, &r.value.zenoh->rbuf);
   ASSERT_P_RESULT(r_msg, "Failed to receive accept");
+  z_message_p_result_free(&r_msg);
 
   r.value.zenoh->sock = r_sock.value.socket;
   r.value.zenoh->pid = pid;  
@@ -130,9 +131,6 @@ z_declare_subscriber(z_zenoh_t *z, const char *resource,  z_sub_mode_t sm, subsc
   r.value.sub->id = z_get_entity_id(z);
 
   z_message_t msg;
-  z_message_p_result_t r_msg;
-  z_message_p_result_init(&r_msg);
-
   msg.header = Z_DECLARE;
   msg.payload.declare.sn = z->sn++;
   int dnum = 3;
@@ -175,9 +173,6 @@ z_declare_publisher(z_zenoh_t *z, const char *resource) {
   r.value.pub->id = z_get_entity_id(z);
 
   z_message_t msg;
-  z_message_p_result_t r_msg;
-  z_message_p_result_init(&r_msg);
-
   msg.header = Z_DECLARE;
   msg.payload.declare.sn = z->sn++;
   int dnum = 3;
@@ -207,14 +202,17 @@ z_declare_publisher(z_zenoh_t *z, const char *resource) {
   // -- This will be refactored to use mvars
   return r;
 #if 0
+  z_message_p_result_t r_msg;
   r_msg = z_recv_msg(z->sock, &z->rbuf);
   ASSERT_P_RESULT(r_msg, "Failed to receive message");
   
   if (Z_MID(r_msg.value.message->header) == Z_DECLARE) {
-    Z_DEBUG ("Declaration was accepted");    
+    Z_DEBUG ("Declaration was accepted");
+    z_message_p_result_free(&r_msg);
     return 0;
   }
-  else return -1;
+  z_message_p_result_free(&r_msg);
+  return -1;
 #endif 
   
 }

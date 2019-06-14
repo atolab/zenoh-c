@@ -35,7 +35,8 @@ typedef struct { \
     int error; \
   } value;\
 } z_ ## name ## _p_result_t; \
-void z_ ## name ## _p_result_init(z_ ## name ## _p_result_t *r);
+void z_ ## name ## _p_result_init(z_ ## name ## _p_result_t *r);\
+void z_ ## name ## _p_result_free(z_ ## name ## _p_result_t *r);
 
 #define ASSURE_RESULT(in_r, out_r, e) \
   if (in_r.tag == Z_ERROR_TAG) { \
