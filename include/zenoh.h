@@ -5,7 +5,10 @@
 #include "zenoh/msg.h"
 #include "zenoh/codec.h"
 
-
+#define Z_SN_KEY 0x01
+#define Z_COMPACT_CLIENT_KEY 0x02
+#define Z_USER_KEY 0x50
+#define Z_PASSWD_KEY 0x51
 
 z_zenoh_p_result_t 
 z_open(char* locator, on_disconnect_t *on_disconnect, const z_vec_t *ps);

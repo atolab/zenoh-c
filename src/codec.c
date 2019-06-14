@@ -110,6 +110,16 @@ z_property_result_t z_property_decode(z_iobuf_t* buf, uint8_t header) {
   return r;  
 }
 
+void z_properties_encode(z_iobuf_t *buf, const z_vec_t *ps) {
+  z_property_t *p;
+  z_vle_t l = z_vec_length(ps);
+  z_vle_encode(buf, l);
+  for (unsigned int i = 0; i < l; ++i) {    
+    p = (z_property_t *)z_vec_get(ps, i);    
+    z_property_encode(buf, p);
+  }
+}
+
 void 
 z_open_encode(z_iobuf_t* buf, const z_open_t* m) {
   z_iobuf_write(buf, m->version);  
@@ -673,7 +683,10 @@ z_message_encode(z_iobuf_t* buf, const z_message_t* m) {
       break;
     default:
       Z_ERROR("WARNING: Trying to encode message with unknown ID(%d)", mid); 
+      return;
   }
+  if (m->header & Z_P_FLAG ) 
+    z_properties_encode(buf, m->properties);  
 }
 
 void

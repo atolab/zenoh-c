@@ -57,7 +57,7 @@ z_open(char* locator, on_disconnect_t *on_disconnect, const z_vec_t* ps) {
 
   z_message_t msg;
 
-  msg.header = Z_OPEN;
+  msg.header = Z_P_FLAG | Z_OPEN;
   msg.payload.open.version = ZENOH_PROTO_VERSION;
   msg.payload.open.pid = pid;
   msg.payload.open.lease = ZENOH_DEFAULT_LEASE;
