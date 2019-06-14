@@ -1,4 +1,5 @@
 #include "zenoh/types.h"
+#include "zenoh/rname.h"
 #include <assert.h>
 #include <stdio.h>
 
@@ -33,47 +34,6 @@ char *replace_with(const char *src, const char *match, const char *rep) {
     strcat(r, token);
     strcat(r, rep);    
   }
-  free(tofree);
-  return r;
-}
-
-char *resource_to_regex(const char *res) {
-  char *s_star = "*";    
-  char star = '*';
-  char *re_star = "([a-zA-Z0-9_-]+)";
-  char *re_2star = "([a-zA-Z0-9_-]+(/[a-zA-Z0-9_-])*)";
-
-  int n = count_occurences(res, s_star);  
-  if (n == 0) 
-    return strdup(res);
-
-  int k = strlen(re_2star);  
-  int len = strlen(res);
-  // count in for prefix and postfix;
-  int nlen = len + (n * k) + 8;
-  char *r = (char *)malloc(nlen);
-
-  r[0] = '\0';
-  char *s, *tofree, *token;
-  tofree = s = strdup(res);
-  
-  int idx = 0;
-  strcat(r, "^(");
-  while ((token = strsep(&s, s_star)) != 0) {
-    idx += strlen(token)+1;
-    strcat(r, token);    
-    if (idx < len) {
-      if (res[idx] == star) {
-        idx += 1;
-        strcat(r, re_2star);
-      } else{        
-        strcat(r, re_star);      
-      }    
-    } else if (idx == len) {
-      strcat(r, re_star);
-    }    
-  }
-  strcat(r, ")$");
   free(tofree);
   return r;
 }
@@ -197,12 +157,7 @@ int z_register_res_decl(z_zenoh_t *z, z_vle_t rid, const char *rname) {
   if (rd_bid == 0 && rd_brn == 0) {  
     z_res_decl_t *rdecl = (z_res_decl_t *) malloc(sizeof(z_res_decl_t));
     rdecl->rid = rid;
-    rdecl->r_name = strdup(rname);    
-    Z_DEBUG(">>> Converting resource to regex\n");
-    char *regex = resource_to_regex(rname);  
-    rdecl->regex_expr = regex;
-    Z_DEBUG_VA(">>> Registering declaration %s as regex %s\n", rname, regex);
-    regcomp(&rdecl->re, regex, REG_ICASE | REG_EXTENDED);  
+    rdecl->r_name = strdup(rname); 
     z->declarations = z_list_cons(z->declarations, rdecl);   
     return 0;
   } 
@@ -229,18 +184,16 @@ z_res_decl_t *z_get_res_decl_by_rid(z_zenoh_t *z, z_vle_t rid) {
 
 z_res_decl_t *z_get_res_decl_by_rname(z_zenoh_t *z, const char *rname) {
   if (z->declarations == 0) {
-    printf(">>> Empty declarations set");
     return 0;
-  }
-  else {
+  } else {
     z_res_decl_t *decl = (z_res_decl_t *)z_list_head(z->subscriptions);
     z_list_t *decls = z_list_tail(z->declarations);
 
-    while (decls != 0 && regexec(&decl->re, rname, 0, NULL, 0) != 0) {      
+    while (decls != 0 && strcmp(decl->r_name, rname) != 0) {      
       decls = z_list_head(decls);
       decls = z_list_tail(decls);  
     }    
-    if (regexec(&decl->re, rname, 0, NULL, 0) == 0) return decl;
+    if (strcmp(decl->r_name, rname) == 0) return decl;
     else return 0;
   }
 }
@@ -252,9 +205,6 @@ void z_register_subscription(z_zenoh_t *z, z_vle_t rid, subscriber_callback_t *c
   z_res_decl_t *decl = z_get_res_decl_by_rid(z, rid);
   assert(decl != 0);
   sub->rname = strdup(decl->r_name);
-  char *regex = resource_to_regex(decl->r_name);
-  regcomp(&sub->re, regex, REG_ICASE | REG_EXTENDED);
-  free(regex);
   sub->callback = callback;
   z->subscriptions = z_list_cons(z->subscriptions, sub);
 }
@@ -291,22 +241,6 @@ z_list_t *z_get_subscriptions_by_rid(z_zenoh_t *z, z_vle_t rid) {
   }
 }
 
-// z_subscription_t *z_get_subscription_by_rname(z_zenoh_t *z, const char *rname) {
-//   if (z->subscriptions == 0) {
-//     return 0;
-//   }
-//   else {
-//     z_subscription_t *sub = (z_subscription_t *)z_list_head(z->subscriptions);
-//     z_list_t *subs = z_list_tail(z->subscriptions);
-//     while (subs != 0 && regexec(&sub->re, rname, 0, NULL, 0) != 0) {      
-//       sub = z_list_head(subs);
-//       subs = z_list_tail(subs);  
-//     }    
-//     if (regexec(&sub->re, rname, 0, NULL, 0) == 0) return sub;
-//     else return 0;
-//   }
-// }
-
 z_list_t *
 z_get_subscriptions_by_rname(z_zenoh_t *z, const char *rname) {
   z_list_t *subs = z_list_empty;
@@ -320,7 +254,7 @@ z_get_subscriptions_by_rname(z_zenoh_t *z, const char *rname) {
     do {      
       sub = (z_subscription_t *)z_list_head(subs);
       subs = z_list_tail(subs);            
-      if (regexec(&sub->re, rname, 0, NULL, 0) == 0) {        
+      if (intersect(sub->rname, (char *)rname)) {        
         xs = z_list_cons(xs, sub);
       }       
     } while (subs != 0);          
