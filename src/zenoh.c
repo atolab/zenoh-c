@@ -129,15 +129,14 @@ z_declare_subscriber(z_zenoh_t *z, const char *resource,  z_sub_mode_t sm, subsc
   r.value.sub->z = z;
   r.value.sub->id = z_get_entity_id(z);
 
-  z_message_t *msg = (z_message_t *)malloc(sizeof(z_message_t));
+  z_message_t msg;
   z_message_p_result_t r_msg;
   z_message_p_result_init(&r_msg);
 
-  msg->header = Z_DECLARE;
-  msg->payload.declare.sn = z->sn++;
+  msg.header = Z_DECLARE;
+  msg.payload.declare.sn = z->sn++;
   int dnum = 3;
   z_array_declaration_t decl = {dnum, (z_declaration_t*)malloc(dnum*sizeof(z_declaration_t))};
-  
   
   int rid = z_get_resource_id(z, resource);
   r.value.sub->rid = rid;
@@ -153,11 +152,15 @@ z_declare_subscriber(z_zenoh_t *z, const char *resource,  z_sub_mode_t sm, subsc
   decl.elem[2].header = Z_COMMIT_DECL;
   decl.elem[2].payload.commit.cid = z->cid++;
   
-  msg->payload.declare.declarations = decl;  
-  z_send_msg(z->sock, &z->wbuf, msg);  
+  msg.payload.declare.declarations = decl; 
+
+  if (z_send_msg(z->sock, &z->wbuf, &msg) != 0) {
+      Z_DEBUG("Trying to reconnect....\n");
+      z->on_disconnect(z);
+      z_send_msg(z->sock, &z->wbuf, &msg);
+  } 
   z_register_res_decl(z, rid, resource);
   z_register_subscription(z, rid, callback);
-  free(msg);
   // -- This will be refactored to use mvars
   return r;
 }
@@ -170,12 +173,12 @@ z_declare_publisher(z_zenoh_t *z, const char *resource) {
   r.value.pub->z = z;
   r.value.pub->id = z_get_entity_id(z);
 
-  z_message_t *msg = (z_message_t *)malloc(sizeof(z_message_t));
+  z_message_t msg;
   z_message_p_result_t r_msg;
   z_message_p_result_init(&r_msg);
 
-  msg->header = Z_DECLARE;
-  msg->payload.declare.sn = z->sn++;
+  msg.header = Z_DECLARE;
+  msg.payload.declare.sn = z->sn++;
   int dnum = 3;
   z_array_declaration_t decl = {dnum, (z_declaration_t*)malloc(dnum*sizeof(z_declaration_t))};
     
@@ -192,10 +195,13 @@ z_declare_publisher(z_zenoh_t *z, const char *resource) {
   decl.elem[2].header = Z_COMMIT_DECL;
   decl.elem[2].payload.commit.cid = z->cid++;
   
-  msg->payload.declare.declarations = decl;  
-  z_send_msg(z->sock, &z->wbuf, msg);  
+  msg.payload.declare.declarations = decl;  
+  if (z_send_msg(z->sock, &z->wbuf, &msg) != 0) {
+      Z_DEBUG("Trying to reconnect....\n");
+      z->on_disconnect(z);
+      z_send_msg(z->sock, &z->wbuf, &msg);
+  }  
   z_register_res_decl(z, rid, resource);
-  free(msg);
   // -- This will be refactored to use mvars
   return r;
 #if 0
@@ -373,21 +379,20 @@ int z_write_data_wo(z_zenoh_t *z, const char* resource, const unsigned char *pay
 int z_write_data(z_zenoh_t *z, const char* resource, const unsigned char *payload, size_t length) {
   return z_write_data_wo(z, resource, payload, length, 0, 0);
 }
-int z_query(z_zenoh_t *z, const char* resource, const char* predicate, z_reply_callback_t *callback) { 
-  z_message_t *msg = (z_message_t *)malloc(sizeof(z_message_t));
-  z_message_p_result_t r_msg;
-  z_message_p_result_init(&r_msg);
 
-  msg->header = Z_QUERY;
-  msg->payload.query.pid = z->pid;
-  msg->payload.query.qid = z->qid++;
-  // No need to take ownership --  avoid strdup.
-  msg->payload.query.rname = (char *)resource;
-  msg->payload.query.predicate = (char *)predicate;
+int z_query(z_zenoh_t *z, const char* resource, const char* predicate, z_reply_callback_t *callback) { 
+  z_message_t msg;
+  msg.header = Z_QUERY;
+  msg.payload.query.pid = z->pid;
+  msg.payload.query.qid = z->qid++;
+  msg.payload.query.rname = (char *)resource;
+  msg.payload.query.predicate = (char *)predicate;
   
-  z_send_msg(z->sock, &z->wbuf, msg);  
-  z_register_query(z, msg->payload.query.qid, callback);
-  free(msg);
-  // -- This will be refactored to use mvars
+  if (z_send_msg(z->sock, &z->wbuf, &msg) != 0) {
+    Z_DEBUG("Trying to reconnect....\n");
+    z->on_disconnect(z);
+    z_send_msg(z->sock, &z->wbuf, &msg);
+  }
+  z_register_query(z, msg.payload.query.qid, callback);
   return 0;
 }
