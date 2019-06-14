@@ -34,6 +34,10 @@ int main(int argc, char **argv) {
   if (argc > 1) {
     locator = argv[1];
   }
+  char *uri="/demo/hello/*";
+  if (argc > 2) {
+    uri = argv[2];
+  }
 
   printf("Connecting to %s...\n", locator);
   z_zenoh_p_result_t r_z = z_open(locator, 0, &ps);
@@ -46,7 +50,7 @@ int main(int argc, char **argv) {
   printf("Declaring Subscriber...\n");
   z_sub_mode_t sm;
   sm.kind = Z_PUSH_MODE;
-  z_sub_p_result_t r = z_declare_subscriber(z, "/demo/hello/*", sm, listener);
+  z_sub_p_result_t r = z_declare_subscriber(z, uri, sm, listener);
   ASSERT_P_RESULT(r,"Unable to declare pub\n");
   
   sleep(60000);

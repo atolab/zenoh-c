@@ -10,6 +10,14 @@ int main(int argc, char **argv) {
   if (argc > 1) {
     locator = argv[1];
   }
+  char *uri="/demo/hello/alpha";
+  if (argc > 2) {
+    uri = argv[2];
+  }
+  char *value="Hello World!";
+  if (argc > 3) {
+    value = argv[3];
+  }
 
   printf("Connecting to %s...\n", locator);
   z_zenoh_p_result_t r_z = z_open(locator, 0, 0);
@@ -20,14 +28,13 @@ int main(int argc, char **argv) {
 
   
   printf("Declaring Publisher...\n");
-  z_pub_p_result_t r = z_declare_publisher(z, "/demo/hello/alpha");
+  z_pub_p_result_t r = z_declare_publisher(z, uri);
   ASSERT_P_RESULT(r, "Unable to declare pub\n");
   
   z_pub_t *pub = r.value.pub;
 
   z_iobuf_t data = z_iobuf_make(512);
-  char *str = "Hello World!";  
-  z_string_encode(&data, str);
+  z_string_encode(&data, value);
   size_t len = z_iobuf_readable(&data);
   printf("Streaming Data...\n");
   while (1) {    
