@@ -17,6 +17,16 @@ z_array_##T * arr = (z_array_##T*)malloc(sizeof(z_array_##T)); \
 arr->length = len; \
 arr->elem = (T*)malloc(len*sizeof(T));
 
+#define Z_ARRAY_S_FREE(arr) \
+free(arr.elem); \
+arr.elem = 0; \
+arr.length = 0;
+
+#define Z_ARRAY_H_FREE(arr) \
+free(arr->elem); \
+arr->elem = 0; \
+arr->length = 0;
+
 typedef struct {
   unsigned int capacity_;
   unsigned int length_;

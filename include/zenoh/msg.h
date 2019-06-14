@@ -199,15 +199,12 @@ typedef struct {
   uint8_t header; 
 } z_declaration_t;
 
-typedef struct {
-  unsigned int length;
-  z_declaration_t *elem;  
-} z_array_declaration_t;
+Z_ARRAY_DECLARE(z_declaration_t)
 
 /*------------------ Declare Messages ------------------*/
 typedef struct  {  
   z_vle_t sn;
-  z_array_declaration_t declarations;
+  z_array_z_declaration_t declarations;
 } z_declare_t;
 
 

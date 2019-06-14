@@ -136,7 +136,7 @@ z_declare_subscriber(z_zenoh_t *z, const char *resource,  z_sub_mode_t sm, subsc
   msg.header = Z_DECLARE;
   msg.payload.declare.sn = z->sn++;
   int dnum = 3;
-  z_array_declaration_t decl = {dnum, (z_declaration_t*)malloc(dnum*sizeof(z_declaration_t))};
+  Z_ARRAY_S_MAKE(z_declaration_t, decl, dnum)
   
   int rid = z_get_resource_id(z, resource);
   r.value.sub->rid = rid;
@@ -159,6 +159,7 @@ z_declare_subscriber(z_zenoh_t *z, const char *resource,  z_sub_mode_t sm, subsc
       z->on_disconnect(z);
       z_send_msg(z->sock, &z->wbuf, &msg);
   } 
+  Z_ARRAY_S_FREE(decl);
   z_register_res_decl(z, rid, resource);
   z_register_subscription(z, rid, callback);
   // -- This will be refactored to use mvars
@@ -180,7 +181,7 @@ z_declare_publisher(z_zenoh_t *z, const char *resource) {
   msg.header = Z_DECLARE;
   msg.payload.declare.sn = z->sn++;
   int dnum = 3;
-  z_array_declaration_t decl = {dnum, (z_declaration_t*)malloc(dnum*sizeof(z_declaration_t))};
+  Z_ARRAY_S_MAKE(z_declaration_t, decl, dnum)
     
   int rid = z_get_resource_id(z, resource);
   r.value.pub->rid = rid;
@@ -200,7 +201,8 @@ z_declare_publisher(z_zenoh_t *z, const char *resource) {
       Z_DEBUG("Trying to reconnect....\n");
       z->on_disconnect(z);
       z_send_msg(z->sock, &z->wbuf, &msg);
-  }  
+  }
+  Z_ARRAY_S_FREE(decl);
   z_register_res_decl(z, rid, resource);
   // -- This will be refactored to use mvars
   return r;
