@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include "zenoh.h"
-
+#include "zenoh/recv_loop.h"
 
 
 int main(int argc, char **argv) {
@@ -24,7 +24,8 @@ int main(int argc, char **argv) {
   
   z_zenoh_p_result_t r_z = z_open(locator, 0, 0);
   z_zenoh_t *z = r_z.value.zenoh;
-  
+  z_start_recv_loop(z);  
+
   z_pub_p_result_t rp = z_declare_publisher(z, "/test/thr");
   ASSERT_P_RESULT(rp, "Unable to declare publisher");
   z_pub_t *pub = rp.value.pub;

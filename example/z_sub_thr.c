@@ -5,7 +5,7 @@
 #include <sys/time.h>
 
 
-#define N 1000
+#define N 100000
 
 volatile unsigned long long int count = 0;
 volatile struct timeval start;
@@ -44,7 +44,6 @@ int main(int argc, char **argv) {
   z_zenoh_p_result_t r_z = z_open(locator, 0, 0);
   ASSERT_RESULT(r_z, "Unable to open session with broker")
   z_zenoh_t *z = r_z.value.zenoh;
-
   z_start_recv_loop(z);  
 
   printf("Declaring Subscriber...\n");
