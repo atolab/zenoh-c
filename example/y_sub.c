@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
   z_zenoh_t *z = r_z.value.zenoh;
 
   z_start_recv_loop(z);
-  printf("Declaring Resource: %s\n", se);
+  printf("Declaring Subscriber: %s\n", se);
   y_subscribe(z, se, listener);
   sleep(60000);
   return 0;
