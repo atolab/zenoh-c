@@ -254,7 +254,7 @@ typedef struct {
 typedef struct {
   z_array_uint8_t qpid; 
   z_vle_t qid;
-  z_iobuf_t stoid;
+  z_array_uint8_t stoid;
   z_vle_t rsn;
   char* rname;
   z_iobuf_t payload_header;

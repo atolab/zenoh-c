@@ -603,11 +603,18 @@ z_query_decode(z_iobuf_t *buf, uint8_t header) {
 }
 
 void
-z_reply_encode(z_iobuf_t *buf, const z_reply_t* m) {
+z_reply_encode(z_iobuf_t *buf, const z_reply_t* m, uint8_t header) {
   z_array_uint8_encode(buf, &(m->qpid));
   z_vle_encode(buf, m->qid);
 
-  // TODO : encode value
+  if(header & Z_F_FLAG) {
+    z_array_uint8_encode(buf, &(m->stoid));
+    z_vle_encode(buf, m->rsn);
+    z_string_encode(buf, m->rname);
+    z_vle_t len = z_iobuf_readable(&m->payload_header);
+    z_vle_encode(buf, len);  
+    z_iobuf_write_slice(buf, m->payload_header.buf, m->payload_header.r_pos, m->payload_header.w_pos); 
+  }
 }
 
 void z_reply_decode_na(z_iobuf_t *buf, uint8_t header, z_reply_result_t *r) {
@@ -623,13 +630,11 @@ void z_reply_decode_na(z_iobuf_t *buf, uint8_t header, z_reply_result_t *r) {
 
   if (header & Z_F_FLAG)
   {
-    z_vle_result_t r_vle = z_vle_decode(buf);
-    ASSURE_P_RESULT(r_vle, r, Z_VLE_PARSE_ERROR);  
-    uint8_t *stoid = z_iobuf_read_n(buf, r_vle.value.vle);
-    r->value.reply.stoid = z_iobuf_wrap_wo(stoid, r_vle.value.vle, 0, r_vle.value.vle);
-    r->value.reply.stoid.w_pos = r_vle.value.vle;
+    z_array_uint8_result_t r_stoid = z_array_uint8_decode(buf);
+    ASSURE_P_RESULT(r_stoid, r, Z_ARRAY_PARSE_ERROR)
+    r->value.reply.stoid = r_stoid.value.array_uint8;
 
-    r_vle = z_vle_decode(buf);
+    z_vle_result_t r_vle = z_vle_decode(buf);
     ASSURE_P_RESULT(r_vle, r, Z_VLE_PARSE_ERROR)
     r->value.reply.rsn = r_vle.value.vle;
 
@@ -670,7 +675,7 @@ z_message_encode(z_iobuf_t* buf, const z_message_t* m) {
       z_query_encode(buf, &m->payload.query);
       break;
     case Z_REPLY:
-      z_reply_encode(buf, &m->payload.reply);
+      z_reply_encode(buf, &m->payload.reply, m->header);
       break;
     case Z_OPEN:
       z_open_encode(buf, &m->payload.open);

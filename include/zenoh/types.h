@@ -115,6 +115,19 @@ typedef void z_reply_callback_t(z_reply_value_t reply);
 
 typedef void subscriber_callback_t(z_resource_id_t rid, const unsigned char *data, size_t length, z_data_info_t info);
 
+typedef struct {
+  const char* rname;
+  const unsigned char *data;
+  size_t length;
+  unsigned short encoding;
+  unsigned short kind; 
+} z_resource_t;
+
+Z_ARRAY_DECLARE(z_resource_t)
+
+typedef z_array_z_resource_t query_handler_t(const char *rname, const char *predicate);
+typedef void replies_cleaner_t(z_array_z_resource_t replies);
+
 #endif /* ZENOH_C_SWIG */
 typedef void on_disconnect_t(void *z);
 
@@ -132,6 +145,7 @@ typedef struct {
   on_disconnect_t *on_disconnect;
   z_list_t *declarations;
   z_list_t *subscriptions;
+  z_list_t *storages;
   z_list_t *replywaiters;
   z_i_map_t *remote_subs;
   z_mvar_t *reply_msg_mvar;
@@ -150,6 +164,12 @@ typedef struct {
   z_zenoh_t *z;
   z_vle_t rid;
   z_vle_t id;
+} z_sto_t;
+
+typedef struct {
+  z_zenoh_t *z;
+  z_vle_t rid;
+  z_vle_t id;
 } z_pub_t;
 #endif /* ZENOH_C_SWIG */
 
@@ -163,8 +183,15 @@ typedef struct {
   char *rname;
   z_vle_t rid;
   subscriber_callback_t *callback;
-} z_subscription_t;
+}  z_subscription_t;
 
+typedef struct {  
+  char *rname;
+  z_vle_t rid;
+  subscriber_callback_t *callback;
+  query_handler_t *handler;
+  replies_cleaner_t *cleaner;
+}  z_storage_t;
 
 typedef struct {  
   z_vle_t qid;
@@ -182,6 +209,9 @@ void z_register_subscription(z_zenoh_t *z, z_vle_t rid,  subscriber_callback_t *
 const char * z_get_resource_name(z_zenoh_t *z, z_vle_t rid);
 z_list_t * z_get_subscriptions_by_rid(z_zenoh_t *z, z_vle_t rid);
 z_list_t * z_get_subscriptions_by_rname(z_zenoh_t *z, const char *rname);
+
+void z_register_storage(z_zenoh_t *z, z_vle_t rid, subscriber_callback_t *callback, query_handler_t *handler, replies_cleaner_t *cleaner);
+z_list_t * z_get_storages_by_rname(z_zenoh_t *z, const char *rname);
 
 int z_matching_remote_sub(z_zenoh_t *z, z_vle_t rid);
 

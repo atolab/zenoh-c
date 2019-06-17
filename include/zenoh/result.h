@@ -74,6 +74,7 @@ enum result_kind {
 
 Z_P_RESULT_DECLARE(z_zenoh_t, zenoh)
 Z_P_RESULT_DECLARE(z_sub_t, sub)
+Z_P_RESULT_DECLARE(z_sto_t, sto)
 Z_P_RESULT_DECLARE(z_pub_t, pub)
 
 #endif /* ZENOH_C_SWIG */
