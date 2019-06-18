@@ -125,6 +125,7 @@ z_open_encode(z_iobuf_t* buf, const z_open_t* m) {
   z_iobuf_write(buf, m->version);  
   z_array_uint8_encode(buf, &(m->pid));
   z_vle_encode(buf, m->lease);
+  z_vle_encode(buf, 0); // no locators
   // TODO: Encode properties if present
 }
 

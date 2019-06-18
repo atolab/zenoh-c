@@ -133,6 +133,7 @@ typedef struct {
   uint8_t version;  
   z_array_uint8_t pid; 
   z_vle_t lease;    
+  // z_vec_t *locators; 
 } z_open_t;
 
 
