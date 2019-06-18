@@ -7,11 +7,11 @@ all: cmake-debug make install
 release: cmake-release make install
 
 cmake-debug: CMakeLists.txt
-	mkdir -p build
+	mkdir -p $(BUILD_DIR)
 	cmake -DCMAKE_BUILD_TYPE=Debug -B$(BUILD_DIR) -H.
 
 cmake-release: CMakeLists.txt
-	mkdir -p build
+	mkdir -p $(BUILD_DIR)
 	cmake -DCMAKE_BUILD_TYPE=Release -B$(BUILD_DIR) -H.
 
 make: $(BUILD_DIR)/Makefile
@@ -33,7 +33,7 @@ endif
 
 
 $(CROSS_BUILD_DIR)/%: CMakeLists.txt
-	$(CROSS_SCRIPTS_DIR)/dockcross-$* cmake -DCMAKE_BUILD_TYPE=Release -B$@ -H.
+	$(CROSS_SCRIPTS_DIR)/dockcross-$* cmake -DJAVA_HOME=${JAVA_HOME} -DCMAKE_BUILD_TYPE=Release -B$@ -H.
 	$(CROSS_SCRIPTS_DIR)/dockcross-$* make -C$@
 
 
