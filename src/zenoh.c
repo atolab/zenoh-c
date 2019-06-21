@@ -123,8 +123,10 @@ z_open_wup(char* locator, const char * uname, const char *passwd) {
 void z_close(z_zenoh_t* z) { }
 
 z_sub_p_result_t
-z_declare_subscriber(z_zenoh_t *z, const char *resource,  z_sub_mode_t sm, subscriber_callback_t *callback) {
+z_declare_subscriber(z_zenoh_t *z, const char *resource,  z_sub_mode_t *sm, subscriber_callback_t *callback) {
   z_sub_p_result_t r;
+  printf("Sub mode: %d\n", sm->kind);
+  assert((sm->kind > 0) && (sm->kind <= 4));
   r.tag = Z_OK_TAG;
   r.value.sub = (z_sub_t*)malloc(sizeof(z_sub_t));
   r.value.sub->z = z;
@@ -144,7 +146,7 @@ z_declare_subscriber(z_zenoh_t *z, const char *resource,  z_sub_mode_t sm, subsc
   decl.elem[0].payload.resource.rid = rid;
 
   decl.elem[1].header = Z_SUBSCRIBER_DECL;
-  decl.elem[1].payload.sub.sub_mode = sm;
+  decl.elem[1].payload.sub.sub_mode = *sm;
   decl.elem[1].payload.sub.rid = rid;
   
   decl.elem[2].header = Z_COMMIT_DECL;

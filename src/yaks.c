@@ -15,6 +15,6 @@ y_subscribe(z_zenoh_t *z, const char *selector, subscriber_callback_t *callback)
   Z_DEBUG_VA(">>> Creating Yaks sub for %s\n", selector);      
   z_sub_mode_t sm;
   sm.kind = Z_PUSH_MODE;
-  return z_declare_subscriber(z, selector, sm, callback);
+  return z_declare_subscriber(z, selector, &sm, callback);
   
 }
