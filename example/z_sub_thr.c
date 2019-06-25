@@ -18,7 +18,7 @@ void print_stats(volatile struct timeval *start, volatile struct timeval *stop) 
   printf("%f msgs/sec\n", thpt);
 }
 
-void listener(z_resource_id_t rid, const unsigned char *data, size_t length, z_data_info_t info) {      
+void listener(z_resource_id_t rid, const unsigned char *data, size_t length, z_data_info_t info, void *unused) {      
   struct timeval tv;
   if (count == 0) {
     gettimeofday(&tv, 0);
@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
   printf("Declaring Subscriber...\n");
   z_sub_mode_t sm;
   sm.kind = Z_PUSH_MODE;
-  z_sub_p_result_t r = z_declare_subscriber(z, "/test/thr", &sm, listener);
+  z_sub_p_result_t r = z_declare_subscriber(z, "/test/thr", &sm, listener, NULL);
   ASSERT_P_RESULT(r, "Unable to declare pub\n");
   
   sleep(60);

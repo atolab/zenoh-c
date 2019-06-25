@@ -123,7 +123,7 @@ z_open_wup(char* locator, const char * uname, const char *passwd) {
 void z_close(z_zenoh_t* z) { }
 
 z_sub_p_result_t
-z_declare_subscriber(z_zenoh_t *z, const char *resource,  z_sub_mode_t *sm, subscriber_callback_t *callback) {
+z_declare_subscriber(z_zenoh_t *z, const char *resource,  z_sub_mode_t *sm, subscriber_callback_t *callback, void *arg) {
   z_sub_p_result_t r;
   printf("Sub mode: %d\n", sm->kind);
   assert((sm->kind > 0) && (sm->kind <= 4));
@@ -161,14 +161,14 @@ z_declare_subscriber(z_zenoh_t *z, const char *resource,  z_sub_mode_t *sm, subs
   } 
   Z_ARRAY_S_FREE(decl);
   z_register_res_decl(z, rid, resource);
-  z_register_subscription(z, rid, callback);
+  z_register_subscription(z, rid, callback, arg);
   // -- This will be refactored to use mvars
   return r;
 }
 
 
 z_sto_p_result_t
-z_declare_storage(z_zenoh_t *z, const char *resource, subscriber_callback_t *callback, query_handler_t *handler, replies_cleaner_t *cleaner) {
+z_declare_storage(z_zenoh_t *z, const char *resource, subscriber_callback_t *callback, query_handler_t *handler, replies_cleaner_t *cleaner, void *arg) {
   z_sto_p_result_t r;
   r.tag = Z_OK_TAG;
   r.value.sto = (z_sto_t*)malloc(sizeof(z_sto_t));
@@ -202,7 +202,7 @@ z_declare_storage(z_zenoh_t *z, const char *resource, subscriber_callback_t *cal
   } 
   Z_ARRAY_S_FREE(decl);
   z_register_res_decl(z, rid, resource);
-  z_register_storage(z, rid, callback, handler, cleaner);
+  z_register_storage(z, rid, callback, handler, cleaner, arg);
   // -- This will be refactored to use mvars
   return r;
 }
@@ -284,7 +284,7 @@ int z_stream_compact_data(z_pub_t *pub, const unsigned char *data, size_t length
     xs = subs;
     while (xs != z_list_empty) {
       sub = z_list_head(xs);
-      sub->callback(rid, data, length, info);
+      sub->callback(rid, data, length, info, sub->arg);
       xs = z_list_tail(xs);
     }
     z_list_free(&subs);  
@@ -333,7 +333,7 @@ z_stream_data_wo(z_pub_t *pub, const unsigned char *data, size_t length, uint8_t
     xs = subs;
     while (xs != z_list_empty) {
       sub = z_list_head(xs);
-      sub->callback(rid, data, length, info);
+      sub->callback(rid, data, length, info, sub->arg);
       xs = z_list_tail(xs);
     }
     z_list_free(&subs);    
@@ -388,7 +388,7 @@ int z_write_data_wo(z_zenoh_t *z, const char* resource, const unsigned char *pay
   info.kind = kind;  
   while (subs != 0) {
     sub = z_list_head(subs);
-    sub->callback(rid, payload, length, info);
+    sub->callback(rid, payload, length, info, sub->arg);
     subs = z_list_tail(subs);
   }
   z_payload_header_t ph;

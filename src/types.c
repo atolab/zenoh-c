@@ -199,13 +199,14 @@ z_res_decl_t *z_get_res_decl_by_rname(z_zenoh_t *z, const char *rname) {
 }
 
 
-void z_register_subscription(z_zenoh_t *z, z_vle_t rid, subscriber_callback_t *callback) {
+void z_register_subscription(z_zenoh_t *z, z_vle_t rid, subscriber_callback_t *callback, void *arg) {
   z_subscription_t *sub = (z_subscription_t *) malloc(sizeof(z_subscription_t));
   sub->rid = rid;
   z_res_decl_t *decl = z_get_res_decl_by_rid(z, rid);
   assert(decl != 0);
   sub->rname = strdup(decl->r_name);
   sub->callback = callback;
+  sub->arg = arg;
   z->subscriptions = z_list_cons(z->subscriptions, sub);
 }
 
@@ -262,7 +263,7 @@ z_get_subscriptions_by_rname(z_zenoh_t *z, const char *rname) {
   }
 }
 
-void z_register_storage(z_zenoh_t *z, z_vle_t rid, subscriber_callback_t *callback, query_handler_t *handler, replies_cleaner_t *cleaner) {
+void z_register_storage(z_zenoh_t *z, z_vle_t rid, subscriber_callback_t *callback, query_handler_t *handler, replies_cleaner_t *cleaner, void *arg) {
   z_storage_t *sto = (z_storage_t *) malloc(sizeof(z_storage_t));
   sto->rid = rid;
   z_res_decl_t *decl = z_get_res_decl_by_rid(z, rid);
@@ -271,6 +272,7 @@ void z_register_storage(z_zenoh_t *z, z_vle_t rid, subscriber_callback_t *callba
   sto->callback = callback;
   sto->handler = handler;
   sto->cleaner = cleaner;
+  sto->arg = arg;
   z->storages = z_list_cons(z->storages, sto);
 }
 

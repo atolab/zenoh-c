@@ -62,13 +62,13 @@ void* z_recv_loop(void* arg) {
                             lit = subs;                    
                             while (lit != z_list_empty) {
                                 sub = z_list_head(lit);
-                                sub->callback(rid, r_ph.value.payload_header.payload.buf, z_iobuf_readable(&r_ph.value.payload_header.payload), info);
+                                sub->callback(rid, r_ph.value.payload_header.payload.buf, z_iobuf_readable(&r_ph.value.payload_header.payload), info, sub->arg);
                                 lit = z_list_tail(lit);
                             }
                             lit = stos;
                             while (lit != z_list_empty) {
                                 sto = z_list_head(lit);
-                                sto->callback(rid, r_ph.value.payload_header.payload.buf, z_iobuf_readable(&r_ph.value.payload_header.payload), info);
+                                sto->callback(rid, r_ph.value.payload_header.payload.buf, z_iobuf_readable(&r_ph.value.payload_header.payload), info, sto->arg);
                                 lit = z_list_tail(lit);
                             }
                             free(r_ph.value.payload_header.payload.buf);
@@ -106,7 +106,8 @@ void* z_recv_loop(void* arg) {
                                 rid,
                                 r.value.message->payload.compact_data.payload.buf, 
                                 z_iobuf_readable(&r.value.message->payload.compact_data.payload),
-                                info);                     
+                                info,
+                                sub->arg);                     
                             lit = z_list_tail(lit);
                         }
                         lit = stos;
@@ -116,7 +117,8 @@ void* z_recv_loop(void* arg) {
                                 rid,
                                 r.value.message->payload.compact_data.payload.buf, 
                                 z_iobuf_readable(&r.value.message->payload.compact_data.payload),
-                                info);
+                                info,
+                                sto->arg);
                             lit = z_list_tail(lit);
                         }                        
                         free(r.value.message->payload.compact_data.payload.buf);       
@@ -142,7 +144,8 @@ void* z_recv_loop(void* arg) {
                                     rid, 
                                     r_ph.value.payload_header.payload.buf, 
                                     z_iobuf_readable(&r_ph.value.payload_header.payload), 
-                                    info);
+                                    info,
+                                    sub->arg);
                                 subs = z_list_tail(subs);
                             }
                             while (stos != z_list_empty) {
@@ -151,7 +154,8 @@ void* z_recv_loop(void* arg) {
                                     rid, 
                                     r_ph.value.payload_header.payload.buf, 
                                     z_iobuf_readable(&r_ph.value.payload_header.payload), 
-                                    info);
+                                    info,
+                                    sto->arg);
                                 stos = z_list_tail(stos);
                             }
                             free(r_ph.value.payload_header.payload.buf);
@@ -176,7 +180,8 @@ void* z_recv_loop(void* arg) {
                             sto = (z_storage_t *) z_list_head(stos);
                             replies = sto->handler(
                                 r.value.message->payload.query.rname,
-                                r.value.message->payload.query.predicate);
+                                r.value.message->payload.query.predicate,
+                                sto-> arg);
                             msg.payload.reply.stoid = z->pid;
                             for(i = 0; i < replies.length; ++i)
                             {
@@ -213,7 +218,7 @@ void* z_recv_loop(void* arg) {
                                 z_send_msg(z->sock, &z->wbuf, &msg);
                                 z_iobuf_free(&buf);
                             }
-                            sto->cleaner(replies);
+                            sto->cleaner(replies, sto->arg);
 
                             stos = z_list_tail(stos);
                         }
