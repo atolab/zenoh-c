@@ -3,17 +3,17 @@
 #include "zenoh.h"
 #include "zenoh/recv_loop.h"
 
-void reply_handler(z_reply_value_t reply) {
+void reply_handler(const z_reply_value_t *reply) {
   z_string_result_t r_s;
   z_iobuf_t buf;
-  switch (reply.kind) {
+  switch (reply->kind) {
     case Z_STORAGE_DATA: 
-      buf = z_iobuf_wrap_wo((unsigned char *)reply.data, reply.data_length, 0, reply.data_length);
+      buf = z_iobuf_wrap_wo((unsigned char *)reply->data, reply->data_length, 0, reply->data_length);
       r_s = z_string_decode(&buf);        
       if (r_s.tag == Z_OK_TAG) {
-        printf("Received Storage Data. %s:%s\n", reply.rname, r_s.value.string);
+        printf("Received Storage Data. %s:%s\n", reply->rname, r_s.value.string);
       } else {
-        printf("Received Storage Data. %s:...\n", reply.rname);
+        printf("Received Storage Data. %s:...\n", reply->rname);
       }
       break;
     case Z_STORAGE_FINAL:

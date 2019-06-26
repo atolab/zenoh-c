@@ -62,13 +62,13 @@ void* z_recv_loop(void* arg) {
                             lit = subs;                    
                             while (lit != z_list_empty) {
                                 sub = z_list_head(lit);
-                                sub->callback(rid, r_ph.value.payload_header.payload.buf, z_iobuf_readable(&r_ph.value.payload_header.payload), info);
+                                sub->callback(&rid, r_ph.value.payload_header.payload.buf, z_iobuf_readable(&r_ph.value.payload_header.payload), &info);
                                 lit = z_list_tail(lit);
                             }
                             lit = stos;
                             while (lit != z_list_empty) {
                                 sto = z_list_head(lit);
-                                sto->callback(rid, r_ph.value.payload_header.payload.buf, z_iobuf_readable(&r_ph.value.payload_header.payload), info);
+                                sto->callback(&rid, r_ph.value.payload_header.payload.buf, z_iobuf_readable(&r_ph.value.payload_header.payload), &info);
                                 lit = z_list_tail(lit);
                             }
                             free(r_ph.value.payload_header.payload.buf);
@@ -103,20 +103,20 @@ void* z_recv_loop(void* arg) {
                         while (lit != z_list_empty) {
                             sub = z_list_head(lit);
                             sub->callback(
-                                rid,
+                                &rid,
                                 r.value.message->payload.compact_data.payload.buf, 
                                 z_iobuf_readable(&r.value.message->payload.compact_data.payload),
-                                info);                     
+                                &info);                     
                             lit = z_list_tail(lit);
                         }
                         lit = stos;
                         while (lit != z_list_empty) {
                             sto = z_list_head(lit);
                             sto->callback(
-                                rid,
+                                &rid,
                                 r.value.message->payload.compact_data.payload.buf, 
                                 z_iobuf_readable(&r.value.message->payload.compact_data.payload),
-                                info);
+                                &info);
                             lit = z_list_tail(lit);
                         }                        
                         free(r.value.message->payload.compact_data.payload.buf);       
@@ -139,19 +139,19 @@ void* z_recv_loop(void* arg) {
                             while (subs != z_list_empty) {
                                 sub = (z_subscription_t *) z_list_head(subs);
                                 sub->callback(
-                                    rid, 
+                                    &rid, 
                                     r_ph.value.payload_header.payload.buf, 
                                     z_iobuf_readable(&r_ph.value.payload_header.payload), 
-                                    info);
+                                    &info);
                                 subs = z_list_tail(subs);
                             }
                             while (stos != z_list_empty) {
                                 sto = (z_storage_t *) z_list_head(stos);                                                                                                           
                                 sto->callback(
-                                    rid, 
+                                    &rid, 
                                     r_ph.value.payload_header.payload.buf, 
                                     z_iobuf_readable(&r_ph.value.payload_header.payload), 
-                                    info);
+                                    &info);
                                 stos = z_list_tail(stos);
                             }
                             free(r_ph.value.payload_header.payload.buf);
@@ -257,7 +257,7 @@ void* z_recv_loop(void* arg) {
                         } else {
                             rvalue.kind = Z_REPLY_FINAL;
                         }
-                        rw->callback(rvalue);
+                        rw->callback(&rvalue);
                     }
                     break;
                 case Z_DECLARE:       

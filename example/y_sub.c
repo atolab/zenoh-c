@@ -4,15 +4,15 @@
 #include "zenoh/recv_loop.h"
 #include "yaks.h"
 
-void listener(z_resource_id_t rid, const unsigned char *data, size_t length, z_data_info_t info) {    
+void listener(const z_resource_id_t *rid, const unsigned char *data, size_t length, const z_data_info_t *info) {    
   
   z_iobuf_t buf = z_iobuf_wrap((unsigned char *)data, length);
   z_string_result_t r_s = z_string_decode(&buf);        
   if (r_s.tag == Z_OK_TAG) {
-    if (rid.kind == Z_INT_RES_ID) 
-      printf(">>: (%zu, %s)\n", rid.id.rid, r_s.value.string);
+    if (rid->kind == Z_INT_RES_ID) 
+      printf(">>: (%zu, %s)\n", rid->id.rid, r_s.value.string);
     else
-      printf(">>: (%s, %s)\n", rid.id.rname, r_s.value.string);
+      printf(">>: (%s, %s)\n", rid->id.rname, r_s.value.string);
     free(r_s.value.string);
   } else {
     printf(">>: Error decoding string\n");
@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
 
   z_start_recv_loop(z);
   printf("Declaring Subscriber: %s\n", se);
-  y_subscribe(z, se, listener);
+  y_subscribe(z, se, &listener);
   sleep(60000);
   return 0;
 }

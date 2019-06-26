@@ -23,12 +23,12 @@ int remove_data(void *elem, void*args){
   return 0;
 }
 
-void listener(z_resource_id_t rid, const unsigned char *data, size_t length, z_data_info_t info) {    
-  printf("Received data: %s\n", rid.id.rname);
-  stored = z_list_remove(stored, remove_data, rid.id.rname);
+void listener(const z_resource_id_t *rid, const unsigned char *data, size_t length, const z_data_info_t *info) {    
+  printf("Received data: %s\n", rid->id.rname);
+  stored = z_list_remove(stored, remove_data, rid->id.rname);
 
   sample_t *sample = (sample_t *)malloc(sizeof(sample_t));
-  sample->rname = strdup(rid.id.rname);
+  sample->rname = strdup(rid->id.rname);
   sample->data = malloc(length);
   memcpy(sample->data, data, length);
   sample->length = length;

@@ -199,7 +199,7 @@ z_res_decl_t *z_get_res_decl_by_rname(z_zenoh_t *z, const char *rname) {
 }
 
 
-void z_register_subscription(z_zenoh_t *z, z_vle_t rid, subscriber_callback_t *callback) {
+void z_register_subscription(z_zenoh_t *z, z_vle_t rid, subscriber_callback_t callback) {
   z_subscription_t *sub = (z_subscription_t *) malloc(sizeof(z_subscription_t));
   sub->rid = rid;
   z_res_decl_t *decl = z_get_res_decl_by_rid(z, rid);
@@ -262,7 +262,7 @@ z_get_subscriptions_by_rname(z_zenoh_t *z, const char *rname) {
   }
 }
 
-void z_register_storage(z_zenoh_t *z, z_vle_t rid, subscriber_callback_t *callback, query_handler_t *handler, replies_cleaner_t *cleaner) {
+void z_register_storage(z_zenoh_t *z, z_vle_t rid, subscriber_callback_t callback, query_handler_t handler, replies_cleaner_t cleaner) {
   z_storage_t *sto = (z_storage_t *) malloc(sizeof(z_storage_t));
   sto->rid = rid;
   z_res_decl_t *decl = z_get_res_decl_by_rid(z, rid);
@@ -299,7 +299,7 @@ int z_matching_remote_sub(z_zenoh_t *z, z_vle_t rid) {
   return z_i_map_get(z->remote_subs, rid) != 0 ? 1 : 0;   
 }
 
-void z_register_query(z_zenoh_t *z, z_vle_t qid, z_reply_callback_t *callback) {
+void z_register_query(z_zenoh_t *z, z_vle_t qid, z_reply_callback_t callback) {
   z_replywaiter_t *rw = (z_replywaiter_t *) malloc(sizeof(z_replywaiter_t));
   rw->qid = qid;
   rw->callback = callback;

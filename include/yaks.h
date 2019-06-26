@@ -19,7 +19,7 @@ int y_put(z_zenoh_t *z, const char *path, const unsigned char *data, size_t leng
 int y_remove(z_zenoh_t *z, const char *path, int encoding);
 
 z_sub_p_result_t 
-y_subscribe(z_zenoh_t *z, const char *selector, subscriber_callback_t *callback);
+y_subscribe(z_zenoh_t *z, const char *selector, subscriber_callback_t callback);
 
 
 #endif /* ZENOH_C_H_YAKS_DEFINED_ */

@@ -24,7 +24,7 @@ void default_on_disconnect(void *vz) {
 }
 
 z_zenoh_p_result_t 
-z_open(char* locator, on_disconnect_t *on_disconnect, const z_vec_t* ps) {
+z_open(char* locator, on_disconnect_t on_disconnect, const z_vec_t* ps) {
   z_zenoh_p_result_t r; 
   
   r.value.zenoh = (z_zenoh_t *)malloc(sizeof(z_zenoh_t));
@@ -123,9 +123,9 @@ z_open_wup(char* locator, const char * uname, const char *passwd) {
 void z_close(z_zenoh_t* z) { }
 
 z_sub_p_result_t
-z_declare_subscriber(z_zenoh_t *z, const char *resource,  z_sub_mode_t *sm, subscriber_callback_t *callback) {
+z_declare_subscriber(z_zenoh_t *z, const char *resource,  z_sub_mode_t *sm, subscriber_callback_t callback) {
+  printf("C-Callback: 0x%p\n", (void*)callback);
   z_sub_p_result_t r;
-  printf("Sub mode: %d\n", sm->kind);
   assert((sm->kind > 0) && (sm->kind <= 4));
   r.tag = Z_OK_TAG;
   r.value.sub = (z_sub_t*)malloc(sizeof(z_sub_t));
@@ -168,7 +168,7 @@ z_declare_subscriber(z_zenoh_t *z, const char *resource,  z_sub_mode_t *sm, subs
 
 
 z_sto_p_result_t
-z_declare_storage(z_zenoh_t *z, const char *resource, subscriber_callback_t *callback, query_handler_t *handler, replies_cleaner_t *cleaner) {
+z_declare_storage(z_zenoh_t *z, const char *resource, subscriber_callback_t callback, query_handler_t handler, replies_cleaner_t cleaner) {
   z_sto_p_result_t r;
   r.tag = Z_OK_TAG;
   r.value.sto = (z_sto_t*)malloc(sizeof(z_sto_t));
@@ -284,7 +284,7 @@ int z_stream_compact_data(z_pub_t *pub, const unsigned char *data, size_t length
     xs = subs;
     while (xs != z_list_empty) {
       sub = z_list_head(xs);
-      sub->callback(rid, data, length, info);
+      sub->callback(&rid, data, length, &info);
       xs = z_list_tail(xs);
     }
     z_list_free(&subs);  
@@ -333,7 +333,7 @@ z_stream_data_wo(z_pub_t *pub, const unsigned char *data, size_t length, uint8_t
     xs = subs;
     while (xs != z_list_empty) {
       sub = z_list_head(xs);
-      sub->callback(rid, data, length, info);
+      sub->callback(&rid, data, length, &info);
       xs = z_list_tail(xs);
     }
     z_list_free(&subs);    
@@ -388,7 +388,7 @@ int z_write_data_wo(z_zenoh_t *z, const char* resource, const unsigned char *pay
   info.kind = kind;  
   while (subs != 0) {
     sub = z_list_head(subs);
-    sub->callback(rid, payload, length, info);
+    sub->callback(&rid, payload, length, &info);
     subs = z_list_tail(subs);
   }
   z_payload_header_t ph;
@@ -423,7 +423,7 @@ int z_write_data(z_zenoh_t *z, const char* resource, const unsigned char *payloa
   return z_write_data_wo(z, resource, payload, length, 0, 0);
 }
 
-int z_query(z_zenoh_t *z, const char* resource, const char* predicate, z_reply_callback_t *callback) { 
+int z_query(z_zenoh_t *z, const char* resource, const char* predicate, z_reply_callback_t callback) { 
   z_message_t msg;
   msg.header = Z_QUERY;
   msg.payload.query.pid = z->pid;

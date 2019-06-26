@@ -111,9 +111,9 @@ typedef struct {
   z_res_id_t id; 
 } z_resource_id_t;
 
-typedef void z_reply_callback_t(z_reply_value_t reply);
+typedef void (*z_reply_callback_t)(const z_reply_value_t *reply);
 
-typedef void subscriber_callback_t(z_resource_id_t rid, const unsigned char *data, size_t length, z_data_info_t info);
+typedef void (*subscriber_callback_t)(const z_resource_id_t *rid, const unsigned char *data, size_t length, const z_data_info_t *info);
 
 typedef struct {
   const char* rname;
@@ -125,11 +125,11 @@ typedef struct {
 
 Z_ARRAY_DECLARE(z_resource_t)
 
-typedef z_array_z_resource_t query_handler_t(const char *rname, const char *predicate);
-typedef void replies_cleaner_t(z_array_z_resource_t replies);
+typedef z_array_z_resource_t (*query_handler_t)(const char *rname, const char *predicate);
+typedef void (*replies_cleaner_t)(z_array_z_resource_t replies);
 
 #endif /* ZENOH_C_SWIG */
-typedef void on_disconnect_t(void *z);
+typedef void (*on_disconnect_t)(void *z);
 
 typedef struct {
   z_socket_t sock;
@@ -142,7 +142,7 @@ typedef struct {
   z_array_uint8_t pid;
   z_vle_t qid;
   char *locator;
-  on_disconnect_t *on_disconnect;
+  on_disconnect_t on_disconnect;
   z_list_t *declarations;
   z_list_t *subscriptions;
   z_list_t *storages;
@@ -182,20 +182,20 @@ typedef struct {
 typedef struct {  
   char *rname;
   z_vle_t rid;
-  subscriber_callback_t *callback;
+  subscriber_callback_t callback;
 }  z_subscription_t;
 
 typedef struct {  
   char *rname;
   z_vle_t rid;
-  subscriber_callback_t *callback;
-  query_handler_t *handler;
-  replies_cleaner_t *cleaner;
+  subscriber_callback_t callback;
+  query_handler_t handler;
+  replies_cleaner_t cleaner;
 }  z_storage_t;
 
 typedef struct {  
   z_vle_t qid;
-  z_reply_callback_t *callback;
+  z_reply_callback_t callback;
 } z_replywaiter_t;
 
 z_vle_t z_get_entity_id(z_zenoh_t *z);
@@ -205,17 +205,17 @@ z_res_decl_t *z_get_res_decl_by_rid(z_zenoh_t *z, z_vle_t rid);
 z_res_decl_t *z_get_res_decl_by_rname(z_zenoh_t *z, const char *rname);
 
 
-void z_register_subscription(z_zenoh_t *z, z_vle_t rid,  subscriber_callback_t *callback);
+void z_register_subscription(z_zenoh_t *z, z_vle_t rid,  subscriber_callback_t callback);
 const char * z_get_resource_name(z_zenoh_t *z, z_vle_t rid);
 z_list_t * z_get_subscriptions_by_rid(z_zenoh_t *z, z_vle_t rid);
 z_list_t * z_get_subscriptions_by_rname(z_zenoh_t *z, const char *rname);
 
-void z_register_storage(z_zenoh_t *z, z_vle_t rid, subscriber_callback_t *callback, query_handler_t *handler, replies_cleaner_t *cleaner);
+void z_register_storage(z_zenoh_t *z, z_vle_t rid, subscriber_callback_t callback, query_handler_t handler, replies_cleaner_t cleaner);
 z_list_t * z_get_storages_by_rname(z_zenoh_t *z, const char *rname);
 
 int z_matching_remote_sub(z_zenoh_t *z, z_vle_t rid);
 
-void z_register_query(z_zenoh_t *z, z_vle_t qid, z_reply_callback_t *callback);
+void z_register_query(z_zenoh_t *z, z_vle_t qid, z_reply_callback_t callback);
 z_replywaiter_t *z_get_query(z_zenoh_t *z, z_vle_t qid);
 
 #endif /* ZENOH_C_TYPES_H_ */ 
