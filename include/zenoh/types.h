@@ -113,7 +113,7 @@ typedef struct {
 
 typedef void (*z_reply_callback_t)(const z_reply_value_t *reply);
 
-typedef void (*subscriber_callback_t)(const z_resource_id_t *rid, const unsigned char *data, size_t length, const z_data_info_t *info);
+typedef void (*subscriber_callback_t)(const z_resource_id_t *rid, const unsigned char *data, size_t length, z_data_info_t info, void *arg);
 
 typedef struct {
   const char* rname;
@@ -125,8 +125,8 @@ typedef struct {
 
 Z_ARRAY_DECLARE(z_resource_t)
 
-typedef z_array_z_resource_t (*query_handler_t)(const char *rname, const char *predicate);
-typedef void (*replies_cleaner_t)(z_array_z_resource_t replies);
+typedef z_array_z_resource_t (*query_handler_t)(const char *rname, const char *predicate, void *arg);
+typedef void (*replies_cleaner_t)(z_array_z_resource_t replies, void *arg);
 
 #endif /* ZENOH_C_SWIG */
 typedef void (*on_disconnect_t)(void *z);
@@ -183,6 +183,7 @@ typedef struct {
   char *rname;
   z_vle_t rid;
   subscriber_callback_t callback;
+  void *arg;
 }  z_subscription_t;
 
 typedef struct {  
@@ -191,6 +192,7 @@ typedef struct {
   subscriber_callback_t callback;
   query_handler_t handler;
   replies_cleaner_t cleaner;
+  void *arg;
 }  z_storage_t;
 
 typedef struct {  
@@ -205,12 +207,12 @@ z_res_decl_t *z_get_res_decl_by_rid(z_zenoh_t *z, z_vle_t rid);
 z_res_decl_t *z_get_res_decl_by_rname(z_zenoh_t *z, const char *rname);
 
 
-void z_register_subscription(z_zenoh_t *z, z_vle_t rid,  subscriber_callback_t callback);
+void z_register_subscription(z_zenoh_t *z, z_vle_t rid,  subscriber_callback_t callback, void *arg);
 const char * z_get_resource_name(z_zenoh_t *z, z_vle_t rid);
 z_list_t * z_get_subscriptions_by_rid(z_zenoh_t *z, z_vle_t rid);
 z_list_t * z_get_subscriptions_by_rname(z_zenoh_t *z, const char *rname);
 
-void z_register_storage(z_zenoh_t *z, z_vle_t rid, subscriber_callback_t callback, query_handler_t handler, replies_cleaner_t cleaner);
+void z_register_storage(z_zenoh_t *z, z_vle_t rid, subscriber_callback_t callback, query_handler_t handler, replies_cleaner_t cleaner, void *arg);
 z_list_t * z_get_storages_by_rname(z_zenoh_t *z, const char *rname);
 
 int z_matching_remote_sub(z_zenoh_t *z, z_vle_t rid);

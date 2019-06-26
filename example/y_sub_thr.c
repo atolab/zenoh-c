@@ -19,7 +19,7 @@ void print_stats(volatile struct timeval *start, volatile struct timeval *stop) 
   printf("%f msgs/sec\n", thpt);
 }
 
-void listener(const z_resource_id_t *rid, const unsigned char *data, size_t length, const z_data_info_t *info) {      
+void listener(const z_resource_id_t *rid, const unsigned char *data, size_t length, z_data_info_t info, void *unused) {      
   struct timeval tv;
   if (count == 0) {
     gettimeofday(&tv, 0);
@@ -48,7 +48,7 @@ int main(int argc, char **argv) {
 
   z_start_recv_loop(z);
   printf("Declaring Resource...\n");
-  y_subscribe(z, "/perf/put/thr", &listener);
+  y_subscribe(z, "/perf/put/thr", listener, NULL);
   sleep(60000);
   return 0;
 }
