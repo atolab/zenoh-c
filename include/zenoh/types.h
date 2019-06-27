@@ -111,7 +111,7 @@ typedef struct {
   z_res_id_t id; 
 } z_resource_id_t;
 
-typedef void (*z_reply_callback_t)(const z_reply_value_t *reply);
+typedef void (*z_reply_callback_t)(const z_reply_value_t *reply, void *arg);
 
 typedef void (*subscriber_callback_t)(const z_resource_id_t *rid, const unsigned char *data, size_t length, z_data_info_t info, void *arg);
 
@@ -198,6 +198,7 @@ typedef struct {
 typedef struct {  
   z_vle_t qid;
   z_reply_callback_t callback;
+  void *arg;
 } z_replywaiter_t;
 
 z_vle_t z_get_entity_id(z_zenoh_t *z);
@@ -217,7 +218,7 @@ z_list_t * z_get_storages_by_rname(z_zenoh_t *z, const char *rname);
 
 int z_matching_remote_sub(z_zenoh_t *z, z_vle_t rid);
 
-void z_register_query(z_zenoh_t *z, z_vle_t qid, z_reply_callback_t callback);
+void z_register_query(z_zenoh_t *z, z_vle_t qid, z_reply_callback_t callback, void *arg);
 z_replywaiter_t *z_get_query(z_zenoh_t *z, z_vle_t qid);
 
 #endif /* ZENOH_C_TYPES_H_ */ 

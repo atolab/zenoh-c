@@ -301,10 +301,11 @@ int z_matching_remote_sub(z_zenoh_t *z, z_vle_t rid) {
   return z_i_map_get(z->remote_subs, rid) != 0 ? 1 : 0;   
 }
 
-void z_register_query(z_zenoh_t *z, z_vle_t qid, z_reply_callback_t callback) {
+void z_register_query(z_zenoh_t *z, z_vle_t qid, z_reply_callback_t callback, void *arg) {
   z_replywaiter_t *rw = (z_replywaiter_t *) malloc(sizeof(z_replywaiter_t));
   rw->qid = qid;
   rw->callback = callback;
+  rw->arg = arg;
   z->replywaiters = z_list_cons(z->replywaiters, rw);
 }
 

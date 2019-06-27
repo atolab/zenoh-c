@@ -422,7 +422,7 @@ int z_write_data(z_zenoh_t *z, const char* resource, const unsigned char *payloa
   return z_write_data_wo(z, resource, payload, length, 0, 0);
 }
 
-int z_query(z_zenoh_t *z, const char* resource, const char* predicate, z_reply_callback_t callback) { 
+int z_query(z_zenoh_t *z, const char* resource, const char* predicate, z_reply_callback_t callback, void *arg) { 
   z_message_t msg;
   msg.header = Z_QUERY;
   msg.payload.query.pid = z->pid;
@@ -435,6 +435,6 @@ int z_query(z_zenoh_t *z, const char* resource, const char* predicate, z_reply_c
     z->on_disconnect(z);
     z_send_msg(z->sock, &z->wbuf, &msg);
   }
-  z_register_query(z, msg.payload.query.qid, callback);
+  z_register_query(z, msg.payload.query.qid, callback, arg);
   return 0;
 }

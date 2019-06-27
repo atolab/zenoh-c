@@ -32,6 +32,6 @@ int z_write_data(z_zenoh_t *z, const char* resource, const unsigned char *payloa
 int z_stream_data_wo(z_pub_t *pub, const unsigned char *payload, size_t len, uint8_t encoding, uint8_t kind);
 int z_write_data_wo(z_zenoh_t *z, const char* resource, const unsigned char *payload, size_t len, uint8_t encoding, uint8_t kind);
 
-int z_query(z_zenoh_t *z, const char* resource, const char* predicate, z_reply_callback_t callback);
+int z_query(z_zenoh_t *z, const char* resource, const char* predicate, z_reply_callback_t callback, void *arg);
 
 #endif /* ZENOH_C_H_DEFINED_ */

@@ -3,7 +3,7 @@
 #include "zenoh.h"
 #include "zenoh/recv_loop.h"
 
-void reply_handler(const z_reply_value_t *reply) {
+void reply_handler(const z_reply_value_t *reply, void *unused) {
   z_string_result_t r_s;
   z_iobuf_t buf;
   switch (reply->kind) {
@@ -42,7 +42,7 @@ int main(int argc, char **argv) {
 
   z_start_recv_loop(z);
   printf("Send Query...\n");
-  if (z_query(z, uri, "", reply_handler) != 0) {
+  if (z_query(z, uri, "", reply_handler, NULL) != 0) {
     printf("Unable to query\n");
     return -1;
   }

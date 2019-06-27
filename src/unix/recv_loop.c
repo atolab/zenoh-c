@@ -262,7 +262,7 @@ void* z_recv_loop(void* arg) {
                         } else {
                             rvalue.kind = Z_REPLY_FINAL;
                         }
-                        rw->callback(&rvalue);
+                        rw->callback(&rvalue, rw->arg);
                     }
                     break;
                 case Z_DECLARE:       
