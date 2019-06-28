@@ -47,8 +47,9 @@ z_open(char* locator, on_disconnect_t on_disconnect, const z_vec_t* ps) {
   r.value.zenoh->wbuf = z_iobuf_make(ZENOH_WRITE_BUF_LEN);  
   r.value.zenoh->qid = 0;
   r.value.zenoh->rid = 0;  
-  r.value.zenoh->subscriptions = 0;
   r.value.zenoh->declarations = 0;
+  r.value.zenoh->subscriptions = 0;
+  r.value.zenoh->storages = 0;
   r.value.zenoh->reply_msg_mvar = 0;
 
   Z_ARRAY_S_MAKE(uint8_t, pid, ZENOH_PID_LENGTH);   
@@ -74,6 +75,7 @@ z_open(char* locator, on_disconnect_t on_disconnect, const z_vec_t* ps) {
   r.value.zenoh->pid = pid;  
   r.value.zenoh->declarations = z_list_empty;
   r.value.zenoh->subscriptions = z_list_empty;
+  r.value.zenoh->storages = z_list_empty;
   r.value.zenoh->replywaiters = z_list_empty;
   r.value.zenoh->reply_msg_mvar = z_mvar_empty();
   r.value.zenoh->remote_subs = z_i_map_make(DEFAULT_I_MAP_CAPACITY); 
