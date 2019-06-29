@@ -2,17 +2,21 @@ BUILD_DIR=build
 CROSS_BUILD_DIR=$(BUILD_DIR)/dockcross
 CROSS_SCRIPTS_DIR=dockcross
 
+ifneq ($(ZENOH_DEBUG),)
+	ZENOH_DEBUG_OPT := -DZENOH_DEBUG=$(ZENOH_DEBUG)
+endif
+
 all: cmake-debug make install
 
 release: cmake-release make install
 
 cmake-debug: CMakeLists.txt
 	mkdir -p $(BUILD_DIR)
-	cmake -DCMAKE_BUILD_TYPE=Debug -B$(BUILD_DIR) -H.
+	cmake $(ZENOH_DEBUG_OPT) -DCMAKE_BUILD_TYPE=Debug -B$(BUILD_DIR) -H.
 
 cmake-release: CMakeLists.txt
 	mkdir -p $(BUILD_DIR)
-	cmake -DCMAKE_BUILD_TYPE=Release -B$(BUILD_DIR) -H.
+	cmake $(ZENOH_DEBUG_OPT) -DCMAKE_BUILD_TYPE=Release -B$(BUILD_DIR) -H.
 
 make: $(BUILD_DIR)/Makefile
 	make -C$(BUILD_DIR)
