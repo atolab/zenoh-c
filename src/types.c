@@ -132,6 +132,17 @@ z_array_uint8_t z_iobuf_to_array(z_iobuf_t* buf) {
   return a;
 }
 
+void z_iobuf_compact(z_iobuf_t *buf) {
+  if (buf->r_pos == 0 && buf->w_pos == 0) {
+    return;
+  }
+  size_t len = buf->w_pos - buf->r_pos;
+  uint8_t *cp = buf->buf + buf->r_pos; 
+  memcpy(buf->buf, cp, len);
+  buf->r_pos = 0;
+  buf->w_pos = len;
+}
+
 z_vle_t z_get_entity_id(z_zenoh_t *z) {
   return z->eid++;
 }

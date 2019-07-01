@@ -21,7 +21,10 @@ open_tx_session(const char *locator) {
   char * l = strdup(locator);
   Z_DEBUG_VA("Connecting to: %s:\n", locator);
   char *tx = strtok(l, "/");  
-  assert(strcmp(tx, "tcp") == 0);
+  if (strcmp(tx, "tcp") != 0) {
+    fprintf(stderr, "Locator provided is not for TCP\n");
+    exit(1);
+  }
   char *addr = strdup(strtok(NULL, ":"));  
   char *s_port = strtok(NULL, ":");    
   
@@ -120,7 +123,7 @@ int z_send_iovec(z_socket_t sock, struct iovec* iov, int iovcnt) {
 }
 int z_send_buf(z_socket_t sock, z_iobuf_t* buf) {
   int len =  z_iobuf_readable(buf);
-  uint8_t *ptr = buf->buf;  
+  uint8_t *ptr = buf->buf + buf->r_pos;  
   int n = len;
   int wb;
   do {
@@ -141,8 +144,7 @@ int z_send_buf(z_socket_t sock, z_iobuf_t* buf) {
   return 0;
 }
 
-int z_recv_n(z_socket_t sock, z_iobuf_t* buf, size_t len) {    
-  uint8_t *ptr = buf->buf;  
+int z_recv_n(z_socket_t sock, uint8_t* ptr, size_t len) {      
   int n = len;
   int rb;
   do {    
@@ -152,6 +154,15 @@ int z_recv_n(z_socket_t sock, z_iobuf_t* buf, size_t len) {
     ptr = ptr + (len - n);
   } while (n > 0);
   return 0;
+}
+
+int z_recv_buf(z_socket_t sock, z_iobuf_t *buf) {
+  size_t writable = buf->capacity - buf->w_pos;
+  uint8_t *cp = buf->buf + buf->w_pos;  
+  int rb = 0;
+  rb = recv(sock, cp, writable, 0);
+  buf->w_pos = buf->w_pos +  rb;
+  return rb;
 }
 
 size_t 
@@ -213,7 +224,7 @@ z_recv_msg_na(z_socket_t sock, z_iobuf_t* buf, z_message_p_result_t *r) {
     r->value.error = Z_INSUFFICIENT_IOBUF_SIZE;    
     return;
   }
-  z_recv_n(sock, buf, len);
+  z_recv_n(sock, buf->buf, len);
   buf->r_pos = 0;
   buf->w_pos = len;
   Z_DEBUG(">> \t z_message_decode\n"); 

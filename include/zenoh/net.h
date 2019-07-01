@@ -8,7 +8,9 @@ z_socket_result_t open_tx_session(const char *locator);
 
 int z_send_buf(z_socket_t sock, z_iobuf_t* buf);
 
-int z_recv_n(z_socket_t sock, z_iobuf_t* buf, size_t len);
+int z_recv_buf(z_socket_t sock, z_iobuf_t *buf);
+
+int z_recv_n(z_socket_t sock, uint8_t* buf, size_t len);
 
 size_t z_send_msg(z_socket_t sock, z_iobuf_t* buf, z_message_t* m);
 

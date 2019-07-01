@@ -764,7 +764,7 @@ z_message_decode_na(z_iobuf_t* buf, z_message_p_result_t* r) {
     default:
       r->tag = Z_ERROR_TAG;
       r->value.error = Z_MESSAGE_PARSE_ERROR;
-      Z_ERROR("WARNING: Trying to encode message with unknown ID(%d)", mid); 
+      Z_ERROR("WARNING: Trying to decode message with unknown ID(%d)\n", mid); 
 
   }
 }

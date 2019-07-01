@@ -1,4 +1,4 @@
-
+#include <stdio.h>
 #include "zenoh/types.h"
 #include "zenoh/net.h"
 #include "zenoh/codec.h"
@@ -11,6 +11,7 @@ void* z_recv_loop(void* arg) {
     z_zenoh_t *z = (z_zenoh_t*)arg;
     z_runtime_t *rt = (z_runtime_t*)z->runtime;
     z_message_p_result_t r;
+    z_vle_result_t r_vle;
     z_payload_header_result_t r_ph;
     z_data_info_t info;
     z_declaration_t * decls;
@@ -28,14 +29,38 @@ void* z_recv_loop(void* arg) {
     z_res_decl_t *rd;
     int i;
     int rsn;
+    int jump_to;
     const char *rname;
+    int rb;
+    z_iobuf_clear(&z->rbuf);
     while (rt->running) {
         rname = 0;       
         subs = z_list_empty;
         stos = z_list_empty;
-        lit = z_list_empty;
+        lit = z_list_empty;        
+        if (z_iobuf_readable(&z->rbuf) < 4) {
+            // printf("Not enough data on buffer, reading Socket\n");
+            // printf("Buffer r_pos = %d, w_pos = %d before compact\n", z->rbuf.r_pos, z->rbuf.w_pos);
+            z_iobuf_compact(&z->rbuf);
+            // printf("Buffer r_pos = %d, w_pos = %d AFTER  compact\n", z->rbuf.r_pos, z->rbuf.w_pos);
+            rb = z_recv_buf(z->sock, &z->rbuf);
+            // printf("Buffer r_pos = %d, w_pos = %d AFTER  read\n", z->rbuf.r_pos, z->rbuf.w_pos);
+            // printf("Reveived %d bytes\n", rb);
+        }        
+        r_vle = z_vle_decode(&z->rbuf);        
+        // printf("Decoding message of %zu bytes\n", r_vle.value.vle);        
+        if (r_vle.value.vle > z_iobuf_readable(&z->rbuf)) {
+            // printf("Incomplete messasge on buffer, reading Socket\n");
+            z_iobuf_compact(&z->rbuf);
+            do {
+                z_recv_buf(z->sock, &z->rbuf);                
+            } while (r_vle.value.vle > z_iobuf_readable(&z->rbuf));            
+        }
+        jump_to = z->rbuf.r_pos + r_vle.value.vle;
 
-        z_recv_msg_na(z->sock, &z->rbuf, &r);
+        z_message_decode_na(&z->rbuf, &r);        
+        // z_recv_msg_na(z->sock, &z->rbuf, &r);
+        // printf("Tag = %d\n", r.tag);
         if (r.tag == Z_OK_TAG) {
             mid = Z_MID(r.value.message->header);
             switch (mid) {    
@@ -306,7 +331,9 @@ void* z_recv_loop(void* arg) {
         } else {
             Z_DEBUG("Connection closed due to receive error");
             return 0;
-        }        
+        }
+        // Ensure we jump to the next message if if we did not parse the message.
+        z->rbuf.r_pos = jump_to;
     }
     return 0;
 }

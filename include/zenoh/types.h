@@ -79,6 +79,7 @@ void z_iobuf_put(z_iobuf_t* buf, unsigned char b, unsigned int pos);
 uint8_t z_iobuf_get(z_iobuf_t* buf, unsigned int pos);
 void z_iobuf_clear(z_iobuf_t *buf);
 z_array_uint8_t z_iobuf_to_array(z_iobuf_t* buf);
+void z_iobuf_compact(z_iobuf_t *buf);
 
 #ifndef ZENOH_C_SWIG
 
