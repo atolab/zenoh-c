@@ -88,7 +88,7 @@ z_open(char* locator, on_disconnect_t on_disconnect, const z_vec_t* ps) {
   return r;
 }
 
-z_zenoh_t * 
+z_zenoh_p_result_t 
 z_open_wup(char* locator, const char * uname, const char *passwd) {
   z_zenoh_p_result_t r;
   z_property_t user;
@@ -115,10 +115,8 @@ z_open_wup(char* locator, const char * uname, const char *passwd) {
   } else {
     r = z_open(locator, 0, 0);
   }
-  if (r.tag == Z_ERROR_TAG)
-    return 0;
   
-  return r.value.zenoh;
+  return r;
 }
 
 
