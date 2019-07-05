@@ -3,7 +3,6 @@
 
 #include "zenoh/config.h"
 #include "zenoh/msg.h"
-#include "zenoh/codec.h"
 
 #define Z_SN_KEY 0x01
 #define Z_COMPACT_CLIENT_KEY 0x02

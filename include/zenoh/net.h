@@ -2,7 +2,9 @@
 #define ZENOH_C_NET_H_
 
 #include "zenoh/types.h"
-#include "zenoh/result.h"
+#include "zenoh/codec.h"
+
+Z_RESULT_DECLARE (z_socket_t, socket)
 
 z_socket_result_t open_tx_session(const char *locator);
 

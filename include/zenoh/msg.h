@@ -107,6 +107,7 @@ typedef struct {
   z_vle_t id;
   z_array_uint8_t value;
 } z_property_t;
+Z_RESULT_DECLARE (z_property_t, property)
 
 /*
  * Creates a new property with the given id and name. Notice that the ownership
@@ -286,5 +287,23 @@ typedef struct {
   uint8_t header; 
 } z_message_t;
 
+Z_RESULT_DECLARE (z_accept_t, accept)
+Z_RESULT_DECLARE (z_close_t, close)
+Z_RESULT_DECLARE (z_declare_t, declare)
+Z_RESULT_DECLARE (z_declaration_t, declaration)
+Z_RESULT_DECLARE (z_res_decl_t, res_decl)
+Z_RESULT_DECLARE (z_pub_decl_t, pub_decl)
+Z_RESULT_DECLARE (z_temporal_property_t, temporal_property)
+Z_RESULT_DECLARE (z_sub_mode_t, sub_mode)
+Z_RESULT_DECLARE (z_sub_decl_t, sub_decl)
+Z_RESULT_DECLARE (z_commit_decl_t, commit_decl)
+Z_RESULT_DECLARE (z_result_decl_t, result_decl)
+Z_RESULT_DECLARE (z_compact_data_t, compact_data)
+Z_RESULT_DECLARE (z_payload_header_t, payload_header)
+Z_RESULT_DECLARE (z_stream_data_t, stream_data)
+Z_RESULT_DECLARE (z_write_data_t, write_data)
+Z_RESULT_DECLARE (z_query_t, query)
+Z_RESULT_DECLARE (z_reply_t, reply)
+Z_P_RESULT_DECLARE (z_message_t, message)
 
 #endif /* ZENOH_C_MSG_H_ */

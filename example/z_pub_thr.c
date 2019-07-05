@@ -3,6 +3,7 @@
 #include "zenoh.h"
 #include "zenoh/recv_loop.h"
 
+#include "zenoh/codec.h"
 
 int main(int argc, char **argv) {
   char *locator = strdup("tcp/127.0.0.1:7447");

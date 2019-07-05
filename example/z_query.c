@@ -3,6 +3,8 @@
 #include "zenoh.h"
 #include "zenoh/recv_loop.h"
 
+#include "zenoh/codec.h"
+
 void reply_handler(const z_reply_value_t *reply, void *unused) {
   z_string_result_t r_s;
   z_iobuf_t buf;

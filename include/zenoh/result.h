@@ -1,8 +1,6 @@
 #ifndef ZENOH_C_RESULT_H
 #define ZENOH_C_RESULT_H
 
-#include "zenoh/msg.h"
-
 #define Z_VLE_PARSE_ERROR 0x01
 #define Z_ARRAY_PARSE_ERROR 0x02
 #define Z_STRING_PARSE_ERROR 0x03
@@ -35,8 +33,13 @@ typedef struct { \
     int error; \
   } value;\
 } z_ ## name ## _p_result_t; \
-void z_ ## name ## _p_result_init(z_ ## name ## _p_result_t *r);\
-void z_ ## name ## _p_result_free(z_ ## name ## _p_result_t *r);
+inline static void z_ ## name ## _p_result_init(z_ ## name ## _p_result_t *r) { \
+     r->value.name = (type *)malloc(sizeof(type)); \
+}; \
+inline static void z_ ## name ## _p_result_free(z_ ## name ## _p_result_t *r) { \
+    free(r->value.name); \
+    r->value.name = 0; \
+}; 
 
 #define ASSURE_RESULT(in_r, out_r, e) \
   if (in_r.tag == Z_ERROR_TAG) { \
@@ -70,36 +73,6 @@ enum result_kind {
   Z_ERROR_TAG    
 };
 
-Z_P_RESULT_DECLARE(z_zenoh_t, zenoh)
-Z_P_RESULT_DECLARE(z_sub_t, sub)
-Z_P_RESULT_DECLARE(z_sto_t, sto)
-Z_P_RESULT_DECLARE(z_pub_t, pub)
-
-Z_RESULT_DECLARE (z_vle_t, vle)
-Z_RESULT_DECLARE (z_array_uint8_t, array_uint8)
 Z_RESULT_DECLARE (char*, string)
-Z_RESULT_DECLARE(z_property_t, property)
-
-Z_RESULT_DECLARE (z_socket_t, socket)
-
-Z_RESULT_DECLARE (z_accept_t, accept)
-Z_RESULT_DECLARE (z_close_t, close)
-Z_RESULT_DECLARE (z_declare_t, declare)
-Z_RESULT_DECLARE (z_declaration_t, declaration)
-Z_RESULT_DECLARE (z_res_decl_t, res_decl)
-Z_RESULT_DECLARE (z_pub_decl_t, pub_decl)
-Z_RESULT_DECLARE (z_temporal_property_t, temporal_property)
-Z_RESULT_DECLARE (z_sub_mode_t, sub_mode)
-Z_RESULT_DECLARE (z_sub_decl_t, sub_decl)
-Z_RESULT_DECLARE (z_commit_decl_t, commit_decl)
-Z_RESULT_DECLARE (z_result_decl_t, result_decl)
-Z_RESULT_DECLARE (z_compact_data_t, compact_data)
-Z_RESULT_DECLARE (z_payload_header_t, payload_header)
-Z_RESULT_DECLARE (z_stream_data_t, stream_data)
-Z_RESULT_DECLARE (z_write_data_t, write_data)
-Z_RESULT_DECLARE (z_query_t, query)
-Z_RESULT_DECLARE (z_reply_t, reply)
-Z_P_RESULT_DECLARE (z_message_t, message)
-
 
 #endif /* ZENOH_C_RESULT_H */

@@ -2,6 +2,9 @@
 #include <unistd.h>
 #include "zenoh.h"
 #include "zenoh/recv_loop.h"
+
+#include "zenoh/codec.h"
+
 void listener(const z_resource_id_t *rid, const unsigned char *data, size_t length, z_data_info_t info, void *unused) {    
   z_iobuf_t buf = z_iobuf_wrap_wo((unsigned char *)data, length, 0, length);
   z_string_result_t r_s = z_string_decode(&buf);        

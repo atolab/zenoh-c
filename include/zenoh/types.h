@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <string.h>
 #include "zenoh/config.h"
+#include "zenoh/result.h"
 #include "zenoh/collection.h"
 #include "zenoh/mvar.h"
 
@@ -39,6 +40,7 @@
 #define Z_REPLY_FINAL 2
 
 typedef  size_t  z_vle_t;
+Z_RESULT_DECLARE (z_vle_t, vle)
 
 typedef struct {
     z_vle_t origin;
@@ -53,6 +55,8 @@ typedef struct {
 
 
 Z_ARRAY_DECLARE(uint8_t)
+Z_RESULT_DECLARE (z_array_uint8_t, array_uint8)
+
 typedef struct {
   unsigned int r_pos;
   unsigned int w_pos;
@@ -165,6 +169,11 @@ typedef struct {
   z_vle_t rid;
   z_vle_t id;
 } z_pub_t;
+
+Z_P_RESULT_DECLARE(z_zenoh_t, zenoh)
+Z_P_RESULT_DECLARE(z_sub_t, sub)
+Z_P_RESULT_DECLARE(z_sto_t, sto)
+Z_P_RESULT_DECLARE(z_pub_t, pub)
 
 
 typedef struct {   

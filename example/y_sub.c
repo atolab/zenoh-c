@@ -4,6 +4,8 @@
 #include "zenoh/recv_loop.h"
 #include "yaks.h"
 
+#include "zenoh/codec.h"
+
 void listener(const z_resource_id_t *rid, const unsigned char *data, size_t length, z_data_info_t info, void *unused) {    
   
   z_iobuf_t buf = z_iobuf_wrap((unsigned char *)data, length);
