@@ -65,8 +65,6 @@ void z_ ## name ## _p_result_free(z_ ## name ## _p_result_t *r);
     exit(r.value.error); \
   }
 
-#ifndef ZENOH_C_SWIG
-
 enum result_kind {
   Z_OK_TAG,
   Z_ERROR_TAG    
@@ -76,8 +74,6 @@ Z_P_RESULT_DECLARE(z_zenoh_t, zenoh)
 Z_P_RESULT_DECLARE(z_sub_t, sub)
 Z_P_RESULT_DECLARE(z_sto_t, sto)
 Z_P_RESULT_DECLARE(z_pub_t, pub)
-
-#endif /* ZENOH_C_SWIG */
 
 Z_RESULT_DECLARE (z_vle_t, vle)
 Z_RESULT_DECLARE (z_array_uint8_t, array_uint8)

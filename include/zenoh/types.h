@@ -38,9 +38,8 @@
 #define Z_STORAGE_FINAL 1
 #define Z_REPLY_FINAL 2
 
-#ifndef ZENOH_C_SWIG
 typedef  size_t  z_vle_t;
-/*------------------ Temporal Properties ------------------*/
+
 typedef struct {
     z_vle_t origin;
     z_vle_t period;
@@ -52,7 +51,6 @@ typedef struct {
   z_temporal_property_t tprop;
 } z_sub_mode_t;
 
-#endif /* ZENOH_C_SWIG  */
 
 Z_ARRAY_DECLARE(uint8_t)
 typedef struct {
@@ -80,8 +78,6 @@ uint8_t z_iobuf_get(z_iobuf_t* buf, unsigned int pos);
 void z_iobuf_clear(z_iobuf_t *buf);
 z_array_uint8_t z_iobuf_to_array(z_iobuf_t* buf);
 void z_iobuf_compact(z_iobuf_t *buf);
-
-#ifndef ZENOH_C_SWIG
 
 typedef struct {
   unsigned int flags;
@@ -128,8 +124,6 @@ Z_ARRAY_DECLARE(z_resource_t)
 
 typedef z_array_z_resource_t (*query_handler_t)(const char *rname, const char *predicate, void *arg);
 typedef void (*replies_cleaner_t)(z_array_z_resource_t replies, void *arg);
-
-#endif /* ZENOH_C_SWIG */
 typedef void (*on_disconnect_t)(void *z);
 
 typedef struct {
@@ -154,7 +148,6 @@ typedef struct {
 } z_zenoh_t;
 
 
-#ifndef ZENOH_C_SWIG
 typedef struct {
   z_zenoh_t *z;
   z_vle_t rid;
@@ -172,13 +165,12 @@ typedef struct {
   z_vle_t rid;
   z_vle_t id;
 } z_pub_t;
-#endif /* ZENOH_C_SWIG */
+
 
 typedef struct {   
   z_vle_t rid;
   char* r_name;
 } z_res_decl_t;
-
 
 typedef struct {  
   char *rname;
