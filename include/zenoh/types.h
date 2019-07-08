@@ -114,7 +114,7 @@ typedef struct {
 
 typedef void (*z_reply_callback_t)(const z_reply_value_t *reply, void *arg);
 
-typedef void (*subscriber_callback_t)(const z_resource_id_t *rid, const unsigned char *data, size_t length, z_data_info_t *info, void *arg);
+typedef void (*subscriber_callback_t)(const z_resource_id_t *rid, const unsigned char *data, size_t length, const z_data_info_t *info, void *arg);
 
 typedef struct {
   const char* rname;
