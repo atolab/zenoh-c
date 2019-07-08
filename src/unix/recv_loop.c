@@ -25,7 +25,7 @@ void* z_recv_loop(void* arg) {
     z_storage_t *sto;
     z_replywaiter_t *rw;    
     z_reply_value_t rvalue; 
-    z_array_z_resource_t replies;
+    z_array_resource_t replies;
     z_res_decl_t *rd;
     int i;
     int rsn;
