@@ -18,8 +18,8 @@ void listener(const z_resource_id_t *rid, const unsigned char *data, size_t leng
 }
 
 int main(int argc, char **argv) {
-  Z_ARRAY_S_MAKE(uint8_t, uid, 32);
-  Z_ARRAY_S_MAKE(uint8_t, pwd, 32);
+  Z_ARRAY_S_DEFINE(uint8_t, uid, 32);
+  Z_ARRAY_S_DEFINE(uint8_t, pwd, 32);
   uid.elem = (uint8_t *)"user"; 
   uid.length = strlen("user");
   pwd.elem = (uint8_t *)"password"; 

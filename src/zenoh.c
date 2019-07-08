@@ -52,7 +52,7 @@ z_open(char* locator, on_disconnect_t on_disconnect, const z_vec_t* ps) {
   r.value.zenoh->storages = 0;
   r.value.zenoh->reply_msg_mvar = 0;
 
-  Z_ARRAY_S_MAKE(uint8_t, pid, ZENOH_PID_LENGTH);   
+  Z_ARRAY_S_DEFINE(uint8_t, pid, ZENOH_PID_LENGTH);   
   for (int i = 0; i < ZENOH_PID_LENGTH; ++i) 
     pid.elem[i] = rand() % 255;  
 
@@ -94,8 +94,8 @@ z_open_wup(char* locator, const char * uname, const char *passwd) {
   z_property_t user;
   z_property_t password;
   z_vec_t ps = z_vec_make(2);
-  Z_ARRAY_S_MAKE(uint8_t, uid, 256);
-  Z_ARRAY_S_MAKE(uint8_t, pwd, 256);
+  Z_ARRAY_S_DEFINE(uint8_t, uid, 256);
+  Z_ARRAY_S_DEFINE(uint8_t, pwd, 256);
   if (uname != 0) {
     uid.elem = (uint8_t *)uname; 
     uid.length = strlen(uname);
@@ -135,7 +135,7 @@ z_declare_subscriber(z_zenoh_t *z, const char *resource,  const z_sub_mode_t *sm
   msg.header = Z_DECLARE;
   msg.payload.declare.sn = z->sn++;
   int dnum = 3;
-  Z_ARRAY_S_MAKE(z_declaration_t, decl, dnum)
+  Z_ARRAY_S_DEFINE(z_declaration_t, decl, dnum)
   
   int rid = z_get_resource_id(z, resource);
   r.value.sub->rid = rid;
@@ -178,7 +178,7 @@ z_declare_storage(z_zenoh_t *z, const char *resource, subscriber_callback_t call
   msg.header = Z_DECLARE;
   msg.payload.declare.sn = z->sn++;
   int dnum = 3;
-  Z_ARRAY_S_MAKE(z_declaration_t, decl, dnum)
+  Z_ARRAY_S_DEFINE(z_declaration_t, decl, dnum)
   
   int rid = z_get_resource_id(z, resource);
   r.value.sto->rid = rid;
@@ -218,7 +218,7 @@ z_declare_publisher(z_zenoh_t *z, const char *resource) {
   msg.header = Z_DECLARE;
   msg.payload.declare.sn = z->sn++;
   int dnum = 3;
-  Z_ARRAY_S_MAKE(z_declaration_t, decl, dnum)
+  Z_ARRAY_S_DEFINE(z_declaration_t, decl, dnum)
     
   int rid = z_get_resource_id(z, resource);
   r.value.pub->rid = rid;

@@ -25,7 +25,7 @@ void* z_recv_loop(void* arg) {
     z_storage_t *sto;
     z_replywaiter_t *rw;    
     z_reply_value_t rvalue; 
-    z_array_resource_t *replies;
+    z_array_resource_t replies;
     z_res_decl_t *rd;
     int i;
     int rsn;
@@ -203,21 +203,21 @@ void* z_recv_loop(void* arg) {
                         while (stos != z_list_empty) {
                             rsn = 0;
                             sto = (z_storage_t *) z_list_head(stos);
-                            replies = sto->handler(
+                            sto->handler(
                                 r.value.message->payload.query.rname,
                                 r.value.message->payload.query.predicate,
-                                sto-> arg);
+                                &replies, sto->arg);
                             msg.payload.reply.stoid = z->pid;
-                            for(i = 0; i < replies->length; ++i)
+                            for(i = 0; i < replies.length; ++i)
                             {
                                 msg.payload.reply.rsn = rsn++;
-                                msg.payload.reply.rname = (char *)replies->elem[i].rname;
+                                msg.payload.reply.rname = (char *)replies.elem[i].rname;
                                 z_payload_header_t ph;
                                 ph.flags = Z_ENCODING | Z_KIND;
-                                ph.encoding = replies->elem[i].encoding;
-                                ph.kind = replies->elem[i].kind;
-                                ph.payload = z_iobuf_wrap_wo((unsigned char *)replies->elem[i].data, replies->elem[i].length, 0,  replies->elem[i].length);
-                                z_iobuf_t buf = z_iobuf_make(replies->elem[i].length + 32 );
+                                ph.encoding = replies.elem[i].encoding;
+                                ph.kind = replies.elem[i].kind;
+                                ph.payload = z_iobuf_wrap_wo((unsigned char *)replies.elem[i].data, replies.elem[i].length, 0,  replies.elem[i].length);
+                                z_iobuf_t buf = z_iobuf_make(replies.elem[i].length + 32 );
                                 z_payload_header_encode(&buf, &ph);
                                 msg.payload.reply.payload_header = buf;
   
@@ -243,7 +243,7 @@ void* z_recv_loop(void* arg) {
                                 z_send_msg(z->sock, &z->wbuf, &msg);
                                 z_iobuf_free(&buf);
                             }
-                            sto->cleaner(replies, sto->arg);
+                            sto->cleaner(&replies, sto->arg);
 
                             stos = z_list_tail(stos);
                         }
