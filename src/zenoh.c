@@ -283,7 +283,7 @@ int z_stream_compact_data(z_pub_t *pub, const unsigned char *data, size_t length
     xs = subs;
     while (xs != z_list_empty) {
       sub = z_list_head(xs);
-      sub->callback(&rid, data, length, info, sub->arg);
+      sub->callback(&rid, data, length, &info, sub->arg);
       xs = z_list_tail(xs);
     }
     z_list_free(&subs);  
@@ -332,7 +332,7 @@ z_stream_data_wo(z_pub_t *pub, const unsigned char *data, size_t length, uint8_t
     xs = subs;
     while (xs != z_list_empty) {
       sub = z_list_head(xs);
-      sub->callback(&rid, data, length, info, sub->arg);
+      sub->callback(&rid, data, length, &info, sub->arg);
       xs = z_list_tail(xs);
     }
     z_list_free(&subs);    
@@ -387,7 +387,7 @@ int z_write_data_wo(z_zenoh_t *z, const char* resource, const unsigned char *pay
   info.kind = kind;  
   while (subs != 0) {
     sub = z_list_head(subs);
-    sub->callback(&rid, payload, length, info, sub->arg);
+    sub->callback(&rid, payload, length, &info, sub->arg);
     subs = z_list_tail(subs);
   }
   z_payload_header_t ph;

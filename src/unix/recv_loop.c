@@ -87,13 +87,13 @@ void* z_recv_loop(void* arg) {
                             lit = subs;                    
                             while (lit != z_list_empty) {
                                 sub = z_list_head(lit);
-                                sub->callback(&rid, r_ph.value.payload_header.payload.buf, z_iobuf_readable(&r_ph.value.payload_header.payload), info, sub->arg);
+                                sub->callback(&rid, r_ph.value.payload_header.payload.buf, z_iobuf_readable(&r_ph.value.payload_header.payload), &info, sub->arg);
                                 lit = z_list_tail(lit);
                             }
                             lit = stos;
                             while (lit != z_list_empty) {
                                 sto = z_list_head(lit);
-                                sto->callback(&rid, r_ph.value.payload_header.payload.buf, z_iobuf_readable(&r_ph.value.payload_header.payload), info, sto->arg);
+                                sto->callback(&rid, r_ph.value.payload_header.payload.buf, z_iobuf_readable(&r_ph.value.payload_header.payload), &info, sto->arg);
                                 lit = z_list_tail(lit);
                             }
                             free(r_ph.value.payload_header.payload.buf);
@@ -131,7 +131,7 @@ void* z_recv_loop(void* arg) {
                                 &rid,
                                 r.value.message->payload.compact_data.payload.buf, 
                                 z_iobuf_readable(&r.value.message->payload.compact_data.payload),
-                                info,
+                                &info,
                                 sub->arg);                     
                             lit = z_list_tail(lit);
                         }
@@ -142,7 +142,7 @@ void* z_recv_loop(void* arg) {
                                 &rid,
                                 r.value.message->payload.compact_data.payload.buf, 
                                 z_iobuf_readable(&r.value.message->payload.compact_data.payload),
-                                info,
+                                &info,
                                 sto->arg);
                             lit = z_list_tail(lit);
                         }                        
@@ -169,7 +169,7 @@ void* z_recv_loop(void* arg) {
                                     &rid, 
                                     r_ph.value.payload_header.payload.buf, 
                                     z_iobuf_readable(&r_ph.value.payload_header.payload), 
-                                    info,
+                                    &info,
                                     sub->arg);
                                 subs = z_list_tail(subs);
                             }
@@ -179,7 +179,7 @@ void* z_recv_loop(void* arg) {
                                     &rid, 
                                     r_ph.value.payload_header.payload.buf, 
                                     z_iobuf_readable(&r_ph.value.payload_header.payload), 
-                                    info,
+                                    &info,
                                     sto->arg);
                                 stos = z_list_tail(stos);
                             }

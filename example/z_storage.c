@@ -23,7 +23,7 @@ int remove_data(void *elem, void*args){
   return 0;
 }
 
-void listener(const z_resource_id_t *rid, const unsigned char *data, size_t length, z_data_info_t info, void *unused) {    
+void listener(const z_resource_id_t *rid, const unsigned char *data, size_t length, z_data_info_t *info, void *unused) {    
   printf("Received data: %s\n", rid->id.rname);
   stored = z_list_remove(stored, remove_data, rid->id.rname);
 
