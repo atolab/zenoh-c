@@ -36,7 +36,7 @@ void listener(const z_resource_id_t *rid, const unsigned char *data, size_t leng
   stored = z_list_cons(stored, sample);
 }
 
-z_array_resource_t query_handler(const char *rname, const char *predicate, void *unused) {
+z_array_resource_t *query_handler(const char *rname, const char *predicate, void *unused) {
   printf("Handling Query: %s\n", rname);
   z_list_t *matching_samples = 0;
 
@@ -50,16 +50,16 @@ z_array_resource_t query_handler(const char *rname, const char *predicate, void 
     }
     samples = z_list_tail(samples);
   }
-  Z_ARRAY_S_MAKE_Z_TYPE(resource_t, replies, z_list_len(matching_samples))
+  Z_ARRAY_H_MAKE_Z_TYPE(resource_t, replies, z_list_len(matching_samples))
   samples = matching_samples; 
   int i =0;
   while (samples != z_list_empty) {
     sample = (sample_t *) z_list_head(samples);
-    replies.elem[i].rname = sample->rname;
-    replies.elem[i].data = (const unsigned char *)sample->data;
-    replies.elem[i].length = sample->length;
-    replies.elem[i].encoding = 0;
-    replies.elem[i].kind = 0;
+    replies->elem[i].rname = sample->rname;
+    replies->elem[i].data = (const unsigned char *)sample->data;
+    replies->elem[i].length = sample->length;
+    replies->elem[i].encoding = 0;
+    replies->elem[i].kind = 0;
     samples = z_list_tail(samples);
     ++i;
   }
@@ -67,10 +67,10 @@ z_array_resource_t query_handler(const char *rname, const char *predicate, void 
   return replies;
 }
 
-void replies_cleaner(z_array_resource_t replies, void *unused)
+void replies_cleaner(z_array_resource_t *replies, void *unused)
 {
   printf("Cleaning Replies.\n");
-  Z_ARRAY_S_FREE(replies)
+  Z_ARRAY_H_FREE(replies)
 }
 
 

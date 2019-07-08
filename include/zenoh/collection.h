@@ -27,6 +27,12 @@ z_array_##T * arr = (z_array_##T*)malloc(sizeof(z_array_##T)); \
 arr->length = len; \
 arr->elem = (T*)malloc(len*sizeof(T));
 
+#define Z_ARRAY_H_MAKE_Z_TYPE(T, arr, len) \
+z_array_##T * arr = (z_array_##T*)malloc(sizeof(z_array_##T)); \
+arr->length = len; \
+arr->elem = (z_##T*)malloc(len*sizeof(z_##T));
+
+
 #define Z_ARRAY_S_FREE(arr) \
 free(arr.elem); \
 arr.elem = 0; \

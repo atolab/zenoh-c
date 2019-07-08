@@ -126,8 +126,8 @@ typedef struct {
 
 Z_ARRAY_DECLARE_Z_TYPE(resource_t)
 
-typedef z_array_resource_t (*query_handler_t)(const char *rname, const char *predicate, void *arg);
-typedef void (*replies_cleaner_t)(z_array_resource_t replies, void *arg);
+typedef z_array_resource_t * (*query_handler_t)(const char *rname, const char *predicate, void *arg);
+typedef void (*replies_cleaner_t)(z_array_resource_t *replies, void *arg);
 typedef void (*on_disconnect_t)(void *z);
 
 typedef struct {
