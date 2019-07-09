@@ -297,7 +297,7 @@ int z_stream_compact_data(z_pub_t *pub, const unsigned char *data, size_t length
     z_message_t msg;
     msg.header = Z_COMPACT_DATA;  
     msg.payload.compact_data.rid = pub->rid;    
-    msg.payload.compact_data.payload = z_iobuf_wrap((unsigned char *)data, length);  
+    msg.payload.compact_data.payload = z_iobuf_wrap_wo((unsigned char *)data, length, 0, length);
     msg.payload.compact_data.sn = pub->z->sn++;
     if (z_send_msg(pub->z->sock, &pub->z->wbuf, &msg) == 0) 
       return 0;
@@ -399,7 +399,7 @@ int z_write_data_wo(z_zenoh_t *z, const char* resource, const unsigned char *pay
   ph.flags = Z_ENCODING | Z_KIND;
   ph.encoding = encoding;
   ph.kind = kind;
-  ph.payload = z_iobuf_wrap((unsigned char *)payload, length);
+  ph.payload = z_iobuf_wrap_wo((unsigned char *)payload, length, 0, length);
   z_iobuf_t buf = z_iobuf_make(length + 32 );
   z_payload_header_encode(&buf, &ph);
 
