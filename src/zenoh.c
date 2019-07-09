@@ -72,7 +72,6 @@ z_open(char* locator, on_disconnect_t on_disconnect, const z_vec_t* ps) {
   if (r_msg.tag == Z_ERROR_TAG) {
     r.tag = Z_ERROR_TAG;    
     r.value.error = Z_FAILED_TO_OPEN_SESSION;
-    z_message_p_result_free(&r_msg);
     return r;
   }  
   z_message_p_result_free(&r_msg);
