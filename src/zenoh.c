@@ -434,11 +434,11 @@ int z_query(z_zenoh_t *z, const char* resource, const char* predicate, z_reply_c
   msg.payload.query.rname = (char *)resource;
   msg.payload.query.predicate = (char *)predicate;
   
+  z_register_query(z, msg.payload.query.qid, callback, arg);
   if (z_send_msg(z->sock, &z->wbuf, &msg) != 0) {
     Z_DEBUG("Trying to reconnect....\n");
     z->on_disconnect(z);
     z_send_msg(z->sock, &z->wbuf, &msg);
   }
-  z_register_query(z, msg.payload.query.qid, callback, arg);
   return 0;
 }
