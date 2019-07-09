@@ -121,7 +121,8 @@ typedef struct {
   const unsigned char *data;
   size_t length;
   unsigned short encoding;
-  unsigned short kind; 
+  unsigned short kind;
+  void *context;
 } z_resource_t;
 
 Z_ARRAY_DECLARE_Z_TYPE(resource_t)
