@@ -68,9 +68,14 @@ z_open(char* locator, on_disconnect_t on_disconnect, const z_vec_t* ps) {
   z_send_msg(r_sock.value.socket, &r.value.zenoh->wbuf, &msg);
   z_iobuf_clear(&r.value.zenoh->rbuf);
   z_message_p_result_t r_msg = z_recv_msg(r_sock.value.socket, &r.value.zenoh->rbuf);
-  ASSERT_P_RESULT(r_msg, "Failed to receive accept");
+  
+  if (r_msg.tag == Z_ERROR_TAG) {
+    r.tag = Z_ERROR_TAG;    
+    r.value.error = Z_FAILED_TO_OPEN_SESSION;
+    z_message_p_result_free(&r_msg);
+    return r;
+  }  
   z_message_p_result_free(&r_msg);
-
   r.value.zenoh->sock = r_sock.value.socket;
   r.value.zenoh->pid = pid;  
   r.value.zenoh->declarations = z_list_empty;
