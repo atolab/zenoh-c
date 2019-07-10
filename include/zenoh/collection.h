@@ -26,6 +26,15 @@ arr.elem =  (T*)malloc(len*sizeof(T));
 arr->length = len; \
 arr->elem =  (T*)malloc(len*sizeof(T))
 
+#define Z_ARRAY_S_COPY(T, dst, src) \
+dst.length = src.length; \
+dst.elem = (T*)malloc(dst.length*sizeof(T)); \
+memcpy(dst.elem, src.elem, dst.length);
+
+#define Z_ARRAY_H_COPY(T, dst, src) \
+dst->length = src->length; \
+dst->elem =  (T*)malloc(dst->length*sizeof(T)); \
+memcpy(dst->elem, src->elem, dst->length);
 
 #define Z_ARRAY_S_Z_TYPE_DEFINE(T, arr, len) \
 z_array_##T arr = {len, (z_##T*)malloc(len*sizeof(z_##T))};

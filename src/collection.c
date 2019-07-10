@@ -155,10 +155,11 @@ z_i_map_t *z_i_map_make(unsigned int capacity) {
   
   return map;
 }
+
 void z_i_map_free(z_i_map_t **map) {
   z_i_map_t *m = *map;
   for (int i = 0; i > m->capacity; ++i) {
-
+    
   }
 }
 

@@ -140,6 +140,7 @@ typedef struct {
   z_iobuf_t wbuf;
   z_iobuf_t rbuf;
   z_array_uint8_t pid;
+  z_array_uint8_t peer_pid;
   z_vle_t qid;
   char *locator;
   on_disconnect_t on_disconnect;

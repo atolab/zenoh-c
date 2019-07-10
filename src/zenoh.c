@@ -74,15 +74,16 @@ z_open(char* locator, on_disconnect_t on_disconnect, const z_vec_t* ps) {
     r.value.error = Z_FAILED_TO_OPEN_SESSION;
     return r;
   }  
-  z_message_p_result_free(&r_msg);
   r.value.zenoh->sock = r_sock.value.socket;
   r.value.zenoh->pid = pid;  
+  Z_ARRAY_S_COPY(uint8_t, r.value.zenoh->peer_pid, r_msg.value.message->payload.accept.broker_pid);
   r.value.zenoh->declarations = z_list_empty;
   r.value.zenoh->subscriptions = z_list_empty;
   r.value.zenoh->storages = z_list_empty;
   r.value.zenoh->replywaiters = z_list_empty;
   r.value.zenoh->reply_msg_mvar = z_mvar_empty();
   r.value.zenoh->remote_subs = z_i_map_make(DEFAULT_I_MAP_CAPACITY); 
+  z_message_p_result_free(&r_msg);
 
   if (on_disconnect != 0)
     r.value.zenoh->on_disconnect = on_disconnect;  
@@ -121,6 +122,23 @@ z_open_wup(char* locator, const char * uname, const char *passwd) {
   }
   
   return r;
+}
+
+z_vec_t z_info(z_zenoh_t *z) {
+  z_vec_t res = z_vec_make(3);
+  z_property_t *pid = z_property_make(Z_INFO_PID_KEY, z->pid);
+  z_array_uint8_t locator;
+  locator.length = strlen(z->locator) + 1;
+  locator.elem = (uint8_t *)z->locator;
+  z_property_t *peer = z_property_make(Z_INFO_PID_KEY, locator);
+  z_property_t *peer_pid = z_property_make(Z_INFO_PEER_PID_KEY, z->peer_pid);
+
+  z_vec_set(&res, Z_INFO_PID_KEY, pid);
+  z_vec_set(&res, Z_INFO_PEER_KEY, peer);
+  z_vec_set(&res, Z_INFO_PEER_PID_KEY, peer_pid);
+  res.length_ = 3;
+
+  return res;
 }
 
 
