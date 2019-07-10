@@ -197,11 +197,11 @@ z_res_decl_t *z_get_res_decl_by_rname(z_zenoh_t *z, const char *rname) {
   if (z->declarations == 0) {
     return 0;
   } else {
-    z_res_decl_t *decl = (z_res_decl_t *)z_list_head(z->subscriptions);
+    z_res_decl_t *decl = (z_res_decl_t *)z_list_head(z->declarations);
     z_list_t *decls = z_list_tail(z->declarations);
 
     while (decls != 0 && strcmp(decl->r_name, rname) != 0) {      
-      decls = z_list_head(decls);
+      decl = z_list_head(decls);
       decls = z_list_tail(decls);  
     }    
     if (strcmp(decl->r_name, rname) == 0) return decl;
