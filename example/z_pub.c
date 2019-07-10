@@ -38,7 +38,10 @@ int main(int argc, char **argv) {
   size_t len = z_iobuf_readable(&data);
   printf("Streaming Data...\n");
   while (1) {    
-    z_stream_data(pub, data.buf, len);   
+    z_stream_data(pub, data.buf, len); 
+    z_write_data(z, "/demo/hello/beta", data.buf, len);
+    z_write_data(z, "/demo/hello/gamma", data.buf, len);  
+    z_write_data(z, "/demo/hello/eta", data.buf, len);  
     sleep(1);
   }
 

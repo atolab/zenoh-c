@@ -13,7 +13,7 @@ void reply_handler(const z_reply_value_t *reply, void *unused) {
       buf = z_iobuf_wrap_wo((unsigned char *)reply->data, reply->data_length, 0, reply->data_length);
       r_s = z_string_decode(&buf);        
       if (r_s.tag == Z_OK_TAG) {
-        printf("Received Storage Data. %s:%s\n", reply->rname, r_s.value.string);
+        printf("Received Storage Data. (%s, %s)\n", reply->rname, r_s.value.string);
       } else {
         printf("Received Storage Data. %s:...\n", reply->rname);
       }
@@ -48,6 +48,6 @@ int main(int argc, char **argv) {
     printf("Unable to query\n");
     return -1;
   }
-  sleep(60000);
+  sleep(2);
   return 0;
 }

@@ -9,18 +9,37 @@ typedef struct { \
   T* elem; \
 } z_array_##T;
 
+#define Z_ARRAY_P_DECLARE(T) \
+typedef struct { \
+  unsigned int length; \
+  T** elem; \
+} z_array_##T;
+
 #define Z_ARRAY_DECLARE_Z_TYPE(T) \
 typedef struct { \
   unsigned int length; \
   z_##T* elem; \
 } z_array_##T;
 
+#define Z_ARRAY_P_DECLARE_Z_TYPE(T) \
+typedef struct { \
+  unsigned int length; \
+  z_##T** elem; \
+} z_array_##T;
+
 #define Z_ARRAY_S_DEFINE(T, arr, len) \
 z_array_##T arr = {len, (T*)malloc(len*sizeof(T))};
+
+#define Z_ARRAY_P_S_DEFINE(T, arr, len) \
+z_array_##T arr = {len, (T**)malloc(len*sizeof(T*))};
 
 #define Z_ARRAY_S_INIT(T, arr, len) \
 arr.length = len; \
 arr.elem =  (T*)malloc(len*sizeof(T));
+
+#define Z_ARRAY_P_S_INIT(T, arr, len) \
+arr.length = len; \
+arr.elem =  (T**)malloc(len*sizeof(T*));
 
 #define Z_ARRAY_H_INIT(T, arr, len) \
 arr->length = len; \

@@ -50,16 +50,19 @@ void query_handler(const char *rname, const char *predicate, z_array_resource_t 
     }
     samples = z_list_tail(samples);
   }
-  Z_ARRAY_H_INIT(z_resource_t, replies, z_list_len(matching_samples));
+  replies->length = z_list_len(matching_samples);
+  replies->elem = (z_resource_t**)malloc(sizeof(z_resource_t *) * replies->length);
+  
   samples = matching_samples; 
   int i =0;
   while (samples != z_list_empty) {
     sample = (sample_t *) z_list_head(samples);
-    replies->elem[i].rname = sample->rname;
-    replies->elem[i].data = (const unsigned char *)sample->data;
-    replies->elem[i].length = sample->length;
-    replies->elem[i].encoding = 0;
-    replies->elem[i].kind = 0;
+    replies->elem[i] = (z_resource_t *)malloc(sizeof(z_resource_t));
+    replies->elem[i]->rname = sample->rname;
+    replies->elem[i]->data = (const unsigned char *)sample->data;
+    replies->elem[i]->length = sample->length;
+    replies->elem[i]->encoding = 0;
+    replies->elem[i]->kind = 0;
     samples = z_list_tail(samples);
     ++i;
   }
@@ -69,7 +72,10 @@ void query_handler(const char *rname, const char *predicate, z_array_resource_t 
 void replies_cleaner(z_array_resource_t *replies, void *unused)
 {
   printf("Cleaning Replies.\n");
-  Z_ARRAY_H_FREE(replies);
+  for (int i = 0; i < replies->length; ++i) {
+    free(replies->elem[i]);
+  }  
+
 }
 
 

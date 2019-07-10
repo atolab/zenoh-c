@@ -208,16 +208,21 @@ void* z_recv_loop(void* arg) {
                                 r.value.message->payload.query.predicate,
                                 &replies, sto->arg);
                             msg.payload.reply.stoid = z->pid;
+                            Z_DEBUG_VA("Query replies: %d\n", replies.length);
                             for(i = 0; i < replies.length; ++i)
                             {
                                 msg.payload.reply.rsn = rsn++;
-                                msg.payload.reply.rname = (char *)replies.elem[i].rname;
+                                msg.payload.reply.rname = (char *)replies.elem[i]->rname;
+                                Z_DEBUG_VA("[%d] - Query reply key: %s\n", i, msg.payload.reply.rname);
                                 z_payload_header_t ph;
                                 ph.flags = Z_ENCODING | Z_KIND;
-                                ph.encoding = replies.elem[i].encoding;
-                                ph.kind = replies.elem[i].kind;
-                                ph.payload = z_iobuf_wrap_wo((unsigned char *)replies.elem[i].data, replies.elem[i].length, 0,  replies.elem[i].length);
-                                z_iobuf_t buf = z_iobuf_make(replies.elem[i].length + 32 );
+                                ph.encoding = replies.elem[i]->encoding;
+                                ph.kind = replies.elem[i]->kind;
+                                Z_DEBUG_VA("[%d] - Payload Length: %zu\n", i, replies.elem[i]->length);
+                                Z_DEBUG_VA("[%d] - Payload address: %p\n", i, (void*)replies.elem[i]->data);
+
+                                ph.payload = z_iobuf_wrap_wo((unsigned char *)replies.elem[i]->data, replies.elem[i]->length, 0,  replies.elem[i]->length);
+                                z_iobuf_t buf = z_iobuf_make(replies.elem[i]->length + 32 );
                                 z_payload_header_encode(&buf, &ph);
                                 msg.payload.reply.payload_header = buf;
   

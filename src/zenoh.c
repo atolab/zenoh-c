@@ -499,12 +499,12 @@ int z_query(z_zenoh_t *z, const char* resource, const char* predicate, z_reply_c
       rep.stoid = z->pid.elem;
       rep.stoid_length = z->pid.length;
       rep.rsn = i;
-      rep.rname = replies.elem[i].rname;
+      rep.rname = replies.elem[i]->rname;
       rep.info.flags = Z_ENCODING | Z_KIND;
-      rep.info.encoding = replies.elem[i].encoding;
-      rep.info.kind = replies.elem[i].kind;
-      rep.data = replies.elem[i].data;
-      rep.data_length = replies.elem[i].length;
+      rep.info.encoding = replies.elem[i]->encoding;
+      rep.info.kind = replies.elem[i]->kind;
+      rep.data = replies.elem[i]->data;
+      rep.data_length = replies.elem[i]->length;
       callback(&rep, arg);
     }
     bzero(&rep, sizeof(z_reply_value_t));

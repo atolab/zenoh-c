@@ -125,7 +125,7 @@ typedef struct {
   void *context;
 } z_resource_t;
 
-Z_ARRAY_DECLARE_Z_TYPE(resource_t)
+Z_ARRAY_P_DECLARE_Z_TYPE(resource_t)
 
 typedef void (*query_handler_t)(const char *rname, const char *predicate, z_array_resource_t *replies, void *arg);
 typedef void (*replies_cleaner_t)(z_array_resource_t *replies, void *arg);
