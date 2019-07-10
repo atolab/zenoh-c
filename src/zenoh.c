@@ -285,10 +285,13 @@ int z_stream_compact_data(z_pub_t *pub, const unsigned char *data, size_t length
   const char *rname = z_get_resource_name(pub->z, pub->rid);
   z_resource_id_t rid;
   z_subscription_t *sub;
+  z_storage_t *sto;
   z_list_t *subs = z_list_empty;
+  z_list_t *stos = z_list_empty;
   z_list_t *xs;
   if (rname != 0) {
     subs = z_get_subscriptions_by_rname(pub->z, rname);
+    stos = z_get_storages_by_rname(pub->z, rname);
     rid.kind = Z_STR_RES_ID;
     rid.id.rname = (char *)rname;
   } else {
@@ -296,20 +299,32 @@ int z_stream_compact_data(z_pub_t *pub, const unsigned char *data, size_t length
     rid.kind = Z_INT_RES_ID;
     rid.id.rid = pub->rid;
   }
-    
-  if (subs != z_list_empty) {
+
+  if (subs != 0 || stos != 0) {    
     z_data_info_t info;
-    info.flags = Z_ENCODING | Z_KIND;
-    info.encoding = 0;
-    info.kind = 0;  
-    xs = subs;
-    while (xs != z_list_empty) {
-      sub = z_list_head(xs);
-      sub->callback(&rid, data, length, &info, sub->arg);
-      xs = z_list_tail(xs);
+    bzero(&xs, sizeof(z_data_info_t));
+    
+    if(subs != 0) {
+      xs = subs;
+      while (xs != z_list_empty) {
+        sub = z_list_head(xs);
+        sub->callback(&rid, data, length, &info, sub->arg);
+        xs = z_list_tail(xs);
+      }
+      z_list_free(&subs); 
     }
-    z_list_free(&subs);  
+    
+    if(stos != 0) {
+      xs = stos;
+      while (xs != z_list_empty) {
+        sto = z_list_head(xs);
+        sto->callback(&rid, data, length, &info, sto->arg);
+        xs = z_list_tail(xs);
+      }
+      z_list_free(&stos); 
+    }
   }
+
   if (z_matching_remote_sub(pub->z, pub->rid) == 1) {
     z_message_t msg;
     msg.header = Z_COMPACT_DATA;  
@@ -334,10 +349,13 @@ z_stream_data_wo(z_pub_t *pub, const unsigned char *data, size_t length, uint8_t
   const char *rname = z_get_resource_name(pub->z, pub->rid);
   z_resource_id_t rid;
   z_subscription_t *sub;
+  z_storage_t *sto;
   z_list_t *subs = z_list_empty;
+  z_list_t *stos = z_list_empty;
   z_list_t *xs;
   if (rname != 0) {
     subs = z_get_subscriptions_by_rname(pub->z, rname);
+    stos = z_get_storages_by_rname(pub->z, rname);
     rid.kind = Z_STR_RES_ID;
     rid.id.rname = (char *)rname;
   } else {
@@ -346,19 +364,33 @@ z_stream_data_wo(z_pub_t *pub, const unsigned char *data, size_t length, uint8_t
     rid.id.rid = pub->rid;
   }
 
-  if (subs != 0) {    
+  if (subs != 0 || stos != 0) {    
     z_data_info_t info;
     info.flags = Z_ENCODING | Z_KIND;
     info.encoding = encoding;
     info.kind = kind;  
-    xs = subs;
-    while (xs != z_list_empty) {
-      sub = z_list_head(xs);
-      sub->callback(&rid, data, length, &info, sub->arg);
-      xs = z_list_tail(xs);
+    
+    if(subs != 0) {
+      xs = subs;
+      while (xs != z_list_empty) {
+        sub = z_list_head(xs);
+        sub->callback(&rid, data, length, &info, sub->arg);
+        xs = z_list_tail(xs);
+      }
+      z_list_free(&subs); 
     }
-    z_list_free(&subs);    
+    
+    if(stos != 0) {
+      xs = stos;
+      while (xs != z_list_empty) {
+        sto = z_list_head(xs);
+        sto->callback(&rid, data, length, &info, sto->arg);
+        xs = z_list_tail(xs);
+      }
+      z_list_free(&stos); 
+    }
   }
+
   if (z_matching_remote_sub(pub->z, pub->rid) == 1) {
     z_payload_header_t ph;
     ph.flags = Z_ENCODING | Z_KIND;
@@ -399,7 +431,9 @@ int z_stream_data(z_pub_t *pub, const unsigned char *data, size_t length) {
 
 int z_write_data_wo(z_zenoh_t *z, const char* resource, const unsigned char *payload, size_t length, uint8_t encoding, uint8_t kind) { 
   z_list_t *subs = z_get_subscriptions_by_rname(z, resource);
+  z_list_t *stos = z_get_storages_by_rname(z, resource);
   z_subscription_t *sub;
+  z_storage_t *sto;
   z_resource_id_t rid;
   rid.kind = Z_STR_RES_ID;
   rid.id.rname = (char *)resource;
@@ -411,6 +445,11 @@ int z_write_data_wo(z_zenoh_t *z, const char* resource, const unsigned char *pay
     sub = z_list_head(subs);
     sub->callback(&rid, payload, length, &info, sub->arg);
     subs = z_list_tail(subs);
+  }
+  while (stos != 0) {
+    sto = z_list_head(stos);
+    sto->callback(&rid, payload, length, &info, sto->arg);
+    stos = z_list_tail(stos);
   }
   z_payload_header_t ph;
   ph.flags = Z_ENCODING | Z_KIND;
@@ -445,7 +484,41 @@ int z_write_data(z_zenoh_t *z, const char* resource, const unsigned char *payloa
 }
 
 int z_query(z_zenoh_t *z, const char* resource, const char* predicate, z_reply_callback_t callback, void *arg) { 
+  z_list_t *stos = z_get_storages_by_rname(z, resource);
+  z_storage_t *sto;
   z_message_t msg;
+  z_array_resource_t replies;
+  z_reply_value_t rep;
+  int i;
+  
+  while (stos != 0) {
+    sto = z_list_head(stos);
+    sto->handler(resource, predicate, &replies, arg);
+    for(i = 0; i < replies.length; ++i) {
+      rep.kind = Z_STORAGE_DATA;
+      rep.stoid = z->pid.elem;
+      rep.stoid_length = z->pid.length;
+      rep.rsn = i;
+      rep.rname = replies.elem[i].rname;
+      rep.info.flags = Z_ENCODING | Z_KIND;
+      rep.info.encoding = replies.elem[i].encoding;
+      rep.info.kind = replies.elem[i].kind;
+      rep.data = replies.elem[i].data;
+      rep.data_length = replies.elem[i].length;
+      callback(&rep, arg);
+    }
+    bzero(&rep, sizeof(z_reply_value_t));
+    rep.kind = Z_STORAGE_FINAL;
+    rep.stoid = z->pid.elem;
+    rep.stoid_length = z->pid.length;
+    rep.rsn = i;
+    callback(&rep, arg);
+
+    sto->cleaner(&replies, arg);
+    
+    stos = z_list_tail(stos);
+  }
+
   msg.header = Z_QUERY;
   msg.payload.query.pid = z->pid;
   msg.payload.query.qid = z->qid++;
