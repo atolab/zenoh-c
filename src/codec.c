@@ -448,7 +448,7 @@ z_payload_header_decode_na(z_iobuf_t *buf, z_payload_header_result_t *r) {
 
   if (flags & Z_T_STAMP) {
     Z_DEBUG("Skipping time-stamp\n");
-    z_vle_decode(buf);
+    z_vle_decode(buf);        
     buf->r_pos += 16;
   }
     
@@ -483,6 +483,7 @@ z_payload_header_decode_na(z_iobuf_t *buf, z_payload_header_result_t *r) {
     r_vle = z_vle_decode(buf);
     ASSURE_P_RESULT(r_vle, r, Z_VLE_PARSE_ERROR);
     r->value.payload_header.encoding = r_vle.value.vle;
+    Z_DEBUG("Done Decoding Z_ENCODING\n");
   }
   
   r->value.payload_header.flags = flags;
@@ -710,7 +711,7 @@ z_message_decode_na(z_iobuf_t* buf, z_message_p_result_t* r) {
   uint8_t h = z_iobuf_read(buf);
   r->tag = Z_OK_TAG;
   r->value.message->header = h;
-
+  
   uint8_t mid = Z_MID(h);
   switch (mid) {
     case Z_COMPACT_DATA:
@@ -738,10 +739,12 @@ z_message_decode_na(z_iobuf_t* buf, z_message_p_result_t* r) {
       r->value.message->payload.query = r_q.value.query;
       break;  
     case Z_REPLY:
+      // printf("Parsing Reply\n");
       r->tag = Z_OK_TAG;
       r_r = z_reply_decode(buf, h);
       ASSURE_P_RESULT(r_wd, r, Z_MESSAGE_PARSE_ERROR)
       r->value.message->payload.reply = r_r.value.reply;
+      // printf("Done Parsing Reply\n");
       break;  
     case Z_ACCEPT:
       r->tag = Z_OK_TAG;

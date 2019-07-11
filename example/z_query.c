@@ -14,6 +14,7 @@ void reply_handler(const z_reply_value_t *reply, void *unused) {
       r_s = z_string_decode(&buf);        
       if (r_s.tag == Z_OK_TAG) {
         printf("Received Storage Data. (%s, %s)\n", reply->rname, r_s.value.string);
+        free(r_s.value.string);
       } else {
         printf("Received Storage Data. %s:...\n", reply->rname);
       }
@@ -44,10 +45,14 @@ int main(int argc, char **argv) {
 
   z_start_recv_loop(z);
   printf("Send Query...\n");
-  if (z_query(z, uri, "", reply_handler, NULL) != 0) {
-    printf("Unable to query\n");
-    return -1;
+  // if (z_query(z, uri, "", reply_handler, NULL) != 0) {
+  //   printf("Unable to query\n");
+  //   return -1;
+  // }
+  // sleep(2);
+  while (1) {
+    z_query(z, uri, "", reply_handler, NULL);
+    usleep(100000);
   }
-  sleep(2);
   return 0;
 }

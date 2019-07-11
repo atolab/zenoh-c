@@ -75,6 +75,7 @@ void replies_cleaner(z_array_resource_t *replies, void *unused)
   for (int i = 0; i < replies->length; ++i) {
     free(replies->elem[i]);
   }  
+  free(replies->elem);
 
 }
 
