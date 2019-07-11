@@ -39,18 +39,11 @@ void* z_recv_loop(void* arg) {
         stos = z_list_empty;
         lit = z_list_empty;        
         if (z_iobuf_readable(&z->rbuf) < 4) {
-            // printf("Not enough data on buffer, reading Socket\n");
-            // printf("Buffer r_pos = %d, w_pos = %d before compact\n", z->rbuf.r_pos, z->rbuf.w_pos);
             z_iobuf_compact(&z->rbuf);
-            // printf("Buffer r_pos = %d, w_pos = %d AFTER  compact\n", z->rbuf.r_pos, z->rbuf.w_pos);
             rb = z_recv_buf(z->sock, &z->rbuf);
-            // printf("Buffer r_pos = %d, w_pos = %d AFTER  read\n", z->rbuf.r_pos, z->rbuf.w_pos);
-            // printf("Reveived %d bytes\n", rb);
         }        
         r_vle = z_vle_decode(&z->rbuf);        
-        // printf("Decoding message of %zu bytes\n", r_vle.value.vle);        
-        if (r_vle.value.vle > z_iobuf_readable(&z->rbuf)) {
-            // printf("Incomplete messasge on buffer, reading Socket\n");
+        if (r_vle.value.vle > z_iobuf_readable(&z->rbuf)) {            
             z_iobuf_compact(&z->rbuf);
             do {
                 z_recv_buf(z->sock, &z->rbuf);                
@@ -59,8 +52,6 @@ void* z_recv_loop(void* arg) {
         jump_to = z->rbuf.r_pos + r_vle.value.vle;
 
         z_message_decode_na(&z->rbuf, &r);        
-        // z_recv_msg_na(z->sock, &z->rbuf, &r);
-        // printf("Tag = %d\n", r.tag);
         if (r.tag == Z_OK_TAG) {
             mid = Z_MID(r.value.message->header);
             switch (mid) {    
