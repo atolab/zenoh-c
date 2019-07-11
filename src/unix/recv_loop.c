@@ -33,7 +33,6 @@ void* z_recv_loop(void* arg) {
     const char *rname;
     int rb;
     z_iobuf_clear(&z->rbuf);
-    // printf("--> Available buffer is: %u\n", z_iobuf_readable(&z->rbuf));
     while (rt->running) {
         rname = 0;       
         subs = z_list_empty;
@@ -42,10 +41,9 @@ void* z_recv_loop(void* arg) {
         if (z_iobuf_readable(&z->rbuf) < 4) {
             z_iobuf_compact(&z->rbuf);
             rb = z_recv_buf(z->sock, &z->rbuf);
-            // printf("--> Socket Read Bytes: %d\n", rb);
         }        
         r_vle = z_vle_decode(&z->rbuf);        
-        // printf("Next Message size is: %zu\nAvailable buffer is: %u\n", r_vle.value.vle, z_iobuf_readable(&z->rbuf));
+    
         if (r_vle.value.vle > z_iobuf_readable(&z->rbuf)) {            
             z_iobuf_compact(&z->rbuf);
             do {                
@@ -54,8 +52,6 @@ void* z_recv_loop(void* arg) {
         }
         jump_to = z->rbuf.r_pos + r_vle.value.vle;
 
-        // printf("Available %u bytes to parse.\n", z_iobuf_readable(&z->rbuf));
-        // printf(">>> r_pos = %d, w_pos = %d\n", z->rbuf.r_pos, z->rbuf.w_pos);
         z_message_decode_na(&z->rbuf, &r);        
         if (r.tag == Z_OK_TAG) {
             mid = Z_MID(r.value.message->header);

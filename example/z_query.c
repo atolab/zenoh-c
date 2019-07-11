@@ -45,14 +45,11 @@ int main(int argc, char **argv) {
 
   z_start_recv_loop(z);
   printf("Send Query...\n");
-  // if (z_query(z, uri, "", reply_handler, NULL) != 0) {
-  //   printf("Unable to query\n");
-  //   return -1;
-  // }
-  // sleep(2);
-  while (1) {
-    z_query(z, uri, "", reply_handler, NULL);
-    usleep(100000);
+  if (z_query(z, uri, "", reply_handler, NULL) != 0) {
+    printf("Unable to query\n");
+    return -1;
   }
+  sleep(2);
+  
   return 0;
 }
