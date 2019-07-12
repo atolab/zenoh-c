@@ -130,7 +130,7 @@ z_vec_t z_info(z_zenoh_t *z) {
   z_array_uint8_t locator;
   locator.length = strlen(z->locator) + 1;
   locator.elem = (uint8_t *)z->locator;
-  z_property_t *peer = z_property_make(Z_INFO_PID_KEY, locator);
+  z_property_t *peer = z_property_make(Z_INFO_PEER_KEY, locator);
   z_property_t *peer_pid = z_property_make(Z_INFO_PEER_PID_KEY, z->peer_pid);
 
   z_vec_set(&res, Z_INFO_PID_KEY, pid);
