@@ -6,7 +6,7 @@
 #include "zenoh/recv_loop.h"
 
 
-
+void z_do_nothing() { }
 void* z_recv_loop(void* arg) {
     z_zenoh_t *z = (z_zenoh_t*)arg;
     z_runtime_t *rt = (z_runtime_t*)z->runtime;
@@ -47,7 +47,7 @@ void* z_recv_loop(void* arg) {
         if (r_vle.value.vle > z_iobuf_readable(&z->rbuf)) {            
             z_iobuf_compact(&z->rbuf);
             do {                
-                z_recv_buf(z->sock, &z->rbuf);                                
+                if (z_recv_buf(z->sock, &z->rbuf) <= 0) return 0;                                
             } while (r_vle.value.vle > z_iobuf_readable(&z->rbuf));            
         }
         jump_to = z->rbuf.r_pos + r_vle.value.vle;
@@ -262,7 +262,7 @@ void* z_recv_loop(void* arg) {
                         if (r.value.message->header & Z_F_FLAG) {
                             rvalue.stoid = r.value.message->payload.reply.stoid.elem;
                             rvalue.stoid_length = r.value.message->payload.reply.stoid.length;
-                            rvalue.rsn = r.value.message->payload.reply.rsn;
+                            rvalue.rsn = r.value.message->payload.reply.rsn;                                                                         
                             if (strlen(r.value.message->payload.reply.rname) != 0) {
                                 rvalue.rname = r.value.message->payload.reply.rname;
                                 z_payload_header_decode_na(&r.value.message->payload.reply.payload_header, &r_ph);
@@ -277,22 +277,23 @@ void* z_recv_loop(void* arg) {
                                     Z_DEBUG("Unable to parse Reply Message Payload Header\n");
                                     break;
                                 }
-                                rvalue.kind = Z_STORAGE_DATA;
+                                rvalue.kind = Z_STORAGE_DATA;                                
                             } else {
                                 rvalue.kind = Z_STORAGE_FINAL;
                             }
                         } else {
-                            rvalue.kind = Z_REPLY_FINAL;
-                        }
+                            rvalue.kind = Z_REPLY_FINAL;                            
+                        }                        
+                        printf("");
                         rw->callback(&rvalue, rw->arg);
+                        
                         switch (rvalue.kind) {                                                        
                             case Z_STORAGE_DATA:                                
                                 free((void *)rvalue.data);                                
                                 free((void *)rvalue.rname);
                             case Z_STORAGE_FINAL:
                                 free((void *)rvalue.stoid);
-                            case Z_REPLY_FINAL:
-                                
+                            case Z_REPLY_FINAL:                                
                             
                             default:
                                 break;
@@ -366,7 +367,7 @@ int z_stop_recv_loop(z_zenoh_t *z) {
     c.payload.close.pid = z->pid;
     c.payload.close.reason = Z_PEER_CLOSE;
     z_send_msg(z->sock, &z->wbuf, &c);
-    close(z->sock);
     ((z_runtime_t*)z->runtime)->running = 0;
+    close(z->sock);    
     return 0;
 }

@@ -5,6 +5,7 @@
 #include <time.h>
 #include "zenoh/net.h"
 #include "zenoh.h"
+#include "zenoh/recv_loop.h"
 
 // -- Some refactoring will be done to support multiple platforms / transports
 
