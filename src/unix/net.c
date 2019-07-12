@@ -93,7 +93,7 @@ int z_compute_remaining(struct iovec* iov, int iovcnt, size_t sent) {
   } 
   int j = 0; 
   if (idx + iov[i].iov_len > sent) {
-    iov[0].iov_base = iov[i].iov_base + (sent - idx - iov[i].iov_len );
+    iov[0].iov_base = ((unsigned char*)iov[i].iov_base) + (sent - idx - iov[i].iov_len );
     j = 1;
     while (i < iovcnt) {
       iov[j] = iov[i];

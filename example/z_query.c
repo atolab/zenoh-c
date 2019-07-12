@@ -23,7 +23,7 @@ void reply_handler(const z_reply_value_t *reply, void *unused) {
       printf("Received Storage Final.\n");
       break;
     case Z_REPLY_FINAL:
-      printf("Received Reply Final.\n");
+      printf(".\n");
       break;
   }
 }
@@ -45,11 +45,14 @@ int main(int argc, char **argv) {
 
   z_start_recv_loop(z);
   printf("Send Query...\n");
-  if (z_query(z, uri, "", reply_handler, NULL) != 0) {
-    printf("Unable to query\n");
-    return -1;
+  while (1) {
+
+    if (z_query(z, uri, "", reply_handler, NULL) != 0) {
+      printf("Unable to query\n");
+      return -1;
+    }
+    usleep(100000);
   }
-  sleep(2);
   
   return 0;
 }

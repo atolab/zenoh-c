@@ -77,3 +77,4 @@ void z_message_encode(z_iobuf_t* buf, const z_message_t* m);
 z_message_p_result_t z_message_decode(z_iobuf_t* buf);
 void z_message_decode_na(z_iobuf_t* buf, z_message_p_result_t *r);
 #endif /* ZENOH_C_CODEC_H */
+

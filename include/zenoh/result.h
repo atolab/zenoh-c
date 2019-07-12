@@ -37,11 +37,11 @@ typedef struct { \
 } z_ ## name ## _p_result_t; \
 inline static void z_ ## name ## _p_result_init(z_ ## name ## _p_result_t *r) { \
      r->value.name = (type *)malloc(sizeof(type)); \
-}; \
+} \
 inline static void z_ ## name ## _p_result_free(z_ ## name ## _p_result_t *r) { \
     free(r->value.name); \
     r->value.name = 0; \
-}; 
+} 
 
 #define ASSURE_RESULT(in_r, out_r, e) \
   if (in_r.tag == Z_ERROR_TAG) { \
