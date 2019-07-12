@@ -717,7 +717,7 @@ z_message_decode_na(z_iobuf_t* buf, z_message_p_result_t* r) {
     case Z_COMPACT_DATA:
       r->tag = Z_OK_TAG;
       r_cd = z_compact_data_decode(buf, h);
-      ASSURE_P_RESULT(r_sd, r, Z_MESSAGE_PARSE_ERROR)
+      ASSURE_P_RESULT(r_cd, r, Z_MESSAGE_PARSE_ERROR)
       r->value.message->payload.compact_data = r_cd.value.compact_data;
       break;
     case Z_STREAM_DATA:
