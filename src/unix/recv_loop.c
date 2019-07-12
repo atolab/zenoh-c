@@ -40,7 +40,7 @@ void* z_recv_loop(void* arg) {
         lit = z_list_empty;        
         if (z_iobuf_readable(&z->rbuf) < 4) {
             z_iobuf_compact(&z->rbuf);
-            rb = z_recv_buf(z->sock, &z->rbuf);
+            if (z_recv_buf(z->sock, &z->rbuf) <= 0) return 0;
         }        
         r_vle = z_vle_decode(&z->rbuf);        
     
@@ -297,7 +297,7 @@ void* z_recv_loop(void* arg) {
                             
                             default:
                                 break;
-                        }                        
+                        }        
                     }
                     break;
                 case Z_DECLARE:       
