@@ -31,7 +31,6 @@ void* z_recv_loop(void* arg) {
     int rsn;
     int jump_to;
     const char *rname;
-    int rb;
     z_iobuf_clear(&z->rbuf);
     while (rt->running) {
         rname = 0;       
@@ -284,7 +283,6 @@ void* z_recv_loop(void* arg) {
                         } else {
                             rvalue.kind = Z_REPLY_FINAL;                            
                         }                        
-                        printf("");
                         rw->callback(&rvalue, rw->arg);
                         
                         switch (rvalue.kind) {                                                        

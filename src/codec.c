@@ -735,13 +735,13 @@ z_message_decode_na(z_iobuf_t* buf, z_message_p_result_t* r) {
     case Z_QUERY:
       r->tag = Z_OK_TAG;
       r_q = z_query_decode(buf, h);
-      ASSURE_P_RESULT(r_wd, r, Z_MESSAGE_PARSE_ERROR)
+      ASSURE_P_RESULT(r_q, r, Z_MESSAGE_PARSE_ERROR)
       r->value.message->payload.query = r_q.value.query;
       break;  
     case Z_REPLY:      
       r->tag = Z_OK_TAG;
       r_r = z_reply_decode(buf, h);
-      ASSURE_P_RESULT(r_wd, r, Z_MESSAGE_PARSE_ERROR)
+      ASSURE_P_RESULT(r_r, r, Z_MESSAGE_PARSE_ERROR)
       r->value.message->payload.reply = r_r.value.reply;      
       break;  
     case Z_ACCEPT:
