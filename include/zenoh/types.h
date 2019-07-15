@@ -9,6 +9,8 @@
 #include "zenoh/collection.h"
 #include "zenoh/mvar.h"
 
+const int _z_dummy_arg;
+
 #if (ZENOH_DEBUG == 2)
 #include <stdio.h>
 
@@ -16,13 +18,14 @@
 #define Z_DEBUG_VA(x, ...) printf(x, __VA_ARGS__) 
 #define Z_ERROR(x, ...) printf(x, __VA_ARGS__) 
 #elif (ZENOH_DEBUG == 1)
+
 #define Z_ERROR(x, ...) printf(x, __VA_ARGS__) 
-#define Z_DEBUG_VA(x, ...) 
-#define Z_DEBUG(x) 
+#define Z_DEBUG_VA(x, ...) do { /* nothing */} while (&_z_dummy_arg == 0)
+#define Z_DEBUG(x) do { /* nothing */} while (&_z_dummy_arg == 0);
 #elif (ZENOH_DEBUG == 0)
-#define Z_DEBUG(x) 
-#define Z_DEBUG_VA(x, ...) 
-#define Z_ERROR(x, ...) 
+#define Z_DEBUG(x) do { /* nothing */} while (&_z_dummy_arg == 0)
+#define Z_DEBUG_VA(x, ...) do { /* nothing */} while (&_z_dummy_arg == 0)
+#define Z_ERROR(x, ...) do { /* nothing */} while (&_z_dummy_arg == 0)
 #endif 
 
 # define Z_UNUSED_ARG(z) do {/* null */} while (&z == 0)

@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <stdio.h>
 
+const int _z_dummy_arg = 0;
 
 int count_occurences(const char *src, const char *tok) {
   char *s, *tofree, *token;

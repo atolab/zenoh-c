@@ -105,11 +105,11 @@ int z_compute_remaining(struct iovec* iov, int iovcnt, size_t sent) {
 }
 
 int z_send_iovec(z_socket_t sock, struct iovec* iov, int iovcnt) {
-  size_t len = 0;
+  int len = 0;
   for (int i = 0; i < iovcnt; ++i) 
     len += iov[i].iov_len;
   
-  size_t n = writev(sock, iov, iovcnt);
+  int n = writev(sock, iov, iovcnt);
   Z_DEBUG_VA("z_send_iovec sent %zu of %zu bytes \n", n, len);
   while (n < len) {
     iovcnt = z_compute_remaining(iov, iovcnt, n);

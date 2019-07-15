@@ -91,8 +91,11 @@ void* z_recv_loop(void* arg) {
                             z_list_free(&subs);
                             z_list_free(&stos);
                         }                
-                        else                                                         
-                            Z_DEBUG("Unable to parse StreamData Message Payload Header\n");          
+                        else {                 
+                            do {                                 
+                                Z_DEBUG("Unable to parse StreamData Message Payload Header\n");
+                            } while (0);
+                        }
                         
                     } else {
                         Z_DEBUG_VA("No subscription found for resource %zu\n", r.value.message->payload.stream_data.rid);          
@@ -289,10 +292,13 @@ void* z_recv_loop(void* arg) {
                             case Z_STORAGE_DATA:                                
                                 free((void *)rvalue.data);                                
                                 free((void *)rvalue.rname);
+                                free((void *)rvalue.stoid);
+                                break;
                             case Z_STORAGE_FINAL:
                                 free((void *)rvalue.stoid);
+                                break;
                             case Z_REPLY_FINAL:                                
-                            
+                                break;
                             default:
                                 break;
                         }        
