@@ -482,7 +482,7 @@ int z_query(z_zenoh_t *z, const char* resource, const char* predicate, z_reply_c
   
   while (stos != 0) {
     sto = z_list_head(stos);
-    sto->handler(resource, predicate, &replies, arg);
+    sto->handler(resource, predicate, &replies, sto->arg);
     for(i = 0; i < replies.length; ++i) {
       rep.kind = Z_STORAGE_DATA;
       rep.stoid = z->pid.elem;
@@ -503,7 +503,7 @@ int z_query(z_zenoh_t *z, const char* resource, const char* predicate, z_reply_c
     rep.rsn = i;
     callback(&rep, arg);
 
-    sto->cleaner(&replies, arg);
+    sto->cleaner(&replies, sto->arg);
     
     stos = z_list_tail(stos);
   }
