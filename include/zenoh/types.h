@@ -25,6 +25,11 @@
 #define Z_ERROR(x, ...) 
 #endif 
 
+# define Z_UNUSED_ARG(z) do {/* null */} while (&z == 0)
+# define Z_UNUSED_ARG_2(z1, z2) do {/* null */} while ((&z1 == 0) && (&z2 == 0))
+# define Z_UNUSED_ARG_3(z1, z2, z3) do {/* null */} while ((&z1 == 0) && (&z2 == 0) && (&z3 == 0))
+# define Z_UNUSED_ARG_4(z1, z2, z3, z4) do {/* null */} while ((&z1 == 0) && (&z2 == 0) && (&z3 == 0) && (&z4 == 0))
+# define Z_UNUSED_ARG_5(z1, z2, z3, z4, z5) do {/* null */} while ((&z1 == 0) && (&z2 == 0) && (&z3 == 0) && (&z4 == 0) && (&z5 == 0))
 
 #if (ZENOH_LINUX ==1) || (ZENOH_MACOS == 1) 
 #include "zenoh/unix/types.h"

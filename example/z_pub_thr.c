@@ -19,7 +19,7 @@ int main(int argc, char **argv) {
 
   z_iobuf_t data = z_iobuf_make(len + 8);
   z_vle_encode(&data, len);
-  for (int i = 0; i < len; ++i) 
+  for (unsigned int i = 0; i < len; ++i) 
     z_iobuf_write(&data, i%10);
   
   

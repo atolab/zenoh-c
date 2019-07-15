@@ -7,7 +7,7 @@
 
 char *hexdump(z_array_uint8_t array) {
   char *res = malloc((array.length*2+1)*sizeof(char));
-  for(int i = 0; i < array.length; ++i){
+  for(unsigned int i = 0; i < array.length; ++i){
     sprintf(res + 2*i, "%02x", array.elem[i]);
   }
   res[array.length*2+1] = 0;

@@ -18,7 +18,9 @@ void print_stats(volatile struct timeval *start, volatile struct timeval *stop) 
   printf("%f msgs/sec\n", thpt);
 }
 
-void listener(const z_resource_id_t *rid, const unsigned char *data, size_t length, const z_data_info_t *info, void *unused) {      
+void listener(const z_resource_id_t *rid, const unsigned char *data, size_t length, const z_data_info_t *info, void *arg) {      
+  Z_UNUSED_ARG_5(rid, data, length, info, arg);
+  
   struct timeval tv;
   if (count == 0) {
     gettimeofday(&tv, 0);

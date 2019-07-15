@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <assert.h>
 #include "zenoh/collection.h"
+#include "zenoh/types.h"
 
-int main(int argc, char** arg) {
-
+int main(int argc, char** argv) {
+    Z_UNUSED_ARG_2(argc, argv);
     z_list_t *xs = z_list_of("one");
     z_i_map_t *map = z_i_map_make(5);
 

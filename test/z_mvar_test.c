@@ -3,7 +3,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include "zenoh/types.h"
 #include "zenoh/mvar.h"
+
 
 char msg[256];
 
@@ -30,6 +32,7 @@ void *sleep_and_consume(void *m) {
   return 0;
 }
 int main(int argc, char **argv) {
+  Z_UNUSED_ARG_2(argc, argv);
   pthread_attr_t attr;
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);

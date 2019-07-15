@@ -23,7 +23,8 @@ int remove_data(void *elem, void*args){
   return 0;
 }
 
-void listener(const z_resource_id_t *rid, const unsigned char *data, size_t length, const z_data_info_t *info, void *unused) {    
+void listener(const z_resource_id_t *rid, const unsigned char *data, size_t length, const z_data_info_t *info, void *arg) {    
+  Z_UNUSED_ARG_2(info, arg);
   printf("Received data: %s\n", rid->id.rname);
   stored = z_list_remove(stored, remove_data, rid->id.rname);
 
@@ -36,7 +37,8 @@ void listener(const z_resource_id_t *rid, const unsigned char *data, size_t leng
   stored = z_list_cons(stored, sample);
 }
 
-void query_handler(const char *rname, const char *predicate, z_array_resource_t *replies, void *unused) {
+void query_handler(const char *rname, const char *predicate, z_array_resource_t *replies, void *arg) {
+  Z_UNUSED_ARG_2(predicate, arg);
   printf("Handling Query: %s\n", rname);
   z_list_t *matching_samples = 0;
 
@@ -69,10 +71,11 @@ void query_handler(const char *rname, const char *predicate, z_array_resource_t 
   z_list_free(&matching_samples);
 }
 
-void replies_cleaner(z_array_resource_t *replies, void *unused)
+void replies_cleaner(z_array_resource_t *replies, void *arg)
 {
+  Z_UNUSED_ARG(arg);
   printf("Cleaning Replies.\n");
-  for (int i = 0; i < replies->length; ++i) {
+  for (unsigned int i = 0; i < replies->length; ++i) {
     free(replies->elem[i]);
   }  
   free(replies->elem);

@@ -27,7 +27,7 @@ void* z_recv_loop(void* arg) {
     z_reply_value_t rvalue; 
     z_array_resource_t replies;
     z_res_decl_t *rd;
-    int i;
+    unsigned int i;
     int rsn;
     int jump_to;
     const char *rname;
@@ -301,7 +301,7 @@ void* z_recv_loop(void* arg) {
                 case Z_DECLARE:       
                     Z_DEBUG("Received Z_DECLARE message\n");
                     decls = r.value.message->payload.declare.declarations.elem; 
-                    for (int i = 0; i < r.value.message->payload.declare.declarations.length; ++i) {
+                    for (i = 0; i < r.value.message->payload.declare.declarations.length; ++i) {
                         switch (Z_MID(decls[i].header)) {
                             case Z_RESOURCE_DECL: 
                                 Z_DEBUG("Received declare-resource message\n");

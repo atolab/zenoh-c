@@ -14,16 +14,14 @@ inline z_vec_t z_vec_make(unsigned int capacity) {
 }
 
 z_vec_t z_vec_clone(const z_vec_t* v) {
-  z_vec_t u = z_vec_make(v->capacity_);
-  int i;
-  for (i = 0; i < v->length_; ++i) 
+  z_vec_t u = z_vec_make(v->capacity_);  
+  for (unsigned int i = 0; i < v->length_; ++i) 
     z_vec_append(&u, v->elem_[i]);
   return u;
 }
 
-void z_vec_free(z_vec_t* v) {  
-  int i;
-  for (i = 0; i < v->length_; ++i) 
+void z_vec_free(z_vec_t* v) {    
+  for (unsigned int i = 0; i < v->length_; ++i) 
     free(v->elem_[i]);
   v->length_ = 0;
   v-> capacity_ = 0;
@@ -158,7 +156,7 @@ z_i_map_t *z_i_map_make(unsigned int capacity) {
 
 void z_i_map_free(z_i_map_t **map) {
   z_i_map_t *m = *map;
-  for (int i = 0; i > m->capacity; ++i) {
+  for (unsigned int i = 0; i > m->capacity; ++i) {
     
   }
 }

@@ -5,7 +5,8 @@
 
 #include "zenoh/codec.h"
 
-void reply_handler(const z_reply_value_t *reply, void *unused) {
+void reply_handler(const z_reply_value_t *reply, void *arg) {
+  Z_UNUSED_ARG(arg);
   z_string_result_t r_s;
   z_iobuf_t buf;
   switch (reply->kind) {

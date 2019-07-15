@@ -7,6 +7,9 @@ int y_put(z_zenoh_t *z, const char *path, const unsigned char *data, size_t leng
 }
 
 int y_remove(z_zenoh_t *z, const char *path, int encoding) {
+  Z_UNUSED_ARG(z);
+  Z_UNUSED_ARG(path);
+  Z_UNUSED_ARG(encoding);
   return 0;
 }
 

@@ -1,7 +1,9 @@
 #include <assert.h>
 #include "zenoh/rname.h"
+#include "zenoh/types.h"
 
 int main(int argc, char **argv) {
+  Z_UNUSED_ARG_2(argc, argv);  
   assert(   intersect("/", "/"));
   assert(   intersect("/a", "/a"));
   assert(   intersect("/a/", "/a"));

@@ -143,7 +143,9 @@ z_vec_t z_info(z_zenoh_t *z) {
 }
 
 
-void z_close(z_zenoh_t* z) { }
+void z_close(z_zenoh_t* z) { 
+  Z_UNUSED_ARG(z);
+}
 
 z_sub_p_result_t
 z_declare_subscriber(z_zenoh_t *z, const char *resource,  const z_sub_mode_t *sm, subscriber_callback_t callback, void *arg) {
@@ -490,7 +492,7 @@ int z_query(z_zenoh_t *z, const char* resource, const char* predicate, z_reply_c
   z_message_t msg;
   z_array_resource_t replies;
   z_reply_value_t rep;
-  int i;
+  unsigned int i;
   
   while (stos != 0) {
     sto = z_list_head(stos);
