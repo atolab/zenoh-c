@@ -267,21 +267,7 @@ z_declare_publisher(z_zenoh_t *z, const char *resource) {
   Z_ARRAY_S_FREE(decl);
   z_register_res_decl(z, rid, resource);
   // -- This will be refactored to use mvars
-  return r;
-#if 0
-  z_message_p_result_t r_msg;
-  r_msg = z_recv_msg(z->sock, &z->rbuf);
-  ASSERT_P_RESULT(r_msg, "Failed to receive message");
-  
-  if (Z_MID(r_msg.value.message->header) == Z_DECLARE) {
-    Z_DEBUG ("Declaration was accepted");
-    z_message_p_result_free(&r_msg);
-    return 0;
-  }
-  z_message_p_result_free(&r_msg);
-  return -1;
-#endif 
-  
+  return r;  
 }
 
 int z_stream_compact_data(z_pub_t *pub, const unsigned char *data, size_t length) { 

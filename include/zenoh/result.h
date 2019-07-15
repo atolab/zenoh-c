@@ -71,8 +71,8 @@ inline static void z_ ## name ## _p_result_free(z_ ## name ## _p_result_t *r) { 
   }
 
 enum result_kind {
-  Z_OK_TAG,
-  Z_ERROR_TAG    
+  Z_OK_TAG = 0,
+  Z_ERROR_TAG = 1   
 };
 
 Z_RESULT_DECLARE (char*, string)
