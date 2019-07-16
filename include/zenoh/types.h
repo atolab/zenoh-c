@@ -194,6 +194,7 @@ typedef struct {
 typedef struct {  
   char *rname;
   z_vle_t rid;
+  z_vle_t id;
   subscriber_callback_t callback;
   void *arg;
 }  z_subscription_t;
@@ -201,6 +202,7 @@ typedef struct {
 typedef struct {  
   char *rname;
   z_vle_t rid;
+  z_vle_t id;
   subscriber_callback_t callback;
   query_handler_t handler;
   replies_cleaner_t cleaner;
@@ -220,13 +222,16 @@ z_res_decl_t *z_get_res_decl_by_rid(z_zenoh_t *z, z_vle_t rid);
 z_res_decl_t *z_get_res_decl_by_rname(z_zenoh_t *z, const char *rname);
 
 
-void z_register_subscription(z_zenoh_t *z, z_vle_t rid,  subscriber_callback_t callback, void *arg);
+void z_register_subscription(z_zenoh_t *z, z_vle_t rid, z_vle_t id, subscriber_callback_t callback, void *arg);
 const char * z_get_resource_name(z_zenoh_t *z, z_vle_t rid);
 z_list_t * z_get_subscriptions_by_rid(z_zenoh_t *z, z_vle_t rid);
 z_list_t * z_get_subscriptions_by_rname(z_zenoh_t *z, const char *rname);
+void z_unregister_subscription(z_sub_t *s) ;
 
-void z_register_storage(z_zenoh_t *z, z_vle_t rid, subscriber_callback_t callback, query_handler_t handler, replies_cleaner_t cleaner, void *arg);
+void z_register_storage(z_zenoh_t *z, z_vle_t rid, z_vle_t id, subscriber_callback_t callback, query_handler_t handler, replies_cleaner_t cleaner, void *arg);
+z_list_t * z_get_storages_by_rid(z_zenoh_t *z, z_vle_t rid);
 z_list_t * z_get_storages_by_rname(z_zenoh_t *z, const char *rname);
+void z_unregister_storage(z_sto_t *s) ;
 
 int z_matching_remote_sub(z_zenoh_t *z, z_vle_t rid);
 

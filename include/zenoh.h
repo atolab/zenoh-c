@@ -40,4 +40,8 @@ int z_write_data_wo(z_zenoh_t *z, const char* resource, const unsigned char *pay
 
 int z_query(z_zenoh_t *z, const char* resource, const char* predicate, z_reply_callback_t callback, void *arg);
 
+int z_undeclare_subscriber(z_sub_t *z);
+int z_undeclare_publisher(z_pub_t *z);
+int z_undeclare_storage(z_sto_t *z);
+
 #endif /* ZENOH_C_H_DEFINED_ */

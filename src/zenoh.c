@@ -154,7 +154,8 @@ z_declare_subscriber(z_zenoh_t *z, const char *resource,  const z_sub_mode_t *sm
   r.tag = Z_OK_TAG;
   r.value.sub = (z_sub_t*)malloc(sizeof(z_sub_t));
   r.value.sub->z = z;
-  r.value.sub->id = z_get_entity_id(z);
+  int id = z_get_entity_id(z);
+  r.value.sub->id = id;
 
   z_message_t msg;
   msg.header = Z_DECLARE;
@@ -185,11 +186,40 @@ z_declare_subscriber(z_zenoh_t *z, const char *resource,  const z_sub_mode_t *sm
   } 
   Z_ARRAY_S_FREE(decl);
   z_register_res_decl(z, rid, resource);
-  z_register_subscription(z, rid, callback, arg);
+  z_register_subscription(z, rid, id, callback, arg);
   // -- This will be refactored to use mvars
   return r;
 }
 
+int z_undeclare_subscriber(z_sub_t *sub) {
+  z_unregister_subscription(sub);
+  z_list_t * subs = z_get_subscriptions_by_rid(sub->z, sub->rid);
+  if(subs == z_list_empty) {
+    z_message_t msg;
+    msg.header = Z_DECLARE;
+    msg.payload.declare.sn = sub->z->sn++;
+    int dnum = 2;
+    Z_ARRAY_S_DEFINE(z_declaration_t, decl, dnum)
+    
+    decl.elem[0].header = Z_FORGET_SUBSCRIBER_DECL;
+    decl.elem[0].payload.forget_sub.rid = sub->rid;
+    
+    decl.elem[1].header = Z_COMMIT_DECL;
+    decl.elem[1].payload.commit.cid = sub->z->cid++;
+    
+    msg.payload.declare.declarations = decl; 
+
+    if (z_send_msg(sub->z->sock, &sub->z->wbuf, &msg) != 0) {
+        Z_DEBUG("Trying to reconnect....\n");
+        sub->z->on_disconnect(sub->z);
+        z_send_msg(sub->z->sock, &sub->z->wbuf, &msg);
+    } 
+    Z_ARRAY_S_FREE(decl);
+  }
+  z_list_free(&subs);
+  // TODO free subscription
+  return 0;
+}
 
 z_sto_p_result_t
 z_declare_storage(z_zenoh_t *z, const char *resource, subscriber_callback_t callback, query_handler_t handler, replies_cleaner_t cleaner, void *arg) {
@@ -197,7 +227,8 @@ z_declare_storage(z_zenoh_t *z, const char *resource, subscriber_callback_t call
   r.tag = Z_OK_TAG;
   r.value.sto = (z_sto_t*)malloc(sizeof(z_sto_t));
   r.value.sto->z = z;
-  r.value.sto->id = z_get_entity_id(z);
+  z_vle_t id = z_get_entity_id(z);
+  r.value.sto->id = id;
 
   z_message_t msg;
   msg.header = Z_DECLARE;
@@ -226,9 +257,39 @@ z_declare_storage(z_zenoh_t *z, const char *resource, subscriber_callback_t call
   } 
   Z_ARRAY_S_FREE(decl);
   z_register_res_decl(z, rid, resource);
-  z_register_storage(z, rid, callback, handler, cleaner, arg);
+  z_register_storage(z, rid, id, callback, handler, cleaner, arg);
   // -- This will be refactored to use mvars
   return r;
+}
+
+int z_undeclare_storage(z_sto_t *sto) {
+  z_unregister_storage(sto);
+  z_list_t * stos = z_get_storages_by_rid(sto->z, sto->rid);
+  if(stos == z_list_empty) {
+    z_message_t msg;
+    msg.header = Z_DECLARE;
+    msg.payload.declare.sn = sto->z->sn++;
+    int dnum = 2;
+    Z_ARRAY_S_DEFINE(z_declaration_t, decl, dnum)
+    
+    decl.elem[0].header = Z_FORGET_STORAGE_DECL;
+    decl.elem[0].payload.forget_sto.rid = sto->rid;
+    
+    decl.elem[1].header = Z_COMMIT_DECL;
+    decl.elem[1].payload.commit.cid = sto->z->cid++;
+    
+    msg.payload.declare.declarations = decl; 
+
+    if (z_send_msg(sto->z->sock, &sto->z->wbuf, &msg) != 0) {
+        Z_DEBUG("Trying to reconnect....\n");
+        sto->z->on_disconnect(sto->z);
+        z_send_msg(sto->z->sock, &sto->z->wbuf, &msg);
+    } 
+    Z_ARRAY_S_FREE(decl);
+  }
+  z_list_free(&stos);
+  // TODO free storages
+  return 0;
 }
 
 z_pub_p_result_t 
@@ -268,6 +329,32 @@ z_declare_publisher(z_zenoh_t *z, const char *resource) {
   z_register_res_decl(z, rid, resource);
   // -- This will be refactored to use mvars
   return r;  
+}
+
+int z_undeclare_publisher(z_pub_t *pub) {
+  z_message_t msg;
+  msg.header = Z_DECLARE;
+  msg.payload.declare.sn = pub->z->sn++;
+  int dnum = 2;
+  Z_ARRAY_S_DEFINE(z_declaration_t, decl, dnum)
+  
+  decl.elem[0].header = Z_FORGET_PUBLISHER_DECL;
+  decl.elem[0].payload.forget_pub.rid = pub->rid;
+  
+  decl.elem[1].header = Z_COMMIT_DECL;
+  decl.elem[1].payload.commit.cid = pub->z->cid++;
+  
+  msg.payload.declare.declarations = decl; 
+
+  if (z_send_msg(pub->z->sock, &pub->z->wbuf, &msg) != 0) {
+      Z_DEBUG("Trying to reconnect....\n");
+      pub->z->on_disconnect(pub->z);
+      z_send_msg(pub->z->sock, &pub->z->wbuf, &msg);
+  } 
+  Z_ARRAY_S_FREE(decl);
+
+  // TODO manage multi publishers
+  return 0;
 }
 
 int z_stream_compact_data(z_pub_t *pub, const unsigned char *data, size_t length) { 

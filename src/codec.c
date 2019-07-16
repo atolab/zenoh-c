@@ -263,6 +263,15 @@ z_declaration_encode(z_iobuf_t *buf, z_declaration_t *d) {
       z_vle_encode(buf, d->payload.sub.rid);
       z_sub_mode_encode(buf, &d->payload.sub.sub_mode);
       break;
+    case Z_FORGET_PUBLISHER_DECL:
+      z_vle_encode(buf, d->payload.forget_pub.rid);
+      break;
+    case Z_FORGET_STORAGE_DECL:
+      z_vle_encode(buf, d->payload.forget_sto.rid);
+      break;
+    case Z_FORGET_SUBSCRIBER_DECL:
+      z_vle_encode(buf, d->payload.forget_sub.rid);
+      break;
     case Z_RESULT_DECL:  
       z_iobuf_write(buf, d->payload.result.cid);
       z_iobuf_write(buf, d->payload.result.status);
@@ -308,6 +317,21 @@ z_declaration_decode_na(z_iobuf_t *buf, z_declaration_result_t *r) {
       ASSURE_P_RESULT(r_sm, r, Z_MESSAGE_PARSE_ERROR)
       r->value.declaration.payload.sub.rid = r_vle.value.vle;
       r->value.declaration.payload.sub.sub_mode = r_sm.value.sub_mode; 
+      break;
+    case Z_FORGET_PUBLISHER_DECL:
+      r_vle = z_vle_decode(buf);
+      ASSURE_P_RESULT(r_vle, r, Z_VLE_PARSE_ERROR)
+      r->value.declaration.payload.forget_pub.rid = r_vle.value.vle;
+      break;
+    case Z_FORGET_STORAGE_DECL:
+      r_vle = z_vle_decode(buf);
+      ASSURE_P_RESULT(r_vle, r, Z_VLE_PARSE_ERROR)
+      r->value.declaration.payload.forget_sto.rid = r_vle.value.vle;
+      break;
+    case Z_FORGET_SUBSCRIBER_DECL:
+      r_vle = z_vle_decode(buf);
+      ASSURE_P_RESULT(r_vle, r, Z_VLE_PARSE_ERROR)
+      r->value.declaration.payload.forget_sub.rid = r_vle.value.vle;
       break;
     case Z_RESULT_DECL:  
       r->value.declaration.payload.result.cid = z_iobuf_read(buf);

@@ -210,16 +210,30 @@ z_res_decl_t *z_get_res_decl_by_rname(z_zenoh_t *z, const char *rname) {
   }
 }
 
-
-void z_register_subscription(z_zenoh_t *z, z_vle_t rid, subscriber_callback_t callback, void *arg) {
+void z_register_subscription(z_zenoh_t *z, z_vle_t rid, z_vle_t id, subscriber_callback_t callback, void *arg) {
   z_subscription_t *sub = (z_subscription_t *) malloc(sizeof(z_subscription_t));
   sub->rid = rid;
+  sub->id = id;
   z_res_decl_t *decl = z_get_res_decl_by_rid(z, rid);
   assert(decl != 0);
   sub->rname = strdup(decl->r_name);
   sub->callback = callback;
   sub->arg = arg;
   z->subscriptions = z_list_cons(z->subscriptions, sub);
+}
+
+int sub_predicate(void *elem, void *arg) {
+  z_sub_t *s = (z_sub_t *)arg;
+  z_subscription_t *sub = (z_subscription_t *)elem;
+  if(sub->id == s->id) {
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
+void z_unregister_subscription(z_sub_t *s) {
+  s->z->subscriptions = z_list_remove(s->z->subscriptions, sub_predicate, s);
 }
 
 const char *z_get_resource_name(z_zenoh_t *z, z_vle_t rid) {
@@ -234,23 +248,25 @@ const char *z_get_resource_name(z_zenoh_t *z, z_vle_t rid) {
   }
   return 0;
 }
-z_list_t *z_get_subscriptions_by_rid(z_zenoh_t *z, z_vle_t rid) {
-  if (z->subscriptions == z_list_empty) {
-    return z_list_empty;
-  }
+
+z_list_t *
+z_get_subscriptions_by_rid(z_zenoh_t *z, z_vle_t rid) {
+  z_list_t *subs = z_list_empty;
+  if (z->subscriptions == 0) {
+    return subs;
+  }  
   else {
+    z_subscription_t *sub = 0;
     z_list_t *subs = z->subscriptions;
-    z_list_t *msubs = z_list_empty;
-    z_subscription_t *sub;
-    
-    while (subs != z_list_empty) {      
-      sub = z_list_head(subs);
-      if (sub->rid == rid) {
-        z_list_cons(msubs, sub);
-      }
-      subs = z_list_tail(subs);  
-    }    
-    return msubs;    
+    z_list_t *xs = z_list_empty;
+    do {      
+      sub = (z_subscription_t *)z_list_head(subs);
+      subs = z_list_tail(subs);            
+      if (sub->rid == rid) {        
+        xs = z_list_cons(xs, sub);
+      }       
+    } while (subs != 0);          
+    return xs;
   }
 }
 
@@ -275,9 +291,10 @@ z_get_subscriptions_by_rname(z_zenoh_t *z, const char *rname) {
   }
 }
 
-void z_register_storage(z_zenoh_t *z, z_vle_t rid, subscriber_callback_t callback, query_handler_t handler, replies_cleaner_t cleaner, void *arg) {
+void z_register_storage(z_zenoh_t *z, z_vle_t rid, z_vle_t id, subscriber_callback_t callback, query_handler_t handler, replies_cleaner_t cleaner, void *arg) {
   z_storage_t *sto = (z_storage_t *) malloc(sizeof(z_storage_t));
   sto->rid = rid;
+  sto->id = id;
   z_res_decl_t *decl = z_get_res_decl_by_rid(z, rid);
   assert(decl != 0);
   sto->rname = strdup(decl->r_name);
@@ -286,6 +303,41 @@ void z_register_storage(z_zenoh_t *z, z_vle_t rid, subscriber_callback_t callbac
   sto->cleaner = cleaner;
   sto->arg = arg;
   z->storages = z_list_cons(z->storages, sto);
+}
+
+int sto_predicate(void *elem, void *arg) {
+  z_sto_t *s = (z_sto_t *)arg;
+  z_storage_t *sto = (z_storage_t *)elem;
+  if(sto->id == s->id) {
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
+void z_unregister_storage(z_sto_t *s) {
+  s->z->storages = z_list_remove(s->z->storages, sto_predicate, s);
+}
+
+z_list_t *
+z_get_storages_by_rid(z_zenoh_t *z, z_vle_t rid) {
+  z_list_t *stos = z_list_empty;
+  if (z->storages == 0) {
+    return stos;
+  }
+  else {
+    z_storage_t *sto = 0;
+    z_list_t *stos = z->storages;
+    z_list_t *xs = z_list_empty;
+    do {
+      sto = (z_storage_t *)z_list_head(stos);
+      stos = z_list_tail(stos);
+      if (sto->rid == rid) {
+        xs = z_list_cons(xs, sto);
+      }
+    } while (stos != 0);
+    return xs;
+  }
 }
 
 z_list_t *

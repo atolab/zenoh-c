@@ -159,17 +159,31 @@ typedef struct {
   z_vle_t rid;    
 } z_pub_decl_t;
 
+/*------------------ Forget Publisher Message ------------------*/
+typedef struct {   
+  z_vle_t rid; 
+} z_forget_pub_decl_t;
+
 /*------------------ Declare Storage ------------------*/
 typedef struct {   
   z_vle_t rid;    
 } z_storage_decl_t;
 
+/*------------------ Forget Storage Message ------------------*/
+typedef struct {   
+  z_vle_t rid; 
+} z_forget_sto_decl_t;
 
 /*------------------ Declare Subscriber Message ------------------*/
 typedef struct {   
   z_vle_t rid;  
   z_sub_mode_t sub_mode;  
 } z_sub_decl_t;
+
+/*------------------ Forget Subscriber Message ------------------*/
+typedef struct {   
+  z_vle_t rid; 
+} z_forget_sub_decl_t;
 
 /*------------------ Declaration Commit Message ------------------*/
 typedef struct {  
@@ -195,6 +209,9 @@ typedef struct {
     z_pub_decl_t pub;
     z_sub_decl_t sub;
     z_storage_decl_t storage;
+    z_forget_pub_decl_t forget_pub;
+    z_forget_sub_decl_t forget_sub;
+    z_forget_sto_decl_t forget_sto;
     z_commit_decl_t commit;
     z_result_decl_t result;
   } payload;  
