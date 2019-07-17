@@ -244,6 +244,7 @@ typedef struct {
   uint8_t src_id[16];
   uint8_t brk_id[16];
   uint8_t flags;  
+  z_timestamp_t tstamp;
   z_iobuf_t payload;
 } z_payload_header_t;
 

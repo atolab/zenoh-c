@@ -378,7 +378,7 @@ int z_stream_compact_data(z_pub_t *pub, const unsigned char *data, size_t length
 
   if (subs != 0 || stos != 0) {    
     z_data_info_t info;
-    bzero(&xs, sizeof(z_data_info_t));
+    bzero(&info, sizeof(z_data_info_t));
     
     if(subs != 0) {
       xs = subs;

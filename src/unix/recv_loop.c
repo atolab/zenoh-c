@@ -75,6 +75,9 @@ void* z_recv_loop(void* arg) {
                             info.flags = r_ph.value.payload_header.flags;                            
                             info.encoding = r_ph.value.payload_header.encoding;
                             info.kind = r_ph.value.payload_header.kind; 
+                            if (info.flags & Z_T_STAMP) {
+                                info.tstamp = r_ph.value.payload_header.tstamp;
+                            }
                             lit = subs;                    
                             while (lit != z_list_empty) {
                                 sub = z_list_head(lit);
@@ -157,6 +160,9 @@ void* z_recv_loop(void* arg) {
                             info.flags = r_ph.value.payload_header.flags;                            
                             info.encoding = r_ph.value.payload_header.encoding;
                             info.kind = r_ph.value.payload_header.kind;     
+                            if (info.flags & Z_T_STAMP) {
+                                info.tstamp = r_ph.value.payload_header.tstamp;
+                            }
                             while (subs != z_list_empty) {
                                 sub = (z_subscription_t *) z_list_head(subs);
                                 sub->callback(
@@ -272,6 +278,9 @@ void* z_recv_loop(void* arg) {
                                     rvalue.info.flags = r_ph.value.payload_header.flags;
                                     rvalue.info.encoding = r_ph.value.payload_header.encoding;
                                     rvalue.info.kind = r_ph.value.payload_header.kind;
+                                    if (info.flags & Z_T_STAMP) {
+                                        info.tstamp = r_ph.value.payload_header.tstamp;
+                                    }
                                     rvalue.data = r_ph.value.payload_header.payload.buf;
                                     rvalue.data_length = z_iobuf_readable(&r_ph.value.payload_header.payload);
                                 }

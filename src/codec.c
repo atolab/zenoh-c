@@ -468,9 +468,11 @@ z_payload_header_decode_na(z_iobuf_t *buf, z_payload_header_result_t *r) {
     z_iobuf_read_to_n(buf, r->value.payload_header.src_id, 16);
   }
 
-  if (flags & Z_T_STAMP) {
-    Z_DEBUG("Skipping time-stamp\n");
-    z_vle_decode(buf);        
+  if (flags & Z_T_STAMP) {          
+    r_vle = z_vle_decode(buf);        
+    ASSURE_P_RESULT(r_vle, r, Z_VLE_PARSE_ERROR);
+    r->value.payload_header.tstamp.time = r_vle.value.vle;
+    memcpy(r->value.payload_header.tstamp.clock_id, buf->buf + buf->r_pos, 16);
     buf->r_pos += 16;
   }
     

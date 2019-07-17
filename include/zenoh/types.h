@@ -92,9 +92,13 @@ z_array_uint8_t z_iobuf_to_array(z_iobuf_t* buf);
 void z_iobuf_compact(z_iobuf_t *buf);
 
 typedef struct {
-  unsigned int flags;
-  // TODO: Add support for timestamp
-  // unsigned long long timestamp;
+  uint8_t clock_id[16];
+  z_vle_t time;
+} z_timestamp_t;
+
+typedef struct {
+  unsigned int flags;  
+  z_timestamp_t tstamp;
   unsigned short encoding;
   unsigned short kind;  
 } z_data_info_t;
