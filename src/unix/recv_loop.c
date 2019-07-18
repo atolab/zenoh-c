@@ -373,6 +373,9 @@ int z_start_recv_loop(z_zenoh_t* z) {
     return -1;
 }
 
+int z_running(z_zenoh_t *z) { 
+    return ((z_runtime_t*)z->runtime)->running;
+}
 
 int z_stop_recv_loop(z_zenoh_t *z) { 
     z_message_t c;
