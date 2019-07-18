@@ -5,7 +5,7 @@ set (zenoh_c_VERSION_MAJOR 0)
 set (zenoh_c_VERSION_MINOR 1)
 
 if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Debug)
+  set(CMAKE_BUILD_TYPE Release)
 endif()
 
 option (UNIX_TARGET "Use this for Linux, Macos, etc." ON)
