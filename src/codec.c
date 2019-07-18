@@ -366,6 +366,7 @@ void
 z_declare_decode_na(z_iobuf_t* buf, z_declare_result_t *r) { 
   z_declaration_result_t *r_decl;
   z_vle_result_t r_sn = z_vle_decode(buf);
+  r->tag = Z_OK_TAG;
   ASSURE_P_RESULT(r_sn, r, Z_VLE_PARSE_ERROR)
 
   z_vle_result_t r_dlen = z_vle_decode(buf);
