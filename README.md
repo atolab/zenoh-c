@@ -50,24 +50,24 @@ To see the zenoh manual page, simply do:
 ### Basic Pub/Sub Example
 Assuming that (1) you are running the **zenoh** network service,  and (2) you are under the build directory, do:
 
-  $ ./z_sub
+    $ ./z_sub
 
 And on another shell, do:
 
-  $ ./z_pub
+    $ ./z_pub
 
 ## Storage and Query Example
 Assuming you are running the **zenoh** network service, do:
 
-  $ ./z_storage
+    $ ./z_storage
 
 And on another shell, do:
 
-  $ ./z_pub
+    $ ./z_pub
 
 After a few publications just terminate the publisher, and then try to query the storage:
 
-  $ ./z_query
+    $ ./z_query
 
 
 
