@@ -156,5 +156,10 @@ if (TESTS)
   target_link_libraries(z_data_struct ${Libname})
   target_link_libraries(z_mvar_test ${Libname})
   target_link_libraries(z_rname_test ${Libname})
+
+  enable_testing()
+  add_test(z_data_struct z_data_struct)
+  add_test(z_mvar_test z_mvar_test)
+  add_test(z_rname_test z_rname_test)
 endif(TESTS)
 
