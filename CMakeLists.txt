@@ -72,6 +72,7 @@ find_package(Threads REQUIRED)
 
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_FLAGS_DEBUG "${ZENOH_DEBUG_OPT} ${ZENOH_PLATFORM_OPT} -Wall -Wextra -Werror -Wpedantic -Wunused -pipe -g -O0")
+set(CMAKE_C_FLAGS_GCOV "${ZENOH_DEBUG_OPT} ${ZENOH_PLATFORM_OPT} -fprofile-arcs -ftest-coverage -Wall -Wextra -Werror -Wpedantic -Wunused -pipe -g -O0")
 set(CMAKE_C_FLAGS_RELEASE "${ZENOH_DEBUG_OPT} ${ZENOH_PLATFORM_OPT} -DNDEBUG -pipe -O3")
 
 
@@ -156,5 +157,10 @@ if (TESTS)
   target_link_libraries(z_data_struct ${Libname})
   target_link_libraries(z_mvar_test ${Libname})
   target_link_libraries(z_rname_test ${Libname})
+
+  enable_testing()
+  add_test(z_data_struct z_data_struct)
+  add_test(z_mvar_test z_mvar_test)
+  add_test(z_rname_test z_rname_test)
 endif(TESTS)
 

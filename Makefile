@@ -1,3 +1,5 @@
+.PHONY: test clean
+
 BUILD_DIR=build
 CROSS_BUILD_DIR=$(BUILD_DIR)/dockcross
 CROSS_SCRIPTS_DIR=dockcross
@@ -8,11 +10,17 @@ endif
 
 all: cmake-debug make
 
+gcov: cmake-gcov make
+
 release: cmake-release make
 
 cmake-debug: CMakeLists.txt
 	mkdir -p $(BUILD_DIR)
 	cmake $(ZENOH_DEBUG_OPT) -DCMAKE_BUILD_TYPE=Debug -B$(BUILD_DIR) -H.
+
+cmake-gcov: CMakeLists.txt
+	mkdir -p $(BUILD_DIR)
+	cmake $(ZENOH_DEBUG_OPT) -DCMAKE_BUILD_TYPE=GCov -B$(BUILD_DIR) -H.
 
 cmake-release: CMakeLists.txt
 	mkdir -p $(BUILD_DIR)
@@ -24,6 +32,8 @@ make: $(BUILD_DIR)/Makefile
 install:
 	make -C$(BUILD_DIR) install
 
+test:
+	make -C$(BUILD_DIR) test
 
 all-cross: check-docker $(CROSS_BUILD_DIR)/linux-x64 $(CROSS_BUILD_DIR)/linux-armv6
 

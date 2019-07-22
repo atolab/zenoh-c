@@ -2,5 +2,8 @@ language: c
 env:
   - ZENOH_DEBUG=0
 script:
-  - make
+  - make gcov
   - sudo make install
+  - make test
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
