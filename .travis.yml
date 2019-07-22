@@ -1,3 +1,5 @@
 language: c
+env:
+  - ZENOH_DEBUG=2
 script:
   - make
