@@ -1,3 +1,6 @@
 language: c
+env:
+  - ZENOH_DEBUG=0
 script:
   - make
+  - sudo make install

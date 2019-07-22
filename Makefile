@@ -6,9 +6,9 @@ ifneq ($(ZENOH_DEBUG),)
 	ZENOH_DEBUG_OPT := -DZENOH_DEBUG=$(ZENOH_DEBUG)
 endif
 
-all: cmake-debug make install
+all: cmake-debug make
 
-release: cmake-release make install
+release: cmake-release make
 
 cmake-debug: CMakeLists.txt
 	mkdir -p $(BUILD_DIR)
