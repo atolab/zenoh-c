@@ -4,3 +4,4 @@ env:
 script:
   - make
   - sudo make install
+  - make test

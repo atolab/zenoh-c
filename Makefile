@@ -1,3 +1,5 @@
+.PHONY: test clean
+
 BUILD_DIR=build
 CROSS_BUILD_DIR=$(BUILD_DIR)/dockcross
 CROSS_SCRIPTS_DIR=dockcross
@@ -24,6 +26,10 @@ make: $(BUILD_DIR)/Makefile
 install:
 	make -C$(BUILD_DIR) install
 
+test: make
+	$(BUILD_DIR)/z_data_struct
+	$(BUILD_DIR)/z_mvar_test
+	$(BUILD_DIR)/z_rname_test
 
 all-cross: check-docker $(CROSS_BUILD_DIR)/linux-x64 $(CROSS_BUILD_DIR)/linux-armv6
 
