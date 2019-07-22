@@ -28,11 +28,11 @@ const int _z_dummy_arg;
 #define Z_ERROR(x, ...) do { /* nothing */} while (&_z_dummy_arg == 0)
 #endif 
 
-# define Z_UNUSED_ARG(z) do {/* null */} while (&z == 0)
-# define Z_UNUSED_ARG_2(z1, z2) do {/* null */} while ((&z1 == 0) && (&z2 == 0))
-# define Z_UNUSED_ARG_3(z1, z2, z3) do {/* null */} while ((&z1 == 0) && (&z2 == 0) && (&z3 == 0))
-# define Z_UNUSED_ARG_4(z1, z2, z3, z4) do {/* null */} while ((&z1 == 0) && (&z2 == 0) && (&z3 == 0) && (&z4 == 0))
-# define Z_UNUSED_ARG_5(z1, z2, z3, z4, z5) do {/* null */} while ((&z1 == 0) && (&z2 == 0) && (&z3 == 0) && (&z4 == 0) && (&z5 == 0))
+# define Z_UNUSED_ARG(z) (void)(z)
+# define Z_UNUSED_ARG_2(z1, z2) (void)(z1); (void)(z2)
+# define Z_UNUSED_ARG_3(z1, z2, z3) (void)(z1); (void)(z2); (void)(z3)
+# define Z_UNUSED_ARG_4(z1, z2, z3, z4) (void)(z1); (void)(z2); (void)(z3); (void)(z4)
+# define Z_UNUSED_ARG_5(z1, z2, z3, z4, z5) (void)(z1); (void)(z2); (void)(z3); (void)(z4); (void)(z5)
 
 #if (ZENOH_LINUX ==1) || (ZENOH_MACOS == 1) 
 #include "zenoh/unix/types.h"
