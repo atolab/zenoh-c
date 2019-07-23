@@ -347,6 +347,10 @@ void* z_recv_loop(void* arg) {
                     }
                     break;
                 case Z_ACCEPT:
+                    Z_DEBUG("Received Z_ACCEPT message\n");
+                    break;
+                case Z_CLOSE:
+                    Z_DEBUG("Received Z_CLOSE message\n");
                     break;
                 default:
                     break;

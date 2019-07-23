@@ -143,8 +143,12 @@ z_vec_t z_info(z_zenoh_t *z) {
 }
 
 
-void z_close(z_zenoh_t* z) { 
-  Z_UNUSED_ARG(z);
+int z_close(z_zenoh_t* z) {
+  z_message_t msg;
+  msg.header = Z_CLOSE;
+  msg.payload.close.pid = z->pid;
+  msg.payload.close.reason = 0;
+  return z_send_msg(z->sock, &z->wbuf, &msg);
 }
 
 z_sub_p_result_t

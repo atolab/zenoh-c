@@ -44,4 +44,6 @@ int z_undeclare_subscriber(z_sub_t *z);
 int z_undeclare_publisher(z_pub_t *z);
 int z_undeclare_storage(z_sto_t *z);
 
+int z_close(z_zenoh_t *z);
+
 #endif /* ZENOH_C_H_DEFINED_ */
