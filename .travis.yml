@@ -1,3 +1,5 @@
+before_install:
+  - sudo apt-get install -y libev4
 language: c
 env:
   - ZENOH_DEBUG=0
