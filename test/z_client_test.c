@@ -118,34 +118,49 @@ int main(int argc, char **argv) {
   z_zenoh_t *z1 = z1_r.value.zenoh;
   z_start_recv_loop(z1);
 
+  z_vec_t z1_info = z_info(z1);
+  assert(0 == strcmp(locator, (const char *)((z_property_t *)z_vec_get(&z1_info, Z_INFO_PEER_KEY))->value.elem));
+  z_vec_free(&z1_info);
+
   z_sub_mode_t sm;
   sm.kind = Z_PUSH_MODE;
   z_sub_p_result_t z1_sub1_r = z_declare_subscriber(z1, "/test/client/**", &sm, z1_sub1_listener, NULL);
   ASSERT_P_RESULT(z1_sub1_r,"Unable to declare subscriber\n");
+  z_sub_t *z1_sub1 = z1_sub1_r.value.sub;
 
   z_sto_p_result_t z1_sto1_r = z_declare_storage(z1, "/test/client/**", z1_sto1_listener, z1_sto1_handler, replies_cleaner, NULL);
   ASSERT_P_RESULT(z1_sto1_r, "Unable to declare storage\n");
+  z_sto_t *z1_sto1 = z1_sto1_r.value.sto;
 
   z_pub_p_result_t z1_pub1_r = z_declare_publisher(z1, "/test/client/z1_pub1");
   ASSERT_P_RESULT(z1_pub1_r, "Unable to declare publisher\n");
   z_pub_t *z1_pub1 = z1_pub1_r.value.pub;
 
-  z_zenoh_p_result_t z2_r = z_open(locator, 0, 0);
+  z_zenoh_p_result_t z2_r = z_open_wup(locator, "user", "password");
   ASSERT_RESULT(z2_r, "Unable to open session with broker")
   z_zenoh_t *z2 = z2_r.value.zenoh;
   z_start_recv_loop(z2);
 
+  z_vec_t z2_info = z_info(z2);
+  assert(0 == strcmp(locator, (const char *)((z_property_t *)z_vec_get(&z2_info, Z_INFO_PEER_KEY))->value.elem));
+  z_vec_free(&z2_info);
+
   z_sub_p_result_t z2_sub1_r = z_declare_subscriber(z2, "/test/client/**", &sm, z2_sub1_listener, NULL);
   ASSERT_P_RESULT(z2_sub1_r,"Unable to declare subscriber\n");
+  z_sub_t *z2_sub1 = z2_sub1_r.value.sub;
 
   z_sto_p_result_t z2_sto1_r = z_declare_storage(z1, "/test/client/**", z2_sto1_listener, z2_sto1_handler, replies_cleaner, NULL);
   ASSERT_P_RESULT(z2_sto1_r, "Unable to declare storage\n");
+  z_sto_t *z2_sto1 = z2_sto1_r.value.sto;
 
   z_pub_p_result_t z2_pub1_r = z_declare_publisher(z2, "/test/client/z2_pub1");
   ASSERT_P_RESULT(z2_pub1_r, "Unable to declare publisher\n");
   z_pub_t *z2_pub1 = z2_pub1_r.value.pub;
 
   sleep(1);
+
+  assert(1 == z_running(z1));
+  assert(1 == z_running(z2));
   
   resource  sent_res;
   resource *rcvd_res;
@@ -183,7 +198,7 @@ int main(int argc, char **argv) {
   z_list_free(&replies);
 
 
-  sent_res.name = "/test/client/z2_wr1";
+  sent_res.name = "/test/client/**";
   sent_res.data = 5;
   z_write_data(z2, sent_res.name, &sent_res.data, 1);
   rcvd_res = z_mvar_get(z1_sub1_mvar);
@@ -280,4 +295,22 @@ int main(int argc, char **argv) {
   assert(0 == strcmp(sent_res.name, rcvd_res->name));
   assert(sent_res.data == rcvd_res->data);
   z_list_free(&replies);
+
+  z_undeclare_subscriber(z1_sub1);
+  z_undeclare_subscriber(z2_sub1);
+  z_undeclare_storage(z1_sto1);
+  z_undeclare_storage(z2_sto1);
+  z_undeclare_publisher(z1_pub1);
+  z_undeclare_publisher(z2_pub1);
+
+  z_close(z1);
+  z_close(z2);
+
+  sleep(1); // let time for close msg to comme back from router
+
+  z_stop_recv_loop(z1);
+  z_stop_recv_loop(z2);
+
+  assert(0 == z_running(z1));
+  assert(0 == z_running(z2));
 }
