@@ -153,14 +153,19 @@ if (TESTS)
   add_executable(z_data_struct test/z_data_struct.c)
   add_executable(z_mvar_test test/z_mvar_test.c)
   add_executable(z_rname_test test/z_rname_test.c)
+  add_executable(z_client_test test/z_client_test.c)
 
   target_link_libraries(z_data_struct ${Libname})
   target_link_libraries(z_mvar_test ${Libname})
   target_link_libraries(z_rname_test ${Libname})
+  target_link_libraries(z_client_test ${Libname})
+
+  configure_file(test/routed.sh routed.sh COPYONLY)
 
   enable_testing()
   add_test(z_data_struct z_data_struct)
   add_test(z_mvar_test z_mvar_test)
   add_test(z_rname_test z_rname_test)
+  add_test(z_client_test bash routed.sh z_client_test)
 endif(TESTS)
 

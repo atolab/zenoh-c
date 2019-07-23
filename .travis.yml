@@ -1,3 +1,5 @@
+before_install:
+  - sudo apt-get install -y libev4
 language: c
 env:
   - ZENOH_DEBUG=0
@@ -7,3 +9,5 @@ script:
   - make test
 after_success:
   - bash <(curl -s https://codecov.io/bash)
+after_failure:
+  - cat ./build/Testing/Temporary/LastTest.log
