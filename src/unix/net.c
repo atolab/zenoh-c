@@ -169,7 +169,6 @@ size_t
 z_send_msg(z_socket_t sock, z_iobuf_t* buf, z_message_t* m) {
   Z_DEBUG(">> send_msg\n");
   z_iobuf_clear(buf);
-  Z_DEBUG(">> \t z_message_encode\n");
   z_message_encode(buf, m);
   z_iobuf_t l_buf = z_iobuf_make(10);
   z_vle_t len =  z_iobuf_readable(buf);
@@ -183,6 +182,19 @@ z_send_msg(z_socket_t sock, z_iobuf_t* buf, z_message_t* m) {
   int rv = z_send_iovec(sock, iov, 2);
   z_iobuf_free(&l_buf);
   return rv;
+}
+
+size_t 
+z_send_large_msg(z_socket_t sock, z_iobuf_t* buf, z_message_t* m, unsigned int max_len) {
+  if(max_len > buf->capacity) {
+    z_iobuf_t bigbuf = z_iobuf_make(max_len);
+    int rv = z_send_msg(sock, &bigbuf, m);
+    z_iobuf_free(&bigbuf);
+    return rv;
+  }
+  else {
+    return z_send_msg(sock, buf, m);
+  }
 }
 
 z_vle_result_t

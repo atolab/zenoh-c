@@ -411,13 +411,13 @@ int z_stream_compact_data(z_pub_t *pub, const unsigned char *data, size_t length
     msg.payload.compact_data.rid = pub->rid;    
     msg.payload.compact_data.payload = z_iobuf_wrap_wo((unsigned char *)data, length, 0, length);
     msg.payload.compact_data.sn = pub->z->sn++;
-    if (z_send_msg(pub->z->sock, &pub->z->wbuf, &msg) == 0) 
+    if (z_send_large_msg(pub->z->sock, &pub->z->wbuf, &msg, length + 128) == 0)
       return 0;
     else
     {
       Z_DEBUG("Trying to reconnect....\n");
       pub->z->on_disconnect(pub->z);
-      return z_send_msg(pub->z->sock, &pub->z->wbuf, &msg);
+      return z_send_large_msg(pub->z->sock, &pub->z->wbuf, &msg, length + 128);
     }
   }
   return 0;
@@ -486,7 +486,7 @@ z_stream_data_wo(z_pub_t *pub, const unsigned char *data, size_t length, uint8_t
     msg.payload.stream_data.rid = pub->rid;      
     msg.payload.stream_data.sn = pub->z->sn++;
     msg.payload.stream_data.payload_header = buf;
-    if (z_send_msg(pub->z->sock, &pub->z->wbuf, &msg) == 0) {
+    if (z_send_large_msg(pub->z->sock, &pub->z->wbuf, &msg, length + 128) == 0) {
       z_iobuf_free(&buf);
       return 0;
     }
@@ -494,7 +494,7 @@ z_stream_data_wo(z_pub_t *pub, const unsigned char *data, size_t length, uint8_t
     {
       Z_DEBUG("Trying to reconnect....\n");
       pub->z->on_disconnect(pub->z);
-      int rv = z_send_msg(pub->z->sock, &pub->z->wbuf, &msg);
+      int rv = z_send_large_msg(pub->z->sock, &pub->z->wbuf, &msg, length + 128);
       z_iobuf_free(&buf);
       return rv;
     }
@@ -545,14 +545,14 @@ int z_write_data_wo(z_zenoh_t *z, const char* resource, const unsigned char *pay
   msg.payload.write_data.rname = (char*) resource;      
   msg.payload.write_data.sn = z->sn++;
   msg.payload.write_data.payload_header = buf;
-  if (z_send_msg(z->sock, &z->wbuf, &msg) == 0) {
+  if (z_send_large_msg(z->sock, &z->wbuf, &msg, length + 128) == 0) {
     z_iobuf_free(&buf);
     return 0;
   }
   else { 
     Z_DEBUG("Trying to reconnect....\n");
     z->on_disconnect(z);
-    int rv = z_send_msg(z->sock, &z->wbuf, &msg);
+    int rv = z_send_large_msg(z->sock, &z->wbuf, &msg, length + 128);
     z_iobuf_free(&buf);
     return rv;    
   }
