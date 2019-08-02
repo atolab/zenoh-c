@@ -367,6 +367,7 @@ void* z_recv_loop(void* arg) {
 
         // READ MESSAGE
         if (r_vle.value.vle > z_iobuf_readable(buf)) {
+            z_iobuf_compact(&z->rbuf);
             do {
                 if (z_recv_buf(z->sock, buf) <= 0) return 0;
             } while (r_vle.value.vle > z_iobuf_readable(buf));
