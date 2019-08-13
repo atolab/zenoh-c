@@ -41,12 +41,14 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
   set(ZENOH_PLATFORM_OPT "-DZENOH_LINUX=1")  
   set(INSTALL_RPATH "/usr/local/lib")
   set(INSTALL_NAME_DIR "/usr/local/lib")
+  set(INSTALL_INCLUDE_NAME_DIR "/usr/local/include")
   set(JNI_PLATFORM_NAME "linux")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
   message(STATUS "Configuring on/for macOS")
   set(ZENOH_PLATFORM_OPT "-DZENOH_MACOS=1")
   set(MACOSX_RPATH "ON")  
   set(INSTALL_NAME_DIR "/usr/local/lib")
+  set(INSTALL_INCLUDE_NAME_DIR "/usr/local/include")
   set(JNI_PLATFORM_NAME "darwin")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
   message(STATUS "Configuring on/for Windows")
@@ -78,6 +80,7 @@ set(CMAKE_C_FLAGS_RELEASE "${ZENOH_DEBUG_OPT} ${ZENOH_PLATFORM_OPT} -DNDEBUG -pi
 
 if (NOT SWIG_JAVA)
   set(Libname "zenohc")
+  file(GLOB PublicHeaders "include/**.h")
   include_directories(
       "${PROJECT_SOURCE_DIR}/include"
     )
@@ -118,7 +121,10 @@ target_link_libraries(${Libname})
 
 if (NOT SWIG_JAVA)
   install (TARGETS ${Libname}  DESTINATION ${INSTALL_NAME_DIR})
-endif()
+  # FILE (GLOB_RECURSE INCLUDE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h")
+   install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/zenoh.h DESTINATION ${INSTALL_INCLUDE_NAME_DIR})
+   install (DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/zenoh DESTINATION ${INSTALL_INCLUDE_NAME_DIR})
+  endif()
 
 
 if (EXAMPLES)
@@ -163,4 +169,3 @@ if (TESTS)
   add_test(z_client_test bash routed.sh z_client_test)
   add_test(z_large_data_test bash routed.sh z_large_data_test)
 endif(TESTS)
-
