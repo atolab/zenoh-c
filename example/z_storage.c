@@ -37,9 +37,10 @@ void listener(const z_resource_id_t *rid, const unsigned char *data, size_t leng
   stored = z_list_cons(stored, sample);
 }
 
-void query_handler(const char *rname, const char *predicate, z_array_resource_t *replies, void *arg) {
+void query_handler(const char *rname, const char *predicate, replies_sender_t send_replies, void *query_handle, void *arg) {
   Z_UNUSED_ARG_2(predicate, arg);
   printf("Handling Query: %s\n", rname);
+  z_array_resource_t replies;
   z_list_t *matching_samples = 0;
 
   z_list_t *samples = stored;
@@ -52,36 +53,30 @@ void query_handler(const char *rname, const char *predicate, z_array_resource_t 
     }
     samples = z_list_tail(samples);
   }
-  replies->length = z_list_len(matching_samples);
-  replies->elem = (z_resource_t**)malloc(sizeof(z_resource_t *) * replies->length);
+  replies.length = z_list_len(matching_samples);
+
+  z_resource_t resources[replies.length];
+  z_resource_t *p_resources[replies.length];
   
   samples = matching_samples; 
   int i =0;
   while (samples != z_list_empty) {
     sample = (sample_t *) z_list_head(samples);
-    replies->elem[i] = (z_resource_t *)malloc(sizeof(z_resource_t));
-    replies->elem[i]->rname = sample->rname;
-    replies->elem[i]->data = (const unsigned char *)sample->data;
-    replies->elem[i]->length = sample->length;
-    replies->elem[i]->encoding = 0;
-    replies->elem[i]->kind = 0;
+    resources[i].rname = sample->rname;
+    resources[i].data = (const unsigned char *)sample->data;
+    resources[i].length = sample->length;
+    resources[i].encoding = 0;
+    resources[i].kind = 0;
+    p_resources[i] = &resources[i];
     samples = z_list_tail(samples);
     ++i;
   }
   z_list_free(&matching_samples);
+
+  replies.elem = &p_resources[0];
+
+  send_replies(query_handle, replies);
 }
-
-void replies_cleaner(z_array_resource_t *replies, void *arg)
-{
-  Z_UNUSED_ARG(arg);
-  printf("Cleaning Replies.\n");
-  for (unsigned int i = 0; i < replies->length; ++i) {
-    free(replies->elem[i]);
-  }  
-  free(replies->elem);
-
-}
-
 
 int main(int argc, char **argv) {
   char *locator = strdup("tcp/127.0.0.1:7447");
@@ -100,7 +95,7 @@ int main(int argc, char **argv) {
 
   z_start_recv_loop(z);
   printf("Declaring Storage: %s\n", uri);
-  z_declare_storage(z, uri, listener, query_handler, replies_cleaner, NULL);
+  z_declare_storage(z, uri, listener, query_handler, NULL);
 
   while (1) { 
     sleep(1);

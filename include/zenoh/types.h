@@ -139,8 +139,8 @@ typedef struct {
 
 Z_ARRAY_P_DECLARE_Z_TYPE(resource_t)
 
-typedef void (*query_handler_t)(const char *rname, const char *predicate, z_array_resource_t *replies, void *arg);
-typedef void (*replies_cleaner_t)(z_array_resource_t *replies, void *arg);
+typedef void (*replies_sender_t)(void* query_handle, z_array_resource_t replies);
+typedef void (*query_handler_t)(const char *rname, const char *predicate, replies_sender_t send_replies, void *query_handle, void *arg);
 typedef void (*on_disconnect_t)(void *z);
 
 typedef struct {
@@ -209,7 +209,6 @@ typedef struct {
   z_vle_t id;
   subscriber_callback_t callback;
   query_handler_t handler;
-  replies_cleaner_t cleaner;
   void *arg;
 }  z_storage_t;
 
@@ -232,7 +231,7 @@ z_list_t * z_get_subscriptions_by_rid(z_zenoh_t *z, z_vle_t rid);
 z_list_t * z_get_subscriptions_by_rname(z_zenoh_t *z, const char *rname);
 void z_unregister_subscription(z_sub_t *s) ;
 
-void z_register_storage(z_zenoh_t *z, z_vle_t rid, z_vle_t id, subscriber_callback_t callback, query_handler_t handler, replies_cleaner_t cleaner, void *arg);
+void z_register_storage(z_zenoh_t *z, z_vle_t rid, z_vle_t id, subscriber_callback_t callback, query_handler_t handler, void *arg);
 z_list_t * z_get_storages_by_rid(z_zenoh_t *z, z_vle_t rid);
 z_list_t * z_get_storages_by_rname(z_zenoh_t *z, const char *rname);
 void z_unregister_storage(z_sto_t *s) ;

@@ -38,23 +38,22 @@ void sto_listener(const z_resource_id_t *rid, const unsigned char *data, size_t 
   z_mvar_put(sto_mvar, &sto_last_res);
 }
 
-void sto_handler(const char *rname, const char *predicate, z_array_resource_t *replies, void *arg) {
+void sto_handler(const char *rname, const char *predicate, replies_sender_t send_replies, void *query_handle, void *arg) {
   Z_UNUSED_ARG_3(rname, predicate, arg);
-  replies->length = 1;
-  replies->elem = (z_resource_t**)malloc(sizeof(z_resource_t *));
-  replies->elem[0] = (z_resource_t *)malloc(sizeof(z_resource_t));
-  replies->elem[0]->rname = sto_last_res.name;
-  replies->elem[0]->data = sto_last_res.data;
-  replies->elem[0]->length = sto_last_res.length;
-  replies->elem[0]->encoding = 0;
-  replies->elem[0]->kind = 0;
-}
+  z_resource_t resource;
+  resource.rname = sto_last_res.name;
+  resource.data = sto_last_res.data;
+  resource.length = sto_last_res.length;;
+  resource.encoding = 0;
+  resource.kind = 0;
 
-void replies_cleaner(z_array_resource_t *replies, void *arg)
-{
-  Z_UNUSED_ARG(arg);
-  free(replies->elem[0]);
-  free(replies->elem);
+  z_resource_t *p_resource = &resource;
+
+  z_array_resource_t replies;
+  replies.length = 1;
+  replies.elem = &p_resource;
+
+  send_replies(query_handle, replies);
 }
 
 void reply_handler(const z_reply_value_t *reply, void *arg) {
@@ -103,7 +102,7 @@ int main(int argc, char **argv) {
   ASSERT_P_RESULT(z2_sub1_r,"Unable to declare subscriber\n");
   z_sub_t *z2_sub1 = z2_sub1_r.value.sub;
 
-  z_sto_p_result_t z2_sto1_r = z_declare_storage(z2, "/test/large_data/big", sto_listener, sto_handler, replies_cleaner, NULL);
+  z_sto_p_result_t z2_sto1_r = z_declare_storage(z2, "/test/large_data/big", sto_listener, sto_handler, NULL);
   ASSERT_P_RESULT(z2_sto1_r,"Unable to declare storage\n");
   z_sto_t *z2_sto1 = z2_sto1_r.value.sto;
 

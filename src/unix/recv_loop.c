@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdatomic.h>
 #include "zenoh/types.h"
 #include "zenoh/net.h"
 #include "zenoh/codec.h"
@@ -7,6 +8,77 @@
 
 
 void z_do_nothing() { }
+
+typedef struct {
+  z_zenoh_t *z;
+  z_vle_t qid;
+  z_array_uint8_t qpid;
+  atomic_int nbstos;
+  atomic_flag sent_final;
+} query_handle_t;
+
+void send_replies(void* query_handle, z_array_resource_t replies){
+    unsigned int i;
+    int rsn = 0;
+    query_handle_t *handle = (query_handle_t*)query_handle;
+    z_message_t msg;
+    msg.header = Z_REPLY | Z_F_FLAG;
+    msg.payload.reply.qid = handle->qid;
+    msg.payload.reply.qpid = handle->qpid;
+    msg.payload.reply.stoid = handle->z->pid;
+
+    for(i = 0; i < replies.length; ++i)
+    {
+        msg.payload.reply.rsn = rsn++;
+        msg.payload.reply.rname = (char *)replies.elem[i]->rname;
+        Z_DEBUG_VA("[%d] - Query reply key: %s\n", i, msg.payload.reply.rname);
+        z_payload_header_t ph;
+        ph.flags = Z_ENCODING | Z_KIND;
+        ph.encoding = replies.elem[i]->encoding;
+        ph.kind = replies.elem[i]->kind;
+        Z_DEBUG_VA("[%d] - Payload Length: %zu\n", i, replies.elem[i]->length);
+        Z_DEBUG_VA("[%d] - Payload address: %p\n", i, (void*)replies.elem[i]->data);
+
+        ph.payload = z_iobuf_wrap_wo((unsigned char *)replies.elem[i]->data, replies.elem[i]->length, 0,  replies.elem[i]->length);
+        z_iobuf_t buf = z_iobuf_make(replies.elem[i]->length + 32 );
+        z_payload_header_encode(&buf, &ph);
+        msg.payload.reply.payload_header = buf;
+
+        if (z_send_large_msg(handle->z->sock, &handle->z->wbuf, &msg, replies.elem[i]->length + 128) == 0) {
+            z_iobuf_free(&buf);
+        } else {
+            Z_DEBUG("Trying to reconnect....\n");
+            handle->z->on_disconnect(handle->z);
+            z_send_large_msg(handle->z->sock, &handle->z->wbuf, &msg, replies.elem[i]->length + 128);
+            z_iobuf_free(&buf);
+        }
+    }
+    msg.payload.reply.rsn = rsn++;
+    msg.payload.reply.rname = "";
+    z_iobuf_t buf = z_iobuf_make(0);
+    msg.payload.reply.payload_header = buf;
+
+    if (z_send_msg(handle->z->sock, &handle->z->wbuf, &msg) == 0) {
+        z_iobuf_free(&buf);
+    } else {
+        Z_DEBUG("Trying to reconnect....\n");
+        handle->z->on_disconnect(handle->z);
+        z_send_msg(handle->z->sock, &handle->z->wbuf, &msg);
+        z_iobuf_free(&buf);
+    }
+
+    atomic_fetch_sub(&handle->nbstos, 1);
+    if(handle->nbstos <= 0 && !atomic_flag_test_and_set(&handle->sent_final))
+    {
+        msg.header = Z_REPLY;
+
+        if (z_send_msg(handle->z->sock, &handle->z->wbuf, &msg) != 0) {
+            Z_DEBUG("Trying to reconnect....\n");
+            handle->z->on_disconnect(handle->z);
+            z_send_msg(handle->z->sock, &handle->z->wbuf, &msg);
+        }    
+    }
+}
 
 void handle_msg(z_zenoh_t *z, z_message_p_result_t r) {
     z_payload_header_result_t r_ph;
@@ -22,10 +94,8 @@ void handle_msg(z_zenoh_t *z, z_message_p_result_t r) {
     z_storage_t *sto;
     z_replywaiter_t *rw;    
     z_reply_value_t rvalue; 
-    z_array_resource_t replies;
     z_res_decl_t *rd;
     unsigned int i;
-    int rsn;
     rname = 0;
     subs = z_list_empty;
     stos = z_list_empty;
@@ -173,71 +243,24 @@ void handle_msg(z_zenoh_t *z, z_message_p_result_t r) {
             Z_DEBUG("Received Z_QUERY message\n");
             stos = z_get_storages_by_rname(z, r.value.message->payload.query.rname);
             if (stos != 0) {
-                z_message_t msg;
-                msg.header = Z_REPLY | Z_F_FLAG;
-                msg.payload.reply.qid = r.value.message->payload.query.qid;
-                msg.payload.reply.qpid = r.value.message->payload.query.pid;
-                while (stos != z_list_empty) {
-                    rsn = 0;
-                    sto = (z_storage_t *) z_list_head(stos);
+                query_handle_t *query_handle = malloc(sizeof(query_handle_t));
+                query_handle->z = z;
+                query_handle->qid = r.value.message->payload.query.qid;
+                query_handle->qpid = r.value.message->payload.query.pid;
+                atomic_init(&query_handle->nbstos, z_list_len(stos));
+                atomic_flag_clear(&query_handle->sent_final);
+                lit = stos;
+                while (lit != z_list_empty) {
+                    sto = (z_storage_t *) z_list_head(lit);
                     sto->handler(
                         r.value.message->payload.query.rname,
                         r.value.message->payload.query.predicate,
-                        &replies, sto->arg);
-                    msg.payload.reply.stoid = z->pid;
-                    Z_DEBUG_VA("Query replies: %d\n", replies.length);
-                    for(i = 0; i < replies.length; ++i)
-                    {
-                        msg.payload.reply.rsn = rsn++;
-                        msg.payload.reply.rname = (char *)replies.elem[i]->rname;
-                        Z_DEBUG_VA("[%d] - Query reply key: %s\n", i, msg.payload.reply.rname);
-                        z_payload_header_t ph;
-                        ph.flags = Z_ENCODING | Z_KIND;
-                        ph.encoding = replies.elem[i]->encoding;
-                        ph.kind = replies.elem[i]->kind;
-                        Z_DEBUG_VA("[%d] - Payload Length: %zu\n", i, replies.elem[i]->length);
-                        Z_DEBUG_VA("[%d] - Payload address: %p\n", i, (void*)replies.elem[i]->data);
-
-                        ph.payload = z_iobuf_wrap_wo((unsigned char *)replies.elem[i]->data, replies.elem[i]->length, 0,  replies.elem[i]->length);
-                        z_iobuf_t buf = z_iobuf_make(replies.elem[i]->length + 32 );
-                        z_payload_header_encode(&buf, &ph);
-                        msg.payload.reply.payload_header = buf;
-
-                        if (z_send_large_msg(z->sock, &z->wbuf, &msg, replies.elem[i]->length + 128) == 0) {
-                            z_iobuf_free(&buf);
-                        } else {
-                            Z_DEBUG("Trying to reconnect....\n");
-                            z->on_disconnect(z);
-                            z_send_large_msg(z->sock, &z->wbuf, &msg, replies.elem[i]->length + 128);
-                            z_iobuf_free(&buf);
-                        }
-                    }
-                    msg.payload.reply.rsn = rsn++;
-                    msg.payload.reply.rname = "";
-                    z_iobuf_t buf = z_iobuf_make(0);
-                    msg.payload.reply.payload_header = buf;
-
-                    if (z_send_msg(z->sock, &z->wbuf, &msg) == 0) {
-                        z_iobuf_free(&buf);
-                    } else {
-                        Z_DEBUG("Trying to reconnect....\n");
-                        z->on_disconnect(z);
-                        z_send_msg(z->sock, &z->wbuf, &msg);
-                        z_iobuf_free(&buf);
-                    }
-                    sto->cleaner(&replies, sto->arg);
-
-                    stos = z_list_tail(stos);
+                        send_replies, 
+                        query_handle,
+                        sto->arg);
+                    lit = z_list_tail(lit);
                 }
-                msg.header = Z_REPLY;
-                msg.payload.reply.qid = r.value.message->payload.query.qid;
-                msg.payload.reply.qpid = r.value.message->payload.query.pid;
-
-                if (z_send_msg(z->sock, &z->wbuf, &msg) != 0) {
-                    Z_DEBUG("Trying to reconnect....\n");
-                    z->on_disconnect(z);
-                    z_send_msg(z->sock, &z->wbuf, &msg);
-                }
+                z_list_free(&stos);
             }
             break;
         case Z_REPLY:

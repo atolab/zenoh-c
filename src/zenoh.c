@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <unistd.h>
 #include <time.h>
+#include <stdatomic.h>
 #include "zenoh/net.h"
 #include "zenoh.h"
 #include "zenoh/recv_loop.h"
@@ -226,7 +227,7 @@ int z_undeclare_subscriber(z_sub_t *sub) {
 }
 
 z_sto_p_result_t
-z_declare_storage(z_zenoh_t *z, const char *resource, subscriber_callback_t callback, query_handler_t handler, replies_cleaner_t cleaner, void *arg) {
+z_declare_storage(z_zenoh_t *z, const char *resource, subscriber_callback_t callback, query_handler_t handler, void *arg) {
   z_sto_p_result_t r;
   r.tag = Z_OK_TAG;
   r.value.sto = (z_sto_t*)malloc(sizeof(z_sto_t));
@@ -261,7 +262,7 @@ z_declare_storage(z_zenoh_t *z, const char *resource, subscriber_callback_t call
   } 
   Z_ARRAY_S_FREE(decl);
   z_register_res_decl(z, rid, resource);
-  z_register_storage(z, rid, id, callback, handler, cleaner, arg);
+  z_register_storage(z, rid, id, callback, handler, arg);
   // -- This will be refactored to use mvars
   return r;
 }
@@ -563,53 +564,96 @@ int z_write_data(z_zenoh_t *z, const char* resource, const unsigned char *payloa
   return z_write_data_wo(z, resource, payload, length, 0, 0);
 }
 
+typedef struct {
+  z_zenoh_t *z;
+  char *resource;
+  char *predicate;
+  z_reply_callback_t callback;
+  void *arg;
+  atomic_int nbstos;
+  atomic_flag sent_final;
+} local_query_handle_t;
+
+void send_local_replies(void* query_handle, z_array_resource_t replies){
+  unsigned int i;
+  z_reply_value_t rep;
+  local_query_handle_t *handle = (local_query_handle_t*)query_handle;
+  for(i = 0; i < replies.length; ++i) {
+    rep.kind = Z_STORAGE_DATA;
+    rep.stoid = handle->z->pid.elem;
+    rep.stoid_length = handle->z->pid.length;
+    rep.rsn = i;
+    rep.rname = replies.elem[i]->rname;
+    rep.info.flags = Z_ENCODING | Z_KIND;
+    rep.info.encoding = replies.elem[i]->encoding;
+    rep.info.kind = replies.elem[i]->kind;
+    rep.data = replies.elem[i]->data;
+    rep.data_length = replies.elem[i]->length;
+    handle->callback(&rep, handle->arg);
+  }
+  bzero(&rep, sizeof(z_reply_value_t));
+  rep.kind = Z_STORAGE_FINAL;
+  rep.stoid = handle->z->pid.elem;
+  rep.stoid_length = handle->z->pid.length;
+  rep.rsn = i;
+  handle->callback(&rep, handle->arg);
+
+  atomic_fetch_sub(&handle->nbstos, 1);
+  if(handle->nbstos <= 0 && !atomic_flag_test_and_set(&handle->sent_final))
+  {
+    z_message_t msg;
+    msg.header = Z_QUERY;
+    msg.payload.query.pid = handle->z->pid;
+    msg.payload.query.qid = handle->z->qid++;
+    msg.payload.query.rname = handle->resource;
+    msg.payload.query.predicate = handle->predicate;
+    
+    z_register_query(handle->z, msg.payload.query.qid, handle->callback, handle->arg);
+    if (z_send_msg(handle->z->sock, &handle->z->wbuf, &msg) != 0) {
+      Z_DEBUG("Trying to reconnect....\n");
+      handle->z->on_disconnect(handle->z);
+      z_send_msg(handle->z->sock, &handle->z->wbuf, &msg);
+    }
+    free(handle);
+  }
+}
+
 int z_query(z_zenoh_t *z, const char* resource, const char* predicate, z_reply_callback_t callback, void *arg) { 
   z_list_t *stos = z_get_storages_by_rname(z, resource);
-  z_storage_t *sto;
-  z_message_t msg;
-  z_array_resource_t replies;
-  z_reply_value_t rep;
-  unsigned int i;
-  
-  while (stos != 0) {
-    sto = z_list_head(stos);
-    sto->handler(resource, predicate, &replies, sto->arg);
-    for(i = 0; i < replies.length; ++i) {
-      rep.kind = Z_STORAGE_DATA;
-      rep.stoid = z->pid.elem;
-      rep.stoid_length = z->pid.length;
-      rep.rsn = i;
-      rep.rname = replies.elem[i]->rname;
-      rep.info.flags = Z_ENCODING | Z_KIND;
-      rep.info.encoding = replies.elem[i]->encoding;
-      rep.info.kind = replies.elem[i]->kind;
-      rep.data = replies.elem[i]->data;
-      rep.data_length = replies.elem[i]->length;
-      callback(&rep, arg);
+  if(stos != 0)
+  {
+    z_storage_t *sto;
+    local_query_handle_t *handle = malloc(sizeof(local_query_handle_t));
+    z_list_t *lit = stos;
+    handle->z = z;
+    handle->resource = (char*)resource;
+    handle->predicate = (char*)predicate;
+    handle->callback = callback;
+    handle->arg = arg;
+    atomic_init(&handle->nbstos, z_list_len(stos));
+    atomic_flag_clear(&handle->sent_final);
+    while (lit != 0) {
+      sto = z_list_head(lit);
+      sto->handler(resource, predicate, send_local_replies, handle, sto->arg);
+      lit = z_list_tail(lit);
     }
-    bzero(&rep, sizeof(z_reply_value_t));
-    rep.kind = Z_STORAGE_FINAL;
-    rep.stoid = z->pid.elem;
-    rep.stoid_length = z->pid.length;
-    rep.rsn = i;
-    callback(&rep, arg);
-
-    sto->cleaner(&replies, sto->arg);
-    
-    stos = z_list_tail(stos);
+    z_list_free(&stos);
   }
-
-  msg.header = Z_QUERY;
-  msg.payload.query.pid = z->pid;
-  msg.payload.query.qid = z->qid++;
-  msg.payload.query.rname = (char *)resource;
-  msg.payload.query.predicate = (char *)predicate;
-  
-  z_register_query(z, msg.payload.query.qid, callback, arg);
-  if (z_send_msg(z->sock, &z->wbuf, &msg) != 0) {
-    Z_DEBUG("Trying to reconnect....\n");
-    z->on_disconnect(z);
-    z_send_msg(z->sock, &z->wbuf, &msg);
+  else
+  {
+    z_message_t msg;
+    msg.header = Z_QUERY;
+    msg.payload.query.pid = z->pid;
+    msg.payload.query.qid = z->qid++;
+    msg.payload.query.rname = (char *)resource;
+    msg.payload.query.predicate = (char *)predicate;
+    
+    z_register_query(z, msg.payload.query.qid, callback, arg);
+    if (z_send_msg(z->sock, &z->wbuf, &msg) != 0) {
+      Z_DEBUG("Trying to reconnect....\n");
+      z->on_disconnect(z);
+      z_send_msg(z->sock, &z->wbuf, &msg);
+    }
   }
   return 0;
 }
