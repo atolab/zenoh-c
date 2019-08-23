@@ -112,7 +112,7 @@ typedef struct z_list  {
   struct z_list *tail;
 } z_list_t;
 
-z_list_t * z_list_empty;
+extern z_list_t * z_list_empty;
 z_list_t * z_list_of(void *x);
 z_list_t * z_list_cons(z_list_t *xs, void *x);
 void * z_list_head(z_list_t *xs);

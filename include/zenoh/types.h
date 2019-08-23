@@ -9,7 +9,7 @@
 #include "zenoh/collection.h"
 #include "zenoh/mvar.h"
 
-const int _z_dummy_arg;
+extern const int _z_dummy_arg;
 
 #if (ZENOH_DEBUG == 2)
 #include <stdio.h>
