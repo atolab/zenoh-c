@@ -24,7 +24,7 @@ void reply_handler(const z_reply_value_t *reply, void *arg) {
       printf("Received Storage Final.\n");
       break;
     case Z_REPLY_FINAL:
-      printf(".\n");
+      printf("-\n");
       break;
   }
 }
@@ -45,11 +45,13 @@ int main(int argc, char **argv) {
   z_zenoh_t *z = r_z.value.zenoh;
 
   z_start_recv_loop(z);
-  printf("Send Query...\n");
-  if (z_query(z, uri, "", reply_handler, NULL) != 0) {
-    printf("Unable to query\n");
-    return -1;
-  }
-  usleep(100000);
+  
+    printf("Send Query...\n");
+    if (z_query(z, uri, "", reply_handler, NULL) != 0) {
+      printf("Unable to query\n");
+      return -1;
+    }
+    usleep(100000);
+  
   return 0;
 }

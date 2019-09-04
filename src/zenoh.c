@@ -145,11 +145,13 @@ z_vec_t z_info(z_zenoh_t *z) {
 
 
 int z_close(z_zenoh_t* z) {
-  z_message_t msg;
-  msg.header = Z_CLOSE;
-  msg.payload.close.pid = z->pid;
-  msg.payload.close.reason = 0;
-  return z_send_msg(z->sock, &z->wbuf, &msg);
+  z_message_t c;    
+  c.header = Z_CLOSE;
+  c.payload.close.pid = z->pid;
+  c.payload.close.reason = Z_PEER_CLOSE;
+  int rv = z_send_msg(z->sock, &z->wbuf, &c);
+  close(z->sock);    
+  return rv;  
 }
 
 z_sub_p_result_t

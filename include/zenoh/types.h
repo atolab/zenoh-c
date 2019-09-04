@@ -99,7 +99,7 @@ typedef struct {
 typedef struct {
   unsigned int flags;  
   z_timestamp_t tstamp;
-  unsigned short encoding;
+  uint8_t encoding;
   unsigned short kind;  
 } z_data_info_t;
 

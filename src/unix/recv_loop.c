@@ -434,12 +434,6 @@ int z_running(z_zenoh_t *z) {
 }
 
 int z_stop_recv_loop(z_zenoh_t *z) { 
-    z_message_t c;
-    c.header = Z_CLOSE;
-    c.payload.close.pid = z->pid;
-    c.payload.close.reason = Z_PEER_CLOSE;
-    z_send_msg(z->sock, &z->wbuf, &c);
-    ((z_runtime_t*)z->runtime)->running = 0;
-    close(z->sock);    
+    ((z_runtime_t*)z->runtime)->running = 0;    
     return 0;
 }
