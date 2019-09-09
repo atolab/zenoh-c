@@ -45,6 +45,7 @@
 #define Z_R_FLAG  0x40
 #define Z_N_FLAG  0x40
 #define Z_C_FLAG  0x40
+#define Z_E_FLAG  0x40
 
 #define Z_A_FLAG  0x80
 #define Z_U_FLAG  0x80
@@ -84,6 +85,8 @@
 #define Z_FORGET_SELECTION_DECL  0x0b
 #define Z_STORAGE_DECL  0x0c
 #define Z_FORGET_STORAGE_DECL  0x0d
+#define Z_EVAL_DECL  0x0e
+#define Z_FORGET_EVAL_DECL  0x0f
 
 #define Z_PUSH_MODE 0x01
 #define Z_PULL_MODE 0x02
@@ -174,6 +177,16 @@ typedef struct {
   z_vle_t rid; 
 } z_forget_sto_decl_t;
 
+/*------------------ Declare Eval ------------------*/
+typedef struct {   
+  z_vle_t rid;    
+} z_eval_decl_t;
+
+/*------------------ Forget Eval Message ------------------*/
+typedef struct {   
+  z_vle_t rid; 
+} z_forget_eval_decl_t;
+
 /*------------------ Declare Subscriber Message ------------------*/
 typedef struct {   
   z_vle_t rid;  
@@ -209,9 +222,11 @@ typedef struct {
     z_pub_decl_t pub;
     z_sub_decl_t sub;
     z_storage_decl_t storage;
+    z_eval_decl_t eval;
     z_forget_pub_decl_t forget_pub;
     z_forget_sub_decl_t forget_sub;
     z_forget_sto_decl_t forget_sto;
+    z_forget_eval_decl_t forget_eval;
     z_commit_decl_t commit;
     z_result_decl_t result;
   } payload;  

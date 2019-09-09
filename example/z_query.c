@@ -11,17 +11,27 @@ void reply_handler(const z_reply_value_t *reply, void *arg) {
   z_iobuf_t buf;
   switch (reply->kind) {
     case Z_STORAGE_DATA: 
+    case Z_EVAL_DATA: 
       buf = z_iobuf_wrap_wo((unsigned char *)reply->data, reply->data_length, 0, reply->data_length);
       r_s = z_string_decode(&buf);        
       if (r_s.tag == Z_OK_TAG) {
-        printf("Received Storage Data. (%s, %s)\n", reply->rname, r_s.value.string);
+        switch (reply->kind) {
+          case Z_STORAGE_DATA: printf("Received Storage Data. (%s, %s)\n", reply->rname, r_s.value.string);break;
+          case Z_EVAL_DATA: printf("Received Eval    Data. (%s, %s)\n", reply->rname, r_s.value.string);break;
+        }
         free(r_s.value.string);
       } else {
-        printf("Received Storage Data. %s:...\n", reply->rname);
+        switch (reply->kind) {
+          case Z_STORAGE_DATA: printf("Received Storage Data. %s:...\n", reply->rname);break;
+          case Z_EVAL_DATA: printf("Received Eval    Data. %s:...\n", reply->rname);break;
+        } 
       }
       break;
     case Z_STORAGE_FINAL:
       printf("Received Storage Final.\n");
+      break;
+    case Z_EVAL_FINAL:
+      printf("Received Eval    Final.\n");
       break;
     case Z_REPLY_FINAL:
       printf("Received Reply Final.\n");

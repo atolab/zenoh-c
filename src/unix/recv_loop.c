@@ -13,16 +13,16 @@ typedef struct {
   z_zenoh_t *z;
   z_vle_t qid;
   z_array_uint8_t qpid;
-  atomic_int nbstos;
+  atomic_int nb_qhandlers;
   atomic_flag sent_final;
 } query_handle_t;
 
-void send_replies(void* query_handle, z_array_resource_t replies){
+void send_replies(void* query_handle, z_array_resource_t replies, uint8_t eval_flag){
     unsigned int i;
     int rsn = 0;
     query_handle_t *handle = (query_handle_t*)query_handle;
     z_message_t msg;
-    msg.header = Z_REPLY | Z_F_FLAG;
+    msg.header = Z_REPLY | Z_F_FLAG | eval_flag;
     msg.payload.reply.qid = handle->qid;
     msg.payload.reply.qpid = handle->qpid;
     msg.payload.reply.stoid = handle->z->pid;
@@ -67,8 +67,8 @@ void send_replies(void* query_handle, z_array_resource_t replies){
         z_iobuf_free(&buf);
     }
 
-    atomic_fetch_sub(&handle->nbstos, 1);
-    if(handle->nbstos <= 0 && !atomic_flag_test_and_set(&handle->sent_final))
+    atomic_fetch_sub(&handle->nb_qhandlers, 1);
+    if(handle->nb_qhandlers <= 0 && !atomic_flag_test_and_set(&handle->sent_final))
     {
         msg.header = Z_REPLY;
 
@@ -80,6 +80,14 @@ void send_replies(void* query_handle, z_array_resource_t replies){
     }
 }
 
+void send_eval_replies(void* query_handle, z_array_resource_t replies){
+    send_replies(query_handle, replies, Z_E_FLAG);
+}
+
+void send_storage_replies(void* query_handle, z_array_resource_t replies){
+    send_replies(query_handle, replies, 0);
+}
+
 void handle_msg(z_zenoh_t *z, z_message_p_result_t r) {
     z_payload_header_result_t r_ph;
     z_data_info_t info;
@@ -89,9 +97,11 @@ void handle_msg(z_zenoh_t *z, z_message_p_result_t r) {
     uint8_t mid;    
     z_list_t *subs;
     z_list_t *stos;
+    z_list_t *evals;
     z_list_t *lit;
     z_subscription_t *sub;
     z_storage_t *sto;
+    z_eval_t *eval;
     z_replywaiter_t *rw;    
     z_reply_value_t rvalue; 
     z_res_decl_t *rd;
@@ -242,25 +252,48 @@ void handle_msg(z_zenoh_t *z, z_message_p_result_t r) {
         case Z_QUERY:
             Z_DEBUG("Received Z_QUERY message\n");
             stos = z_get_storages_by_rname(z, r.value.message->payload.query.rname);
-            if (stos != 0) {
+            evals = z_get_evals_by_rname(z, r.value.message->payload.query.rname);
+            if (stos != 0 || evals != 0) {
                 query_handle_t *query_handle = malloc(sizeof(query_handle_t));
                 query_handle->z = z;
                 query_handle->qid = r.value.message->payload.query.qid;
                 query_handle->qpid = r.value.message->payload.query.pid;
-                atomic_init(&query_handle->nbstos, z_list_len(stos));
+
+                int nb_qhandlers = 0;
+                if(stos != 0){nb_qhandlers += z_list_len(stos);}
+                if(evals != 0){nb_qhandlers += z_list_len(evals);}
+                atomic_init(&query_handle->nb_qhandlers, nb_qhandlers);
                 atomic_flag_clear(&query_handle->sent_final);
-                lit = stos;
-                while (lit != z_list_empty) {
-                    sto = (z_storage_t *) z_list_head(lit);
-                    sto->handler(
-                        r.value.message->payload.query.rname,
-                        r.value.message->payload.query.predicate,
-                        send_replies, 
-                        query_handle,
-                        sto->arg);
-                    lit = z_list_tail(lit);
+
+                if(stos != 0){
+                    lit = stos;
+                    while (lit != z_list_empty) {
+                        sto = (z_storage_t *) z_list_head(lit);
+                        sto->handler(
+                            r.value.message->payload.query.rname,
+                            r.value.message->payload.query.predicate,
+                            send_storage_replies, 
+                            query_handle,
+                            sto->arg);
+                        lit = z_list_tail(lit);
+                    }
+                    z_list_free(&stos);
                 }
-                z_list_free(&stos);
+
+                if(evals != 0){
+                    lit = evals;
+                    while (lit != z_list_empty) {
+                        eval = (z_eval_t *) z_list_head(lit);
+                        eval->handler(
+                            r.value.message->payload.query.rname,
+                            r.value.message->payload.query.predicate,
+                            send_eval_replies, 
+                            query_handle,
+                            eval->arg);
+                        lit = z_list_tail(lit);
+                    }
+                    z_list_free(&evals);
+                }
             }
             break;
         case Z_REPLY:
@@ -288,9 +321,17 @@ void handle_msg(z_zenoh_t *z, z_message_p_result_t r) {
                             Z_DEBUG("Unable to parse Reply Message Payload Header\n");
                             break;
                         }
-                        rvalue.kind = Z_STORAGE_DATA;
+                        if (r.value.message->header & Z_E_FLAG) {
+                            rvalue.kind = Z_EVAL_DATA;
+                        }else{
+                            rvalue.kind = Z_STORAGE_DATA;
+                        }
                     } else {
-                        rvalue.kind = Z_STORAGE_FINAL;
+                        if (r.value.message->header & Z_E_FLAG) {
+                            rvalue.kind = Z_EVAL_FINAL;
+                        }else{
+                            rvalue.kind = Z_STORAGE_FINAL;
+                        }
                     }
                 } else {
                     rvalue.kind = Z_REPLY_FINAL;
@@ -341,6 +382,8 @@ void handle_msg(z_zenoh_t *z, z_message_p_result_t r) {
                     case Z_FORGET_SELECTION_DECL:
                     case Z_STORAGE_DECL:
                     case Z_FORGET_STORAGE_DECL:
+                    case Z_EVAL_DECL:
+                    case Z_FORGET_EVAL_DECL:
                     default:
                         break;
                 }

@@ -360,6 +360,74 @@ z_get_storages_by_rname(z_zenoh_t *z, const char *rname) {
   }
 }
 
+void z_register_eval(z_zenoh_t *z, z_vle_t rid, z_vle_t id, query_handler_t handler, void *arg) {
+  z_eval_t *eval = (z_eval_t *) malloc(sizeof(z_eval_t));
+  eval->rid = rid;
+  eval->id = id;
+  z_res_decl_t *decl = z_get_res_decl_by_rid(z, rid);
+  assert(decl != 0);
+  eval->rname = strdup(decl->r_name);
+  eval->handler = handler;
+  eval->arg = arg;
+  z->evals = z_list_cons(z->evals, eval);
+}
+
+int eva_predicate(void *elem, void *arg) {
+  z_eva_t *e = (z_eva_t *)arg;
+  z_eval_t *eval = (z_eval_t *)elem;
+  if(eval->id == e->id) {
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
+void z_unregister_eval(z_eva_t *e) {
+  e->z->evals = z_list_remove(e->z->evals, sto_predicate, e);
+}
+
+z_list_t *
+z_get_evals_by_rid(z_zenoh_t *z, z_vle_t rid) {
+  z_list_t *evals = z_list_empty;
+  if (z->evals == 0) {
+    return evals;
+  }
+  else {
+    z_eval_t *eval = 0;
+    z_list_t *evals = z->evals;
+    z_list_t *xs = z_list_empty;
+    do {
+      eval = (z_eval_t *)z_list_head(evals);
+      evals = z_list_tail(evals);
+      if (eval->rid == rid) {
+        xs = z_list_cons(xs, eval);
+      }
+    } while (evals != 0);
+    return xs;
+  }
+}
+
+z_list_t *
+z_get_evals_by_rname(z_zenoh_t *z, const char *rname) {
+  z_list_t *evals = z_list_empty;
+  if (z->evals == 0) {
+    return evals;
+  }
+  else {
+    z_eval_t *eval = 0;
+    z_list_t *evals = z->evals;
+    z_list_t *xs = z_list_empty;
+    do {
+      eval = (z_eval_t *)z_list_head(evals);
+      evals = z_list_tail(evals);
+      if (intersect(eval->rname, (char *)rname)) {
+        xs = z_list_cons(xs, eval);
+      }
+    } while (evals != 0);
+    return xs;
+  }
+}
+
 int z_matching_remote_sub(z_zenoh_t *z, z_vle_t rid) {
   return z_i_map_get(z->remote_subs, rid) != 0 ? 1 : 0;   
 }

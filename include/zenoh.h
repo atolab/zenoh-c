@@ -31,6 +31,9 @@ z_declare_publisher(z_zenoh_t *z, const char *resource);
 z_sto_p_result_t 
 z_declare_storage(z_zenoh_t *z, const char* resource, subscriber_callback_t callback, query_handler_t handler, void *arg);
 
+z_eval_p_result_t 
+z_declare_eval(z_zenoh_t *z, const char* resource, query_handler_t handler, void *arg);
+
 int z_stream_compact_data(z_pub_t *pub, const unsigned char *payload, size_t len);
 int z_stream_data(z_pub_t *pub, const unsigned char *payload, size_t len);
 int z_write_data(z_zenoh_t *z, const char* resource, const unsigned char *payload, size_t length);
@@ -43,6 +46,7 @@ int z_query(z_zenoh_t *z, const char* resource, const char* predicate, z_reply_c
 int z_undeclare_subscriber(z_sub_t *z);
 int z_undeclare_publisher(z_pub_t *z);
 int z_undeclare_storage(z_sto_t *z);
+int z_undeclare_eval(z_eva_t *z);
 
 int z_close(z_zenoh_t *z);
 

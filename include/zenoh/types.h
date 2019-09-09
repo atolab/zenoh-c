@@ -45,7 +45,9 @@ extern const int _z_dummy_arg;
 
 #define Z_STORAGE_DATA 0
 #define Z_STORAGE_FINAL 1
-#define Z_REPLY_FINAL 2
+#define Z_EVAL_DATA 2
+#define Z_EVAL_FINAL 3
+#define Z_REPLY_FINAL 4
 
 typedef  size_t  z_vle_t;
 Z_RESULT_DECLARE (z_vle_t, vle)
@@ -159,6 +161,7 @@ typedef struct {
   z_list_t *declarations;
   z_list_t *subscriptions;
   z_list_t *storages;
+  z_list_t *evals;
   z_list_t *replywaiters;
   z_i_map_t *remote_subs;
   z_mvar_t *reply_msg_mvar;
@@ -184,10 +187,17 @@ typedef struct {
   z_vle_t id;
 } z_pub_t;
 
+typedef struct {
+  z_zenoh_t *z;
+  z_vle_t rid;
+  z_vle_t id;
+} z_eva_t;
+
 Z_P_RESULT_DECLARE(z_zenoh_t, zenoh)
 Z_P_RESULT_DECLARE(z_sub_t, sub)
 Z_P_RESULT_DECLARE(z_sto_t, sto)
 Z_P_RESULT_DECLARE(z_pub_t, pub)
+Z_P_RESULT_DECLARE(z_eva_t, eval)
 
 
 typedef struct {   
@@ -213,6 +223,14 @@ typedef struct {
 }  z_storage_t;
 
 typedef struct {  
+  char *rname;
+  z_vle_t rid;
+  z_vle_t id;
+  query_handler_t handler;
+  void *arg;
+}  z_eval_t;
+
+typedef struct {  
   z_vle_t qid;
   z_reply_callback_t callback;
   void *arg;
@@ -235,6 +253,11 @@ void z_register_storage(z_zenoh_t *z, z_vle_t rid, z_vle_t id, subscriber_callba
 z_list_t * z_get_storages_by_rid(z_zenoh_t *z, z_vle_t rid);
 z_list_t * z_get_storages_by_rname(z_zenoh_t *z, const char *rname);
 void z_unregister_storage(z_sto_t *s) ;
+
+void z_register_eval(z_zenoh_t *z, z_vle_t rid, z_vle_t id, query_handler_t handler, void *arg);
+z_list_t * z_get_evals_by_rid(z_zenoh_t *z, z_vle_t rid);
+z_list_t * z_get_evals_by_rname(z_zenoh_t *z, const char *rname);
+void z_unregister_eval(z_eva_t *s) ;
 
 int z_matching_remote_sub(z_zenoh_t *z, z_vle_t rid);
 
