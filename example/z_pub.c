@@ -24,8 +24,6 @@ int main(int argc, char **argv) {
   ASSERT_RESULT(r_z, "Unable to open session with broker")
   z_zenoh_t *z = r_z.value.zenoh;
   z_start_recv_loop(z);  
-
-
   
   printf("Declaring Publisher...\n");
   z_pub_p_result_t r = z_declare_publisher(z, uri);

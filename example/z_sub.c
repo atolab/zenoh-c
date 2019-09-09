@@ -19,21 +19,14 @@ void listener(const z_resource_id_t *rid, const unsigned char *data, size_t leng
 }
 
 int main(int argc, char **argv) {
-  Z_ARRAY_S_DEFINE(uint8_t, uid, 32);
-  Z_ARRAY_S_DEFINE(uint8_t, pwd, 32);
-  uid.elem = (uint8_t *)"user"; 
-  uid.length = strlen("user");
-  pwd.elem = (uint8_t *)"password"; 
-  pwd.length = strlen("password");
-  z_property_t user;
-  user.id = Z_USER_KEY;
-  user.value = uid;
-  z_property_t password;
-  password.id = Z_PASSWD_KEY;
-  password.value = pwd;
+  const char* uid = "user";
+  const char* pwd = "password";
+  z_property_t user = {Z_USER_KEY, {strlen(uid), (uint8_t*)uid}};
+  z_property_t password = {Z_PASSWD_KEY, {strlen(pwd), (uint8_t*)pwd}};
   z_vec_t ps = z_vec_make(2);
   z_vec_append(&ps, &user);
   z_vec_append(&ps, &password);
+
   char *locator = strdup("tcp/127.0.0.1:7447");
   if (argc > 1) {
     locator = argv[1];
@@ -47,9 +40,7 @@ int main(int argc, char **argv) {
   z_zenoh_p_result_t r_z = z_open(locator, 0, &ps);
   ASSERT_RESULT(r_z, "Unable to open session with broker")
   z_zenoh_t *z = r_z.value.zenoh;
-
   z_start_recv_loop(z);
-  printf("Declaring Resource...\n");  
 
   printf("Declaring Subscriber...\n");
   z_sub_mode_t sm;
