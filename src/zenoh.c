@@ -724,8 +724,8 @@ void send_local_eval_replies(void* query_handle, z_array_resource_t replies){
 }
 
 int z_query_wo(z_zenoh_t *z, const char* resource, const char* predicate, z_reply_callback_t callback, void *arg, z_query_dest_t dest_storages, z_query_dest_t dest_evals) { 
-  z_list_t *stos = z_get_storages_by_rname(z, resource);
-  z_list_t *evals = z_get_evals_by_rname(z, resource);
+  z_list_t *stos = dest_storages.kind == Z_NONE ? 0 : z_get_storages_by_rname(z, resource);
+  z_list_t *evals = dest_evals.kind == Z_NONE ? 0 : z_get_evals_by_rname(z, resource);
   if(stos != 0 || evals != 0)
   {
     z_storage_t *sto;
