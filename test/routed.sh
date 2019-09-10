@@ -7,8 +7,8 @@ if [[ ! -f zenohd ]]; then
     echo "> Downloading https://github.com/atolab/atobin/raw/master/zenoh/latest/centos/7.2.1511/zenohd ..."
     curl -L -o zenohd https://github.com/atolab/atobin/raw/master/zenoh/latest/centos/7.2.1511/zenohd
   else 
-    echo "> Downloading https://github.com/atolab/atobin/raw/master/zenoh/latest/ubuntu/16.04/zenohd ..."
-    curl -L -o zenohd https://github.com/atolab/atobin/raw/master/zenoh/latest/ubuntu/16.04/zenohd
+    echo "> Downloading https://github.com/atolab/atobin/raw/master/zenoh/unstable/ubuntu/16.04/zenohd ..."
+    curl -L -o zenohd https://github.com/atolab/atobin/raw/master/zenoh/unstable/ubuntu/16.04/zenohd
   fi
 fi
 chmod +x zenohd
