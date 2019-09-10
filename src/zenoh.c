@@ -643,6 +643,8 @@ typedef struct {
   char *predicate;
   z_reply_callback_t callback;
   void *arg;
+  z_query_dest_t dest_storages;
+  z_query_dest_t dest_evals;
   atomic_int nb_qhandlers;
   atomic_flag sent_final;
 } local_query_handle_t;
@@ -688,6 +690,20 @@ void send_local_replies(void* query_handle, z_array_resource_t replies, char eva
     msg.payload.query.qid = handle->z->qid++;
     msg.payload.query.rname = handle->resource;
     msg.payload.query.predicate = handle->predicate;
+
+    if(handle->dest_storages.kind != Z_BEST_MATCH || handle->dest_evals.kind != Z_BEST_MATCH) {
+      msg.header = Z_QUERY | Z_P_FLAG;
+      z_vec_t ps = z_vec_make(2);
+      if(handle->dest_storages.kind != Z_BEST_MATCH) {
+        z_property_t dest_storages_prop = {Z_DEST_STORAGES_KEY, {1, (uint8_t*)&handle->dest_storages.kind}};
+        z_vec_append(&ps, &dest_storages_prop);
+      }
+      if(handle->dest_evals.kind != Z_BEST_MATCH) {
+        z_property_t dest_evals_prop = {Z_DEST_EVALS_KEY, {1, (uint8_t*)&handle->dest_evals.kind}};
+        z_vec_append(&ps, &dest_evals_prop);
+      }
+      msg.properties = &ps;
+    }
     
     z_register_query(handle->z, msg.payload.query.qid, handle->callback, handle->arg);
     if (z_send_msg(handle->z->sock, &handle->z->wbuf, &msg) != 0) {
@@ -707,7 +723,7 @@ void send_local_eval_replies(void* query_handle, z_array_resource_t replies){
   send_local_replies(query_handle, replies, 1);
 }
 
-int z_query(z_zenoh_t *z, const char* resource, const char* predicate, z_reply_callback_t callback, void *arg) { 
+int z_query_wo(z_zenoh_t *z, const char* resource, const char* predicate, z_reply_callback_t callback, void *arg, z_query_dest_t dest_storages, z_query_dest_t dest_evals) { 
   z_list_t *stos = z_get_storages_by_rname(z, resource);
   z_list_t *evals = z_get_evals_by_rname(z, resource);
   if(stos != 0 || evals != 0)
@@ -722,6 +738,8 @@ int z_query(z_zenoh_t *z, const char* resource, const char* predicate, z_reply_c
     handle->predicate = (char*)predicate;
     handle->callback = callback;
     handle->arg = arg;
+    handle->dest_storages = dest_storages;
+    handle->dest_evals = dest_evals;
 
     int nb_qhandlers = 0;
     if(stos != 0){nb_qhandlers += z_list_len(stos);}
@@ -755,6 +773,20 @@ int z_query(z_zenoh_t *z, const char* resource, const char* predicate, z_reply_c
     msg.payload.query.qid = z->qid++;
     msg.payload.query.rname = (char *)resource;
     msg.payload.query.predicate = (char *)predicate;
+
+    if(dest_storages.kind != Z_BEST_MATCH || dest_evals.kind != Z_BEST_MATCH) {
+      msg.header = Z_QUERY | Z_P_FLAG;
+      z_vec_t ps = z_vec_make(2);
+      if(dest_storages.kind != Z_BEST_MATCH) {
+        z_property_t dest_storages_prop = {Z_DEST_STORAGES_KEY, {1, (uint8_t*)&dest_storages.kind}};
+        z_vec_append(&ps, &dest_storages_prop);
+      }
+      if(dest_evals.kind != Z_BEST_MATCH) {
+        z_property_t dest_evals_prop = {Z_DEST_EVALS_KEY, {1, (uint8_t*)&dest_evals.kind}};
+        z_vec_append(&ps, &dest_evals_prop);
+      }
+      msg.properties = &ps;
+    }
     
     z_register_query(z, msg.payload.query.qid, callback, arg);
     if (z_send_msg(z->sock, &z->wbuf, &msg) != 0) {
@@ -764,4 +796,9 @@ int z_query(z_zenoh_t *z, const char* resource, const char* predicate, z_reply_c
     }
   }
   return 0;
+}
+
+int z_query(z_zenoh_t *z, const char* resource, const char* predicate, z_reply_callback_t callback, void *arg) { 
+  z_query_dest_t best_match = {Z_BEST_MATCH, 0};
+  return z_query_wo(z, resource, predicate, callback, arg, best_match, best_match); 
 }

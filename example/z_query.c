@@ -56,7 +56,8 @@ int main(int argc, char **argv) {
   z_start_recv_loop(z);
 
   printf("Send Query...\n");
-  if (z_query(z, uri, "", reply_handler, NULL) != 0) {
+  z_query_dest_t dest_all = {Z_ALL, 0};
+  if (z_query_wo(z, uri, "", reply_handler, NULL, dest_all, dest_all) != 0) {
     printf("Unable to query\n");
     return -1;
   }

@@ -613,7 +613,6 @@ z_query_encode(z_iobuf_t *buf, const z_query_t* m) {
   z_vle_encode(buf, m->qid);
   z_string_encode(buf, m->rname);
   z_string_encode(buf, m->predicate);
-  // TODO : encode properties 
 }
 
 void z_query_decode_na(z_iobuf_t *buf, z_query_result_t *r) {
@@ -634,8 +633,6 @@ void z_query_decode_na(z_iobuf_t *buf, z_query_result_t *r) {
   r_str = z_string_decode(buf);
   ASSURE_P_RESULT(r_str, r, Z_STRING_PARSE_ERROR);
   r->value.query.predicate = r_str.value.string;
-
-  // TODO : decode properties
 }
 
 z_query_result_t

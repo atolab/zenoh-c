@@ -42,6 +42,7 @@ int z_stream_data_wo(z_pub_t *pub, const unsigned char *payload, size_t len, uin
 int z_write_data_wo(z_zenoh_t *z, const char* resource, const unsigned char *payload, size_t len, uint8_t encoding, uint8_t kind);
 
 int z_query(z_zenoh_t *z, const char* resource, const char* predicate, z_reply_callback_t callback, void *arg);
+int z_query_wo(z_zenoh_t *z, const char* resource, const char* predicate, z_reply_callback_t callback, void *arg, z_query_dest_t dest_storages, z_query_dest_t dest_evals);
 
 int z_undeclare_subscriber(z_sub_t *z);
 int z_undeclare_publisher(z_pub_t *z);

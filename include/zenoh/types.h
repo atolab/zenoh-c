@@ -43,11 +43,19 @@ extern const int _z_dummy_arg;
 #define Z_INT_RES_ID 0
 #define Z_STR_RES_ID 1
 
+#define Z_DEST_STORAGES_KEY 0x10
+#define Z_DEST_EVALS_KEY 0x11
+
 #define Z_STORAGE_DATA 0
 #define Z_STORAGE_FINAL 1
 #define Z_EVAL_DATA 2
 #define Z_EVAL_FINAL 3
 #define Z_REPLY_FINAL 4
+
+#define Z_BEST_MATCH 0
+#define Z_COMPLETE 1
+#define Z_ALL 2
+#define Z_NONE 3
 
 typedef  size_t  z_vle_t;
 Z_RESULT_DECLARE (z_vle_t, vle)
@@ -199,6 +207,10 @@ Z_P_RESULT_DECLARE(z_sto_t, sto)
 Z_P_RESULT_DECLARE(z_pub_t, pub)
 Z_P_RESULT_DECLARE(z_eva_t, eval)
 
+typedef struct {
+  uint8_t kind;
+  uint8_t nb;
+} z_query_dest_t;
 
 typedef struct {   
   z_vle_t rid;
