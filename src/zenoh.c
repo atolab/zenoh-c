@@ -82,6 +82,7 @@ z_open(char* locator, on_disconnect_t on_disconnect, const z_vec_t* ps) {
   r.value.zenoh->declarations = z_list_empty;
   r.value.zenoh->subscriptions = z_list_empty;
   r.value.zenoh->storages = z_list_empty;
+  r.value.zenoh->evals = z_list_empty;
   r.value.zenoh->replywaiters = z_list_empty;
   r.value.zenoh->reply_msg_mvar = z_mvar_empty();
   r.value.zenoh->remote_subs = z_i_map_make(DEFAULT_I_MAP_CAPACITY); 
