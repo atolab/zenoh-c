@@ -40,8 +40,9 @@ int main(int argc, char **argv) {
   ASSERT_P_RESULT(r, "Unable to declare eval\n");  
   z_eva_t *eval = r.value.eval;
 
-  while (1) { 
-    sleep(60);
+  char c = 0;
+  while (c != 'q') {
+    c = fgetc(stdin);
   }
 
   z_undeclare_eval(eval);

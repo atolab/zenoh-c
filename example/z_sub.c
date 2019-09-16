@@ -37,8 +37,9 @@ int main(int argc, char **argv) {
   ASSERT_P_RESULT(r,"Unable to declare subscriber\n");
   z_sub_t *sub = r.value.sub;
 
-  while (1) { 
-    sleep(60);
+  char c = 0;
+  while (c != 'q') {
+    c = fgetc(stdin);
   }
 
   z_undeclare_subscriber(sub);

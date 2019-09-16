@@ -101,8 +101,9 @@ int main(int argc, char **argv) {
   ASSERT_P_RESULT(r, "Unable to declare storage\n");  
   z_sto_t *sto = r.value.sto;
 
-  while (1) { 
-    sleep(60);
+  char c = 0;
+  while (c != 'q') {
+    c = fgetc(stdin);
   }
 
   z_undeclare_storage(sto);
