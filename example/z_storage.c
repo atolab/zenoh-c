@@ -4,7 +4,6 @@
 #include "zenoh/recv_loop.h"
 #include "zenoh/rname.h"
 
-
 typedef struct sample {
   char *rname;
   char *data;
@@ -25,7 +24,10 @@ int remove_data(void *elem, void*args){
 
 void listener(const z_resource_id_t *rid, const unsigned char *data, size_t length, const z_data_info_t *info, void *arg) {    
   Z_UNUSED_ARG_2(info, arg);
-  printf("Received data: %s\n", rid->id.rname);
+  char str[length + 1];
+  memcpy(&str, data, length);
+  str[length] = 0;
+  printf(">> [Storage listener] Received ('%20s' : '%s')\n", rid->id.rname, str);
   stored = z_list_remove(stored, remove_data, rid->id.rname);
 
   sample_t *sample = (sample_t *)malloc(sizeof(sample_t));
@@ -38,8 +40,8 @@ void listener(const z_resource_id_t *rid, const unsigned char *data, size_t leng
 }
 
 void query_handler(const char *rname, const char *predicate, replies_sender_t send_replies, void *query_handle, void *arg) {
-  Z_UNUSED_ARG_2(predicate, arg);
-  printf("Handling Query: %s\n", rname);
+  Z_UNUSED_ARG(arg);
+  printf(">> [Query handler   ] Handling '%s?%s'\n", rname, predicate);
   z_array_resource_t replies;
   z_list_t *matching_samples = 0;
 
@@ -83,7 +85,7 @@ int main(int argc, char **argv) {
   if (argc > 1) {
     locator = argv[1];
   }
-  char *uri="/demo/**";
+  char *uri = "/demo/example/**";
   if (argc > 2) {
     uri = argv[2];
   }
@@ -94,11 +96,17 @@ int main(int argc, char **argv) {
   z_zenoh_t *z = r_z.value.zenoh;
   z_start_recv_loop(z);
 
-  printf("Declaring Storage: %s\n", uri);
-  z_declare_storage(z, uri, listener, query_handler, NULL);
+  printf("Declaring Storage on '%s'...\n", uri);
+  z_sto_p_result_t r = z_declare_storage(z, uri, listener, query_handler, NULL);
+  ASSERT_P_RESULT(r, "Unable to declare storage\n");  
+  z_sto_t *sto = r.value.sto;
 
   while (1) { 
-    sleep(1);
+    sleep(60);
   }
+
+  z_undeclare_storage(sto);
+  z_close(z);
+  z_stop_recv_loop(z);
   return 0;
 }

@@ -3,38 +3,27 @@
 #include "zenoh.h"
 #include "zenoh/recv_loop.h"
 
-#include "zenoh/codec.h"
-
 void reply_handler(const z_reply_value_t *reply, void *arg) {
   Z_UNUSED_ARG(arg);
-  z_string_result_t r_s;
-  z_iobuf_t buf;
+  char str[4096];
   switch (reply->kind) {
     case Z_STORAGE_DATA: 
     case Z_EVAL_DATA: 
-      buf = z_iobuf_wrap_wo((unsigned char *)reply->data, reply->data_length, 0, reply->data_length);
-      r_s = z_string_decode(&buf);        
-      if (r_s.tag == Z_OK_TAG) {
-        switch (reply->kind) {
-          case Z_STORAGE_DATA: printf("Received Storage Data. (%s, %s)\n", reply->rname, r_s.value.string);break;
-          case Z_EVAL_DATA: printf("Received Eval    Data. (%s, %s)\n", reply->rname, r_s.value.string);break;
-        }
-        free(r_s.value.string);
-      } else {
-        switch (reply->kind) {
-          case Z_STORAGE_DATA: printf("Received Storage Data. %s:...\n", reply->rname);break;
-          case Z_EVAL_DATA: printf("Received Eval    Data. %s:...\n", reply->rname);break;
-        } 
+      memcpy(&str, reply->data, reply->data_length);
+      str[reply->data_length] = 0;
+      switch (reply->kind) {
+        case Z_STORAGE_DATA: printf(">> [Reply handler] received -Storage Data- ('%s': '%s')\n", reply->rname, str);break;
+        case Z_EVAL_DATA:    printf(">> [Reply handler] received -Eval Data-    ('%s': '%s')\n", reply->rname, str);break;
       }
       break;
     case Z_STORAGE_FINAL:
-      printf("Received Storage Final.\n");
+      printf(">> [Reply handler] received -Storage Final-\n");
       break;
     case Z_EVAL_FINAL:
-      printf("Received Eval    Final.\n");
+      printf(">> [Reply handler] received -Eval Final-\n");
       break;
     case Z_REPLY_FINAL:
-      printf("Received Reply Final.\n");
+      printf(">> [Reply handler] received -Reply Final-\n");
       break;
   }
 }
@@ -44,7 +33,7 @@ int main(int argc, char **argv) {
   if (argc > 1) {
     locator = argv[1];
   }
-  char *uri="/demo/**";
+  char *uri = "/demo/example/**";
   if (argc > 2) {
     uri = argv[2];
   }
@@ -55,7 +44,7 @@ int main(int argc, char **argv) {
   z_zenoh_t *z = r_z.value.zenoh;
   z_start_recv_loop(z);
 
-  printf("Send Query...\n");
+  printf("Sending Query '%s'...\n", uri);
   z_query_dest_t dest_all = {Z_ALL, 0};
   if (z_query_wo(z, uri, "", reply_handler, NULL, dest_all, dest_all) != 0) {
     printf("Unable to query\n");
@@ -63,5 +52,8 @@ int main(int argc, char **argv) {
   }
 
   sleep(1);
+
+  z_close(z);
+  z_stop_recv_loop(z);
   return 0;
 }

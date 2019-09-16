@@ -3,8 +3,6 @@
 #include "zenoh.h"
 #include "zenoh/recv_loop.h"
 
-#include "zenoh/codec.h"
-
 char *hexdump(z_array_uint8_t array) {
   char *res = malloc((array.length*2+1)*sizeof(char));
   for(unsigned int i = 0; i < array.length; ++i){
@@ -32,5 +30,6 @@ int main(int argc, char **argv) {
 
   z_vec_free(&info);
 
+  z_close(z);
   return 0;
 }

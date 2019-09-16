@@ -4,13 +4,13 @@
 #include "zenoh/recv_loop.h"
 
 void query_handler(const char *rname, const char *predicate, replies_sender_t send_replies, void *query_handle, void *arg) {
-  Z_UNUSED_ARG(predicate);
-  printf("Handling Query: %s\n", rname);
+  printf(">> [Query handler] Handling '%s?%s'\n", rname, predicate);
 
+  char *data = "Eval from C!";
   z_resource_t resource;
   resource.rname = arg;
-  resource.data = (const unsigned char *)"\13EVAL_RESULT";
-  resource.length = 13;
+  resource.data = (const unsigned char *)data;
+  resource.length = strlen(data);
   resource.encoding = 0;
   resource.kind = 0;
   z_resource_t *p_resource = &resource;
@@ -24,7 +24,7 @@ int main(int argc, char **argv) {
   if (argc > 1) {
     locator = argv[1];
   }
-  char *uri="/demo/eval";
+  char *uri = "/demo/example/zenoh-c-eval";
   if (argc > 2) {
     uri = argv[2];
   }
@@ -35,11 +35,17 @@ int main(int argc, char **argv) {
   z_zenoh_t *z = r_z.value.zenoh;
   z_start_recv_loop(z);
 
-  printf("Declaring Eval: %s\n", uri);
-  z_declare_eval(z, uri, query_handler, uri);
+  printf("Declaring Eval on '%s'...\n", uri);
+  z_eval_p_result_t r = z_declare_eval(z, uri, query_handler, uri);
+  ASSERT_P_RESULT(r, "Unable to declare eval\n");  
+  z_eva_t *eval = r.value.eval;
 
   while (1) { 
-    sleep(1);
+    sleep(60);
   }
+
+  z_undeclare_eval(eval);
+  z_close(z);
+  z_stop_recv_loop(z);
   return 0;
 }
