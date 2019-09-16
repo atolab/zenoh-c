@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.com/atolab/zenoh-c.svg?branch=master)](https://travis-ci.com/atolab/zenoh-c)
 [![codecov](https://codecov.io/gh/atolab/zenoh-c/branch/master/graph/badge.svg)](https://codecov.io/gh/atolab/zenoh-c)
+[![Gitter](https://badges.gitter.im/adlink-labs/zenoh.svg)](https://gitter.im/adlink-labs/zenoh?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 # zenoh C Client API
 
