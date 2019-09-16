@@ -28,9 +28,7 @@ void default_on_disconnect(void *vz) {
 z_zenoh_p_result_t 
 z_open(char* locator, on_disconnect_t on_disconnect, const z_vec_t* ps) {
   z_zenoh_p_result_t r; 
-  
-  r.value.zenoh = (z_zenoh_t *)malloc(sizeof(z_zenoh_t));
-  r.value.zenoh->locator = strdup(locator);
+  r.value.zenoh = 0;
   srand(clock());
 
   z_socket_result_t r_sock = open_tx_session(locator);    
@@ -40,19 +38,7 @@ z_open(char* locator, on_disconnect_t on_disconnect, const z_vec_t* ps) {
     return r;
   }
   
-
-  r.tag = Z_OK_TAG;  
-  r.value.zenoh->sock = r_sock.value.socket;
-  r.value.zenoh->cid = 0;
-  r.value.zenoh->sn = 0;
-  r.value.zenoh->rbuf = z_iobuf_make(ZENOH_READ_BUF_LEN);  
-  r.value.zenoh->wbuf = z_iobuf_make(ZENOH_WRITE_BUF_LEN);  
-  r.value.zenoh->qid = 0;
-  r.value.zenoh->rid = 0;  
-  r.value.zenoh->declarations = 0;
-  r.value.zenoh->subscriptions = 0;
-  r.value.zenoh->storages = 0;
-  r.value.zenoh->reply_msg_mvar = 0;
+  r.tag = Z_OK_TAG;
 
   Z_ARRAY_S_DEFINE(uint8_t, pid, ZENOH_PID_LENGTH);   
   for (int i = 0; i < ZENOH_PID_LENGTH; ++i) 
@@ -67,18 +53,33 @@ z_open(char* locator, on_disconnect_t on_disconnect, const z_vec_t* ps) {
   msg.properties = ps;
 
   Z_DEBUG("Sending Open\n");
-  z_send_msg(r_sock.value.socket, &r.value.zenoh->wbuf, &msg);
-  z_iobuf_clear(&r.value.zenoh->rbuf);
-  z_message_p_result_t r_msg = z_recv_msg(r_sock.value.socket, &r.value.zenoh->rbuf);
+  z_iobuf_t wbuf = z_iobuf_make(ZENOH_WRITE_BUF_LEN); 
+  z_iobuf_t rbuf = z_iobuf_make(ZENOH_READ_BUF_LEN); 
+  z_send_msg(r_sock.value.socket, &wbuf, &msg);
+  z_iobuf_clear(&rbuf);
+  z_message_p_result_t r_msg = z_recv_msg(r_sock.value.socket, &rbuf);
   
   if (r_msg.tag == Z_ERROR_TAG) {
     r.tag = Z_ERROR_TAG;    
     r.value.error = Z_FAILED_TO_OPEN_SESSION;
+    z_iobuf_free(&wbuf);
+    z_iobuf_free(&rbuf);
     return r;
-  }  
+  }
+
+  r.value.zenoh = (z_zenoh_t *)malloc(sizeof(z_zenoh_t));
   r.value.zenoh->sock = r_sock.value.socket;
-  r.value.zenoh->pid = pid;  
+  r.value.zenoh->sn = 0;
+  r.value.zenoh->cid = 0;
+  r.value.zenoh->rid = 0;
+  r.value.zenoh->eid = 0;
+  r.value.zenoh->rbuf = rbuf;
+  r.value.zenoh->wbuf = wbuf;
+  r.value.zenoh->pid = pid;
   Z_ARRAY_S_COPY(uint8_t, r.value.zenoh->peer_pid, r_msg.value.message->payload.accept.broker_pid);
+  r.value.zenoh->qid = 0;
+  r.value.zenoh->locator = strdup(locator);
+  r.value.zenoh->on_disconnect = on_disconnect != 0 ? on_disconnect : &default_on_disconnect;
   r.value.zenoh->declarations = z_list_empty;
   r.value.zenoh->subscriptions = z_list_empty;
   r.value.zenoh->storages = z_list_empty;
@@ -87,11 +88,6 @@ z_open(char* locator, on_disconnect_t on_disconnect, const z_vec_t* ps) {
   r.value.zenoh->reply_msg_mvar = z_mvar_empty();
   r.value.zenoh->remote_subs = z_i_map_make(DEFAULT_I_MAP_CAPACITY); 
   z_message_p_result_free(&r_msg);
-
-  if (on_disconnect != 0)
-    r.value.zenoh->on_disconnect = on_disconnect;  
-  else 
-    r.value.zenoh->on_disconnect = &default_on_disconnect;  
   
   return r;
 }

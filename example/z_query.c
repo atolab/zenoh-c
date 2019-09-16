@@ -3,14 +3,16 @@
 #include "zenoh.h"
 #include "zenoh/recv_loop.h"
 
+#define MAX_LEN 256
+
 void reply_handler(const z_reply_value_t *reply, void *arg) {
   Z_UNUSED_ARG(arg);
-  char str[4096];
+  char str[MAX_LEN];
   switch (reply->kind) {
     case Z_STORAGE_DATA: 
     case Z_EVAL_DATA: 
-      memcpy(&str, reply->data, reply->data_length);
-      str[reply->data_length] = 0;
+      memcpy(&str, reply->data, reply->data_length < MAX_LEN ? reply->data_length : MAX_LEN - 1);
+      str[reply->data_length < MAX_LEN ? reply->data_length : MAX_LEN - 1] = 0;
       switch (reply->kind) {
         case Z_STORAGE_DATA: printf(">> [Reply handler] received -Storage Data- ('%s': '%s')\n", reply->rname, str);break;
         case Z_EVAL_DATA:    printf(">> [Reply handler] received -Eval Data-    ('%s': '%s')\n", reply->rname, str);break;

@@ -3,11 +3,13 @@
 #include "zenoh.h"
 #include "zenoh/recv_loop.h"
 
+#define MAX_LEN 256
+
 void listener(const z_resource_id_t *rid, const unsigned char *data, size_t length, const z_data_info_t *info, void *arg) {
   Z_UNUSED_ARG_2(info, arg);
-  char str[length + 1];
-  memcpy(&str, data, length);
-  str[length] = 0;
+  char str[MAX_LEN];
+  memcpy(&str, data, length < MAX_LEN ? length : MAX_LEN - 1);
+  str[length < MAX_LEN ? length : MAX_LEN - 1] = 0;
   if (rid->kind == Z_INT_RES_ID) 
     printf(">> [Subscription listener] Received (#%zu: '%s')\n", rid->id.rid, str);
   else

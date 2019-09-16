@@ -4,6 +4,8 @@
 #include "zenoh/recv_loop.h"
 #include "zenoh/rname.h"
 
+#define MAX_LEN 256
+
 typedef struct sample {
   char *rname;
   char *data;
@@ -24,9 +26,9 @@ int remove_data(void *elem, void*args){
 
 void listener(const z_resource_id_t *rid, const unsigned char *data, size_t length, const z_data_info_t *info, void *arg) {    
   Z_UNUSED_ARG_2(info, arg);
-  char str[length + 1];
-  memcpy(&str, data, length);
-  str[length] = 0;
+  char str[MAX_LEN];
+  memcpy(&str, data, length < MAX_LEN ? length : MAX_LEN - 1);
+  str[length < MAX_LEN ? length : MAX_LEN - 1] = 0;
   printf(">> [Storage listener] Received ('%20s' : '%s')\n", rid->id.rname, str);
   stored = z_list_remove(stored, remove_data, rid->id.rname);
 
