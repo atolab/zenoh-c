@@ -310,8 +310,8 @@ void handle_msg(z_zenoh_t *z, z_message_p_result_t r) {
                             rvalue.info.flags = r_ph.value.payload_header.flags;
                             rvalue.info.encoding = r_ph.value.payload_header.encoding;
                             rvalue.info.kind = r_ph.value.payload_header.kind;
-                            if (info.flags & Z_T_STAMP) {
-                                info.tstamp = r_ph.value.payload_header.tstamp;
+                            if (rvalue.info.flags & Z_T_STAMP) {
+                                rvalue.info.tstamp = r_ph.value.payload_header.tstamp;
                             }
                             rvalue.data = r_ph.value.payload_header.payload.buf;
                             rvalue.data_length = z_iobuf_readable(&r_ph.value.payload_header.payload);
