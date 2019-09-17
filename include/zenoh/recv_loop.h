@@ -3,8 +3,6 @@
 
 #include "zenoh/types.h"
 
-void* z_handle_msg(z_zenoh_t* z);
-
 void* z_recv_loop(z_zenoh_t* z);
 
 int z_running(z_zenoh_t* z);

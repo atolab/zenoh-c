@@ -399,14 +399,17 @@ void handle_msg(z_zenoh_t *z, z_message_p_result_t r) {
     }
 }
 
-void* z_handle_msg(z_zenoh_t *z){
+void* z_recv_loop(z_zenoh_t *z) {
+    z_message_p_result_t r;
     z_vle_result_t r_vle;
     z_iobuf_t bigbuf;
     z_iobuf_t *buf;
-    bigbuf.capacity = 0;
-    z_message_p_result_t r;
     z_message_p_result_init(&r);
     int jump_to;
+    z_iobuf_clear(&z->rbuf);
+    bigbuf.capacity = 0;
+    z->running = 1;
+    while (z->running) {
 
     // READ SIZE
     if (z_iobuf_readable(&z->rbuf) < 4) {
@@ -451,14 +454,6 @@ void* z_handle_msg(z_zenoh_t *z){
         // Ensure we jump to the next message if if we did not parse the message.
         z->rbuf.r_pos = jump_to;
     }
-    return 0;
-}
-
-void* z_recv_loop(z_zenoh_t *z) {
-    z_iobuf_clear(&z->rbuf);
-    z->running = 1;
-    while (z->running) {
-        z_handle_msg(z);
     }
     return 0;
 }
