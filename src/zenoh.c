@@ -87,6 +87,8 @@ z_open(char* locator, on_disconnect_t on_disconnect, const z_vec_t* ps) {
   r.value.zenoh->replywaiters = z_list_empty;
   r.value.zenoh->reply_msg_mvar = z_mvar_empty();
   r.value.zenoh->remote_subs = z_i_map_make(DEFAULT_I_MAP_CAPACITY); 
+  r.value.zenoh->running = 0;
+  r.value.zenoh->thread = 0;
   z_message_p_result_free(&r_msg);
   
   return r;

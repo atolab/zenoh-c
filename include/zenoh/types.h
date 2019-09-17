@@ -173,7 +173,8 @@ typedef struct {
   z_list_t *replywaiters;
   z_i_map_t *remote_subs;
   z_mvar_t *reply_msg_mvar;
-  void *runtime;
+  volatile int running;
+  void *thread;
 } z_zenoh_t;
 
 
