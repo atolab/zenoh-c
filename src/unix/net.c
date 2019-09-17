@@ -20,27 +20,36 @@ open_tx_session(const char *locator) {
   r.tag = Z_OK_TAG;
   char * l = strdup(locator);
   Z_DEBUG_VA("Connecting to: %s:\n", locator);
-  char *tx = strtok(l, "/");  
+  char *tx = strtok(l, "/");
   if (strcmp(tx, "tcp") != 0) {
     fprintf(stderr, "Locator provided is not for TCP\n");
     exit(1);
   }
-  char *addr = strdup(strtok(NULL, ":"));  
-  char *s_port = strtok(NULL, ":");    
-  
+  char *addr = strdup(strtok(NULL, ":"));
+  char *s_port = strtok(NULL, ":");
+
   int port;
-  sscanf(s_port, "%d", &port);    
-  
+  sscanf(s_port, "%d", &port);
+
 
   Z_DEBUG_VA("Connecting to: %s:%d\n", addr, port);
   free(l);
-  struct sockaddr_in serv_addr;  
-  
+  struct sockaddr_in serv_addr;
+
   r.value.socket = socket(PF_INET, SOCK_STREAM, 0);
 
-  if (r.value.socket < 0) {    
+  if (r.value.socket < 0) {
     r.tag = Z_ERROR_TAG;
     r.value.error = r.value.socket;
+    r.value.socket = 0;
+    return r;
+  }
+
+  int flags = 1;
+  if(setsockopt(r.value.socket,SOL_SOCKET, SO_KEEPALIVE, (void *)&flags, sizeof(flags))==-1){
+    r.tag = Z_ERROR_TAG;
+    r.value.error = errno;
+    close(r.value.socket);
     r.value.socket = 0;
     return r;
   }
@@ -48,7 +57,7 @@ open_tx_session(const char *locator) {
 #if (ZENOH_MACOS == 1)
   setsockopt(r.value.socket, SOL_SOCKET, SO_NOSIGPIPE, (void *)0, sizeof(int));
 #endif
-  
+
 
   bzero(&serv_addr, sizeof(serv_addr));
 	serv_addr.sin_family = AF_INET;
@@ -61,37 +70,37 @@ open_tx_session(const char *locator) {
     r.value.socket = 0;
     free(addr);
     return r;
-	} 
-  
+	}
+
   free(addr);
 
-	
+
 	if( connect(r.value.socket, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
     r.tag = Z_ERROR_TAG;
     r.value.error = Z_TX_CONNECTION_ERROR;
     r.value.socket = 0;
     return r;
   }
-    	
+
   return r;
-  
+
 }
 
 size_t z_iovs_len(struct iovec* iov, int iovcnt) {
   size_t len = 0;
-  for (int i = 0; i < iovcnt; ++i) 
+  for (int i = 0; i < iovcnt; ++i)
     len += iov[i].iov_len;
   return len;
 }
 
-int z_compute_remaining(struct iovec* iov, int iovcnt, size_t sent) {  
+int z_compute_remaining(struct iovec* iov, int iovcnt, size_t sent) {
   size_t idx = 0;
   int i = 0;
-  while (idx + iov[i].iov_len <= sent) {    
+  while (idx + iov[i].iov_len <= sent) {
     idx += sent;
     i += 1;
-  } 
-  int j = 0; 
+  }
+  int j = 0;
   if (idx + iov[i].iov_len > sent) {
     iov[0].iov_base = ((unsigned char*)iov[i].iov_base) + (sent - idx - iov[i].iov_len );
     j = 1;
@@ -106,34 +115,34 @@ int z_compute_remaining(struct iovec* iov, int iovcnt, size_t sent) {
 
 int z_send_iovec(z_socket_t sock, struct iovec* iov, int iovcnt) {
   int len = 0;
-  for (int i = 0; i < iovcnt; ++i) 
+  for (int i = 0; i < iovcnt; ++i)
     len += iov[i].iov_len;
-  
+
   int n = writev(sock, iov, iovcnt);
   Z_DEBUG_VA("z_send_iovec sent %d of %d bytes \n", n, len);
   while (n < len) {
     iovcnt = z_compute_remaining(iov, iovcnt, n);
-    len = z_iovs_len(iov, iovcnt);    
+    len = z_iovs_len(iov, iovcnt);
     n = writev(sock, iov, iovcnt);
     Z_DEBUG_VA("z_send_iovec sent %d of %d bytes \n", n, len);
-    if (n < 0) 
-      return -1;    
+    if (n < 0)
+      return -1;
   }
   return 0;
 }
 int z_send_buf(z_socket_t sock, z_iobuf_t* buf) {
   int len =  z_iobuf_readable(buf);
-  uint8_t *ptr = buf->buf + buf->r_pos;  
+  uint8_t *ptr = buf->buf + buf->r_pos;
   int n = len;
   int wb;
   do {
-    Z_DEBUG("Sending data on socket....\n");    
+    Z_DEBUG("Sending data on socket....\n");
   #if (ZENOH_LINUX == 1)
-    wb = send(sock, ptr, n, MSG_NOSIGNAL);       
+    wb = send(sock, ptr, n, MSG_NOSIGNAL);
   #else
-    wb = send(sock, ptr, n, 0);       
-  #endif 
-    Z_DEBUG_VA("Socket returned: %d\n", wb);    
+    wb = send(sock, ptr, n, 0);
+  #endif
+    Z_DEBUG_VA("Socket returned: %d\n", wb);
     if (wb <= 0) {
       Z_DEBUG_VA("Broker closed connection.... [%d]\n", wb);
       return -1;
@@ -144,11 +153,11 @@ int z_send_buf(z_socket_t sock, z_iobuf_t* buf) {
   return 0;
 }
 
-int z_recv_n(z_socket_t sock, uint8_t* ptr, size_t len) {      
+int z_recv_n(z_socket_t sock, uint8_t* ptr, size_t len) {
   int n = len;
   int rb;
-  do {    
-    rb = recv(sock, ptr, n, 0);       
+  do {
+    rb = recv(sock, ptr, n, 0);
     if (rb == 0) return -1;
     n -= rb;
     ptr = ptr + (len - n);
@@ -158,33 +167,33 @@ int z_recv_n(z_socket_t sock, uint8_t* ptr, size_t len) {
 
 int z_recv_buf(z_socket_t sock, z_iobuf_t *buf) {
   size_t writable = buf->capacity - buf->w_pos;
-  uint8_t *cp = buf->buf + buf->w_pos;  
+  uint8_t *cp = buf->buf + buf->w_pos;
   int rb = 0;
   rb = recv(sock, cp, writable, 0);
   buf->w_pos = buf->w_pos +  rb;
   return rb;
 }
 
-size_t 
+size_t
 z_send_msg(z_socket_t sock, z_iobuf_t* buf, z_message_t* m) {
   Z_DEBUG(">> send_msg\n");
   z_iobuf_clear(buf);
   z_message_encode(buf, m);
   z_iobuf_t l_buf = z_iobuf_make(10);
   z_vle_t len =  z_iobuf_readable(buf);
-  z_vle_encode(&l_buf, len); 
+  z_vle_encode(&l_buf, len);
   struct iovec iov[2];
   iov[0].iov_len = z_iobuf_readable(&l_buf);
   iov[0].iov_base = l_buf.buf;
   iov[1].iov_len = len;
   iov[1].iov_base = buf->buf;
-  
+
   int rv = z_send_iovec(sock, iov, 2);
   z_iobuf_free(&l_buf);
   return rv;
 }
 
-size_t 
+size_t
 z_send_large_msg(z_socket_t sock, z_iobuf_t* buf, z_message_t* m, unsigned int max_len) {
   if(max_len > buf->capacity) {
     z_iobuf_t bigbuf = z_iobuf_make(max_len);
@@ -201,11 +210,11 @@ z_vle_result_t
 z_recv_vle(z_socket_t sock) {
   z_vle_result_t r;
   uint8_t buf[10];
-  int n;  
+  int n;
   int i = 0;
   do {
     n = recv(sock, &buf[i], 1, 0);
-    Z_DEBUG_VA(">> recv_vle [%d] : 0x%x\n", i, buf[i]);    
+    Z_DEBUG_VA(">> recv_vle [%d] : 0x%x\n", i, buf[i]);
   } while ((buf[i++] > 0x7f) && (n != 0) && (i < 10));
 
   if (n == 0 || i > 10) {
@@ -223,41 +232,41 @@ z_recv_vle(z_socket_t sock) {
 }
 
 void
-z_recv_msg_na(z_socket_t sock, z_iobuf_t* buf, z_message_p_result_t *r) {   
+z_recv_msg_na(z_socket_t sock, z_iobuf_t* buf, z_message_p_result_t *r) {
   z_iobuf_clear(buf);
-  Z_DEBUG(">> recv_msg\n");   
+  Z_DEBUG(">> recv_msg\n");
   r->tag = Z_OK_TAG;
-  z_vle_result_t r_vle = z_recv_vle(sock);  
+  z_vle_result_t r_vle = z_recv_vle(sock);
   ASSURE_P_RESULT(r_vle, r, Z_VLE_PARSE_ERROR)
-  size_t len = r_vle.value.vle;  
-  Z_DEBUG_VA(">> \t msg len = %zu\n", len); 
+  size_t len = r_vle.value.vle;
+  Z_DEBUG_VA(">> \t msg len = %zu\n", len);
   if (z_iobuf_writable(buf) < len) {
     r->tag = Z_ERROR_TAG;
-    r->value.error = Z_INSUFFICIENT_IOBUF_SIZE;    
+    r->value.error = Z_INSUFFICIENT_IOBUF_SIZE;
     return;
   }
   z_recv_n(sock, buf->buf, len);
   buf->r_pos = 0;
   buf->w_pos = len;
-  Z_DEBUG(">> \t z_message_decode\n"); 
-  z_message_decode_na(buf, r);  
+  Z_DEBUG(">> \t z_message_decode\n");
+  z_message_decode_na(buf, r);
 }
 
 z_message_p_result_t
-z_recv_msg(z_socket_t sock, z_iobuf_t* buf) {   
+z_recv_msg(z_socket_t sock, z_iobuf_t* buf) {
   z_message_p_result_t r;
   z_message_p_result_init(&r);
   z_recv_msg_na(sock, buf, &r);
   return r;
   // z_iobuf_clear(buf);
-  // Z_DEBUG(">> recv_msg\n"); 
+  // Z_DEBUG(">> recv_msg\n");
   // z_message_p_result_t r;
   // z_message_p_result_init(&r);
   // r.tag = Z_ERROR_TAG;
-  // z_vle_result_t r_vle = z_recv_vle(sock);  
+  // z_vle_result_t r_vle = z_recv_vle(sock);
   // ASSURE_RESULT(r_vle, r, Z_VLE_PARSE_ERROR)
-  // size_t len = r_vle.value.vle;  
-  // Z_DEBUG_VA(">> \t msg len = %zu\n", len); 
+  // size_t len = r_vle.value.vle;
+  // Z_DEBUG_VA(">> \t msg len = %zu\n", len);
   // if (z_iobuf_writable(buf) < len) {
   //   r.tag = Z_ERROR_TAG;
   //   r.value.error = Z_INSUFFICIENT_IOBUF_SIZE;
@@ -266,6 +275,6 @@ z_recv_msg(z_socket_t sock, z_iobuf_t* buf) {
   // z_recv_n(sock, buf, len);
   // buf->r_pos = 0;
   // buf->w_pos = len;
-  // Z_DEBUG(">> \t z_message_decode\n"); 
-  // return z_message_decode(buf);  
+  // Z_DEBUG(">> \t z_message_decode\n");
+  // return z_message_decode(buf);
 }
