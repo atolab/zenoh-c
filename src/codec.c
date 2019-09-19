@@ -74,17 +74,14 @@ z_string_decode(z_iobuf_t* buf) {
   return r;
 }
 
-void z_iobuf_encode(z_iobuf_t *buf, const z_iobuf_t *bs) {
-  z_vle_t len = z_iobuf_readable(bs);
-  z_vle_encode(buf, len);
+void z_payload_encode(z_iobuf_t *buf, const z_iobuf_t *bs) {
   z_iobuf_write_slice(buf, bs->buf, bs->r_pos, bs->w_pos);
 }
 
-z_iobuf_t z_iobuf_decode(z_iobuf_t *buf) {
-  z_vle_result_t r_len = z_vle_decode(buf);
-  ASSERT_RESULT(r_len, "Unable to decode iobuf");
-  uint8_t *bs = z_iobuf_read_n(buf, r_len.value.vle);
-  z_iobuf_t iob = z_iobuf_wrap_wo(bs, r_len.value.vle, 0, r_len.value.vle);
+z_iobuf_t z_payload_decode(z_iobuf_t *buf) {
+  z_vle_t len = z_iobuf_readable(buf);
+  uint8_t *bs = z_iobuf_read_n(buf, len);
+  z_iobuf_t iob = z_iobuf_wrap_wo(bs, len, 0, len);
   return iob;
 }
 
@@ -419,7 +416,7 @@ void
 z_compact_data_encode(z_iobuf_t* buf, const z_compact_data_t* m) {
   z_vle_encode(buf, m->sn);
   z_vle_encode(buf, m->rid);
-  z_iobuf_encode(buf, &m->payload);    
+  z_payload_encode(buf, &m->payload);
 }
 
 void
@@ -432,7 +429,7 @@ z_compact_data_decode_na(z_iobuf_t* buf, z_compact_data_result_t *r) {
   r_vle = z_vle_decode(buf);
   ASSURE_P_RESULT(r_vle, r, Z_VLE_PARSE_ERROR)
   r->value.compact_data.rid = r_vle.value.vle;    
-  r->value.compact_data.payload = z_iobuf_decode(buf);
+  r->value.compact_data.payload = z_payload_decode(buf);
 }
 
 z_compact_data_result_t 
@@ -471,7 +468,7 @@ void z_payload_header_encode(z_iobuf_t *buf, const z_payload_header_t *ph) {
     z_vle_encode(buf, ph->encoding);
   }
 
-  z_iobuf_encode(buf, &ph->payload);
+  z_payload_encode(buf, &ph->payload);
 }
 
 void 
@@ -486,6 +483,7 @@ z_payload_header_decode_na(z_iobuf_t *buf, z_payload_header_result_t *r) {
   }
 
   if (flags & Z_T_STAMP) {          
+    Z_DEBUG("Decoding Z_T_STAMP\n");
     r_vle = z_vle_decode(buf);        
     ASSURE_P_RESULT(r_vle, r, Z_VLE_PARSE_ERROR);
     r->value.payload_header.tstamp.time = r_vle.value.vle;
@@ -527,8 +525,9 @@ z_payload_header_decode_na(z_iobuf_t *buf, z_payload_header_result_t *r) {
     Z_DEBUG("Done Decoding Z_ENCODING\n");
   }
   
+  Z_DEBUG("Decoding payload\n");
   r->value.payload_header.flags = flags;
-  r->value.payload_header.payload = z_iobuf_decode(buf);
+  r->value.payload_header.payload = z_payload_decode(buf);
   r->tag = Z_OK_TAG;
 }
 
