@@ -1,8 +1,22 @@
 before_install:
   - sudo apt-get install -y libev4
+  - echo -n | openssl s_client -connect https://scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-  
 language: c
 env:
   - ZENOH_DEBUG=0
+  global:
+   - secure: "Yw4rPyPv24+9eInlNEuLXoXomOkeWnErcgrCNgYJaEJ/6Evwn5Ik65jxeYG0KLkVJQcmUOahKpwxW/jYWnOKEwimzGQiawYRstIO2QZvBJnpPg6+nNE5raOtp1kQTYCvitctAhmjQjwOCiiVSB98hAgRMU8NBPVlcbFJDElPM0FyquRKYB1VEkpIo076jAYlvKBfNG+5i9GdhCCIlzB42fp+BfGHWyesjJek2RBO3am3LlnFGf9ueZIr+8/eGDchg9UE7yqwqoP0tVeMIfdEeol0JsrshE+7UidqruuMoWM4FTGLTXeVDviH2OdhHuACxy8eDaJLWekvD/RwNX0TvXMmTv1SqEp67nlmucfaO/GPrdB+hhqJClB2uqUl943iGBDr+1vQ99MuRLvolQleEfi9pY8sJSmlzpxbPrcEfAabZ4yUjBiNTEdHnGbtWaKwvl3/Yg0Sjo0I+DidxOwczt3fHXdPVk+MqpC4rHHHVmJWncejfUxY9bYAtSkMLWRf/NYXNdhQtXcNtH9S1b2A+F1Q4/1o1n1Dl5ruwhIFT82zW5B8cI3kwVchZd+eK38vw2OYfvN/1rdb4PBuOr65SrhEL21ehIXGw5/dveQcJfPTOWjWXctZAVKdocg26I7YHwnI+cUzgpg34VN65r4l8E+aeQOi4V3sdDoi0p7XJoE="
+
+addons:
+  coverity_scan:
+    project:
+      name: "atolab/zenoh-c"
+      description: "C-client for the zenoh protocol"
+    notification_email: angelo@icorsaro.net
+    build_command_prepend: ""
+    build_command: "make"
+    branch_pattern: coverity_scan
+
 script:
   - make gcov
   - sudo make install
@@ -11,3 +25,5 @@ after_success:
   - bash <(curl -s https://codecov.io/bash)
 after_failure:
   - cat ./build/Testing/Temporary/LastTest.log
+
+
