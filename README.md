@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.com/atolab/zenoh-c.svg?branch=master)](https://travis-ci.com/atolab/zenoh-c)
 [![codecov](https://codecov.io/gh/atolab/zenoh-c/branch/master/graph/badge.svg)](https://codecov.io/gh/atolab/zenoh-c)
-[![Coverity Scan Build Status](https://scan.coverity.com/projects/19243/badge.svg)(https://scan.coverity.com/projects/19243)
+[![Coverity Scan Build Status](https://scan.coverity.com/projects/19243/badge.svg)]("https://scan.coverity.com/projects/atolab-zenoh-c)
 [![Gitter](https://badges.gitter.im/atolab/zenoh.svg)](https://gitter.im/atolab/zenoh?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 
