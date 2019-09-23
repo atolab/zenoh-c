@@ -1,5 +1,9 @@
 [![Build Status](https://travis-ci.com/atolab/zenoh-c.svg?branch=master)](https://travis-ci.com/atolab/zenoh-c)
 [![codecov](https://codecov.io/gh/atolab/zenoh-c/branch/master/graph/badge.svg)](https://codecov.io/gh/atolab/zenoh-c)
+<a href="https://scan.coverity.com/projects/zenoh-c">
+  <img alt="Coverity Scan Build Status"
+       src="https://scan.coverity.com/projects/19241/badge.svg"/>
+</a>
 [![Gitter](https://badges.gitter.im/atolab/zenoh.svg)](https://gitter.im/atolab/zenoh?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 # zenoh C Client API
