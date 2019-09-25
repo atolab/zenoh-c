@@ -46,13 +46,13 @@ examples on your machine.
 Assuming you've downloaded the **zenoh** network service on the current directory, then simply do:
 
 ```bash
-$ ./zenoh 
+$ ./zenohd 
 ```
 
 To see the zenoh manual page, simply do:
 
 ```bash
-$ ./zenoh --help
+$ ./zenohd --help
 ```
 
 
