@@ -4,7 +4,6 @@
 #include "zenoh/recv_loop.h"
 #include <sys/time.h>
 
-
 #define N 100000
 
 volatile unsigned long long int count = 0;
@@ -42,18 +41,21 @@ int main(int argc, char **argv) {
     locator = argv[1];
   }
 
-  printf("Connecting to %s...\n", locator);
   z_zenoh_p_result_t r_z = z_open(locator, 0, 0);
   ASSERT_RESULT(r_z, "Unable to open session with broker")
   z_zenoh_t *z = r_z.value.zenoh;
   z_start_recv_loop(z);  
 
-  printf("Declaring Subscriber...\n");
   z_sub_mode_t sm;
   sm.kind = Z_PUSH_MODE;
   z_sub_p_result_t r = z_declare_subscriber(z, "/test/thr", &sm, listener, NULL);
   ASSERT_P_RESULT(r, "Unable to declare pub\n");
+  z_sub_t *sub = r.value.sub;
   
   sleep(60);
+
+  z_undeclare_subscriber(sub);
+  z_close(z);
+  z_stop_recv_loop(z);
   return 0;
 }

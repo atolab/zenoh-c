@@ -3,8 +3,6 @@
 #include "zenoh.h"
 #include "zenoh/recv_loop.h"
 
-#include "zenoh/codec.h"
-
 int main(int argc, char **argv) {
   char *locator = strdup("tcp/127.0.0.1:7447");
   if (argc < 2) {
@@ -17,11 +15,9 @@ int main(int argc, char **argv) {
     locator = argv[2];
   }  
 
-  z_iobuf_t data = z_iobuf_make(len + 8);
-  z_vle_encode(&data, len);
+  z_iobuf_t data = z_iobuf_make(len);
   for (unsigned int i = 0; i < len; ++i) 
     z_iobuf_write(&data, i%10);
-  
   
   z_zenoh_p_result_t r_z = z_open(locator, 0, 0);
   z_zenoh_t *z = r_z.value.zenoh;
