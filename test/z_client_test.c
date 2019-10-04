@@ -211,7 +211,7 @@ int main(int argc, char **argv) {
   ASSERT_P_RESULT(z2_sub1_r,"Unable to declare subscriber\n");
   z_sub_t *z2_sub1 = z2_sub1_r.value.sub;
 
-  z_sto_p_result_t z2_sto1_r = z_declare_storage(z1, "/test/client/**", z2_sto1_listener, z2_sto1_handler, NULL);
+  z_sto_p_result_t z2_sto1_r = z_declare_storage(z2, "/test/client/**", z2_sto1_listener, z2_sto1_handler, NULL);
   ASSERT_P_RESULT(z2_sto1_r, "Unable to declare storage\n");
   z_sto_t *z2_sto1 = z2_sto1_r.value.sto;
 
