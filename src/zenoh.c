@@ -636,6 +636,19 @@ int z_write_data(z_zenoh_t *z, const char* resource, const unsigned char *payloa
   return z_write_data_wo(z, resource, payload, length, 0, 0);
 }
 
+int z_pull(z_sub_t *sub) {
+  z_message_t msg;
+  msg.header = Z_PULL | Z_F_FLAG | Z_S_FLAG;
+  msg.payload.pull.sn = sub->z->sn++;
+  msg.payload.pull.id = sub->rid;
+  if (z_send_msg(sub->z->sock, &sub->z->wbuf, &msg) != 0) {
+      Z_DEBUG("Trying to reconnect....\n");
+      sub->z->on_disconnect(sub->z);
+      return z_send_msg(sub->z->sock, &sub->z->wbuf, &msg);
+  }
+  return 0;
+}
+
 typedef struct {
   z_zenoh_t *z;
   char *resource;

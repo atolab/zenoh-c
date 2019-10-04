@@ -277,6 +277,13 @@ typedef struct {
   z_iobuf_t payload_header;
 } z_write_data_t;
 
+/*------------------ Pull Message ------------------*/
+typedef struct {
+  z_vle_t sn;
+  z_vle_t id;
+  z_vle_t max_samples;
+} z_pull_t;
+
 /*------------------ Query Message ------------------*/
 typedef struct {
   z_array_uint8_t pid; 
@@ -312,6 +319,7 @@ typedef struct {
     z_compact_data_t compact_data;
     z_stream_data_t stream_data;
     z_write_data_t write_data;
+    z_pull_t pull;
     z_query_t query;
     z_reply_t reply;
     z_scout_t scout;
@@ -335,6 +343,7 @@ Z_RESULT_DECLARE (z_compact_data_t, compact_data)
 Z_RESULT_DECLARE (z_payload_header_t, payload_header)
 Z_RESULT_DECLARE (z_stream_data_t, stream_data)
 Z_RESULT_DECLARE (z_write_data_t, write_data)
+Z_RESULT_DECLARE (z_pull_t, pull)
 Z_RESULT_DECLARE (z_query_t, query)
 Z_RESULT_DECLARE (z_reply_t, reply)
 Z_P_RESULT_DECLARE (z_message_t, message)

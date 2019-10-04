@@ -607,6 +607,12 @@ z_write_data_decode(z_iobuf_t *buf) {
 }
 
 void
+z_pull_encode(z_iobuf_t *buf, const z_pull_t* m) {
+  z_vle_encode(buf, m->sn);
+  z_vle_encode(buf, m->id);
+}
+
+void
 z_query_encode(z_iobuf_t *buf, const z_query_t* m) {
   z_array_uint8_encode(buf, &(m->pid));
   z_vle_encode(buf, m->qid);
@@ -710,6 +716,9 @@ z_message_encode(z_iobuf_t* buf, const z_message_t* m) {
     case Z_WRITE_DATA:
       z_write_data_encode(buf, &m->payload.write_data);
       break;
+    case Z_PULL:
+      z_pull_encode(buf, &m->payload.pull);
+      break;
     case Z_QUERY:
       z_query_encode(buf, &m->payload.query);
       break;
@@ -718,6 +727,9 @@ z_message_encode(z_iobuf_t* buf, const z_message_t* m) {
       break;
     case Z_OPEN:
       z_open_encode(buf, &m->payload.open);
+      if (m->header & Z_P_FLAG ) {
+        z_properties_encode(buf, m->properties);
+      }
       break;
     case Z_CLOSE:
       z_close_encode(buf, &m->payload.close);
@@ -728,9 +740,6 @@ z_message_encode(z_iobuf_t* buf, const z_message_t* m) {
     default:
       Z_ERROR("WARNING: Trying to encode message with unknown ID(%d)\n", mid); 
       return;
-  }
-  if (m->header & Z_P_FLAG ) {
-    z_properties_encode(buf, m->properties);  
   }
 }
 
