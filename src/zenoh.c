@@ -42,7 +42,7 @@ z_open(char* locator, on_disconnect_t on_disconnect, const z_vec_t* ps) {
 
   Z_ARRAY_S_DEFINE(uint8_t, pid, ZENOH_PID_LENGTH);   
   for (int i = 0; i < ZENOH_PID_LENGTH; ++i) 
-    pid.elem[i] = rand() % 255;  
+    pid.elem[i] = rand() % 255;
 
   z_message_t msg;
 
@@ -90,37 +90,6 @@ z_open(char* locator, on_disconnect_t on_disconnect, const z_vec_t* ps) {
   r.value.zenoh->running = 0;
   r.value.zenoh->thread = 0;
   z_message_p_result_free(&r_msg);
-  
-  return r;
-}
-
-z_zenoh_p_result_t 
-z_open_wup(char* locator, const char * uname, const char *passwd) {
-  z_zenoh_p_result_t r;
-  z_property_t user;
-  z_property_t password;
-  z_vec_t ps = z_vec_make(2);
-  Z_ARRAY_S_DEFINE(uint8_t, uid, 256);
-  Z_ARRAY_S_DEFINE(uint8_t, pwd, 256);
-  if (uname != 0) {
-    uid.elem = (uint8_t *)uname; 
-    uid.length = strlen(uname);
-    pwd.elem = (uint8_t *)passwd; 
-    pwd.length = strlen(passwd);
-  
-    user.id = Z_USER_KEY;
-    user.value = uid;
-  
-    password.id = Z_PASSWD_KEY;
-    password.value = pwd;
-  
-    z_vec_append(&ps, &user);
-    z_vec_append(&ps, &password);
-
-    r = z_open(locator, 0, &ps);
-  } else {
-    r = z_open(locator, 0, 0);
-  }
   
   return r;
 }

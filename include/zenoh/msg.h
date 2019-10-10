@@ -117,6 +117,7 @@ Z_RESULT_DECLARE (z_property_t, property)
  * for the name remains with the caller.
  */ 
 z_property_t* z_property_make(z_vle_t id, z_array_uint8_t value);
+z_property_t* z_property_make_from_str(z_vle_t id, char *value);
 void z_property_free(z_property_t** p);
 
 #define HAS_PROPERTIES (m) (m.properties != 0) 

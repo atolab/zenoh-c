@@ -18,8 +18,12 @@ int main(int argc, char **argv) {
     locator = argv[1];
   }
 
+  z_vec_t ps = z_vec_make(2);
+  z_vec_append(&ps, z_property_make_from_str(Z_USER_KEY, "user"));
+  z_vec_append(&ps, z_property_make_from_str(Z_PASSWD_KEY, "password"));
+
   printf("Connecting to %s...\n", locator);
-  z_zenoh_p_result_t r_z = z_open_wup(locator, "user", "password");
+  z_zenoh_p_result_t r_z = z_open(locator, 0, &ps);
   ASSERT_RESULT(r_z, "Unable to open session with broker")
   z_zenoh_t *z = r_z.value.zenoh;
 

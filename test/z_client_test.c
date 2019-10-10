@@ -209,7 +209,7 @@ int main(int argc, char **argv) {
   ASSERT_P_RESULT(z1_pub1_r, "Unable to declare publisher\n");
   z_pub_t *z1_pub1 = z1_pub1_r.value.pub;
 
-  z_zenoh_p_result_t z2_r = z_open_wup(locator, "user", "password");
+  z_zenoh_p_result_t z2_r = z_open(locator, 0, 0);
   ASSERT_RESULT(z2_r, "Unable to open session with broker")
   z_zenoh_t *z2 = z2_r.value.zenoh;
   z_start_recv_loop(z2);
@@ -234,7 +234,7 @@ int main(int argc, char **argv) {
   ASSERT_P_RESULT(z2_pub1_r, "Unable to declare publisher\n");
   z_pub_t *z2_pub1 = z2_pub1_r.value.pub;
 
-  z_zenoh_p_result_t z3_r = z_open_wup(locator, "user", "password");
+  z_zenoh_p_result_t z3_r = z_open(locator, 0, 0);
   ASSERT_RESULT(z3_r, "Unable to open session with broker")
   z_zenoh_t *z3 = z3_r.value.zenoh;
   z_start_recv_loop(z3);

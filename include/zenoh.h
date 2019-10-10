@@ -16,9 +16,6 @@
 z_zenoh_p_result_t 
 z_open(char* locator, on_disconnect_t on_disconnect, const z_vec_t *ps);
 
-z_zenoh_p_result_t 
-z_open_wup(char* locator, const char * uname, const char *passwd);
-
 z_vec_t
 z_info(z_zenoh_t *z);
 
