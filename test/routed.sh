@@ -1,8 +1,8 @@
 echo "------------------ Running test $1 -------------------"
 if [[ ! -f zenohd ]]; then
   if [[ "$OSTYPE" == "darwin"* ]]; then 
-    echo "> Downloading https://github.com/atolab/atobin/raw/master/zenoh/latest/macos/10.15.5/zenohd ..."
-    curl -L -o zenohd https://github.com/atolab/atobin/raw/master/zenoh/latest/macos/10.15.5/zenohd
+    echo "> Downloading https://github.com/atolab/atobin/raw/master/zenoh/unstable/macos/10.14.6/zenohd ..."
+    curl -L -o zenohd https://github.com/atolab/atobin/raw/master/zenoh/unstable/macos/10.14.6/zenohd
   elif [[ "$OSTYPE" == "linux-gnu" ]] && [[ -f /etc/redhat-release ]]; then 
     echo "> Downloading https://github.com/atolab/atobin/raw/master/zenoh/latest/centos/7.2.1511/zenohd ..."
     curl -L -o zenohd https://github.com/atolab/atobin/raw/master/zenoh/latest/centos/7.2.1511/zenohd
@@ -14,7 +14,7 @@ fi
 chmod +x zenohd
 
 echo "> Running zenohd ..."
-./zenohd --verbosity=debug > zenohd.$1.log &
+./zenohd --verbosity=info > zenohd.$1.log &
 ZPID=$!
 sleep 0.2
 
