@@ -24,8 +24,6 @@ Once the [cmake](https://cmake.org) dependency is satisfied, just do the followi
 
 For those that still have **CMake** version 2.8, do the following commands:
 
-  -- CMake version 3 and higher -- 
-
   ```bash
   $ cd /path/to/zenoh-c
   $ mkdir build
