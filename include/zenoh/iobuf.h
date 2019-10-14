@@ -1,6 +1,7 @@
 #ifndef ZENOH_C_IOBUF_H_
 #define ZENOH_C_IOBUF_H_
 
+#include <stdint.h>
 #include <stdlib.h>
 #include "zenoh/result.h"
 #include "zenoh/collection.h"
