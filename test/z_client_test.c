@@ -3,6 +3,7 @@
 #include <assert.h>
 #include "zenoh.h"
 #include "zenoh/recv_loop.h"
+#include "zenoh/codec.h"
 #include "zenoh/mvar.h"
 
 typedef struct {
@@ -66,7 +67,7 @@ void z2_sto1_listener(const z_resource_id_t *rid, const unsigned char *data, siz
   z_mvar_put(z2_sto1_mvar, &z2_sto1_last_res);
 }
 
-void z1_sto1_handler(const char *rname, const char *predicate, replies_sender_t send_replies, void *query_handle, void *arg) {
+void z1_sto1_handler(const char *rname, const char *predicate, z_replies_sender_t send_replies, void *query_handle, void *arg) {
   Z_UNUSED_ARG_3(rname, predicate, arg);
   z_resource_t resource;
   resource.rname = z1_sto1_last_res.name;
@@ -84,7 +85,7 @@ void z1_sto1_handler(const char *rname, const char *predicate, replies_sender_t 
   send_replies(query_handle, replies);
 }
 
-void z2_sto1_handler(const char *rname, const char *predicate, replies_sender_t send_replies, void *query_handle, void *arg) {
+void z2_sto1_handler(const char *rname, const char *predicate, z_replies_sender_t send_replies, void *query_handle, void *arg) {
   Z_UNUSED_ARG_3(rname, predicate, arg);
   z_resource_t resource;
   resource.rname = z2_sto1_last_res.name;
@@ -102,7 +103,7 @@ void z2_sto1_handler(const char *rname, const char *predicate, replies_sender_t 
   send_replies(query_handle, replies);
 }
 
-void z1_eval1_handler(const char *rname, const char *predicate, replies_sender_t send_replies, void *query_handle, void *arg) {
+void z1_eval1_handler(const char *rname, const char *predicate, z_replies_sender_t send_replies, void *query_handle, void *arg) {
   Z_UNUSED_ARG_3(rname, predicate, arg);
   z_resource_t resource;
   resource.rname = "/test/client/z1_eval1";
@@ -121,7 +122,7 @@ void z1_eval1_handler(const char *rname, const char *predicate, replies_sender_t
   send_replies(query_handle, replies);
 }
 
-void z2_eval1_handler(const char *rname, const char *predicate, replies_sender_t send_replies, void *query_handle, void *arg) {
+void z2_eval1_handler(const char *rname, const char *predicate, z_replies_sender_t send_replies, void *query_handle, void *arg) {
   Z_UNUSED_ARG_3(rname, predicate, arg);
   z_resource_t resource;
   resource.rname = "/test/client/z2_eval1";

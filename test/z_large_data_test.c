@@ -38,7 +38,7 @@ void sto_listener(const z_resource_id_t *rid, const unsigned char *data, size_t 
   z_mvar_put(sto_mvar, &sto_last_res);
 }
 
-void sto_handler(const char *rname, const char *predicate, replies_sender_t send_replies, void *query_handle, void *arg) {
+void sto_handler(const char *rname, const char *predicate, z_replies_sender_t send_replies, void *query_handle, void *arg) {
   Z_UNUSED_ARG_3(rname, predicate, arg);
   z_resource_t resource;
   resource.rname = sto_last_res.name;

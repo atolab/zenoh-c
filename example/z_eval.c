@@ -3,7 +3,7 @@
 #include "zenoh.h"
 #include "zenoh/recv_loop.h"
 
-void query_handler(const char *rname, const char *predicate, replies_sender_t send_replies, void *query_handle, void *arg) {
+void query_handler(const char *rname, const char *predicate, z_replies_sender_t send_replies, void *query_handle, void *arg) {
   printf(">> [Query handler] Handling '%s?%s'\n", rname, predicate);
 
   char *data = "Eval from C!";

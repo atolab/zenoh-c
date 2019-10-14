@@ -24,7 +24,7 @@ int remove_data(void *elem, void*args){
   return 0;
 }
 
-void listener(const z_resource_id_t *rid, const unsigned char *data, size_t length, const z_data_info_t *info, void *arg) {    
+void data_handler(const z_resource_id_t *rid, const unsigned char *data, size_t length, const z_data_info_t *info, void *arg) {    
   Z_UNUSED_ARG_2(info, arg);
   char str[MAX_LEN];
   memcpy(&str, data, length < MAX_LEN ? length : MAX_LEN - 1);
@@ -41,7 +41,7 @@ void listener(const z_resource_id_t *rid, const unsigned char *data, size_t leng
   stored = z_list_cons(stored, sample);
 }
 
-void query_handler(const char *rname, const char *predicate, replies_sender_t send_replies, void *query_handle, void *arg) {
+void query_handler(const char *rname, const char *predicate, z_replies_sender_t send_replies, void *query_handle, void *arg) {
   Z_UNUSED_ARG(arg);
   printf(">> [Query handler   ] Handling '%s?%s'\n", rname, predicate);
   z_array_resource_t replies;
@@ -99,7 +99,7 @@ int main(int argc, char **argv) {
   z_start_recv_loop(z);
 
   printf("Declaring Storage on '%s'...\n", uri);
-  z_sto_p_result_t r = z_declare_storage(z, uri, listener, query_handler, NULL);
+  z_sto_p_result_t r = z_declare_storage(z, uri, data_handler, query_handler, NULL);
   ASSERT_P_RESULT(r, "Unable to declare storage\n");  
   z_sto_t *sto = r.value.sto;
 

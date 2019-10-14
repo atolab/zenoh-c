@@ -1,5 +1,5 @@
-#ifndef ZENOH_C_VECTOR_H
-#define ZENOH_C_VECTOR_H
+#ifndef ZENOH_C_COLLECTION_H
+#define ZENOH_C_COLLECTION_H
 
 #define DEFAULT_I_MAP_CAPACITY 64
 
@@ -147,4 +147,4 @@ void z_i_map_remove(z_i_map_t *map, int k);
 unsigned int z_i_map_capacity(z_i_map_t *map);
 unsigned int z_i_map_size(z_i_map_t *map);
 
-#endif /* ZENOH_C_VECTOR_H */
+#endif /* ZENOH_C_COLLECTION_H */

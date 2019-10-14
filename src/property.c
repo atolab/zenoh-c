@@ -1,4 +1,5 @@
-#include "zenoh/msg.h"
+#include "zenoh/property.h"
+#include <string.h>
 
 z_property_t* z_property_make(z_vle_t id, z_array_uint8_t value) {
   z_property_t* p = (z_property_t*)malloc(sizeof(z_property_t));

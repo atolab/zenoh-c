@@ -7,26 +7,11 @@
 #include "zenoh/config.h"
 #include "zenoh/result.h"
 #include "zenoh/collection.h"
+#include "zenoh/property.h"
+#include "zenoh/iobuf.h"
 #include "zenoh/mvar.h"
 
 extern const int _z_dummy_arg;
-
-#if (ZENOH_DEBUG == 2)
-#include <stdio.h>
-
-#define Z_DEBUG(x) printf(x)
-#define Z_DEBUG_VA(x, ...) printf(x, __VA_ARGS__) 
-#define Z_ERROR(x, ...) printf(x, __VA_ARGS__) 
-#elif (ZENOH_DEBUG == 1)
-
-#define Z_ERROR(x, ...) printf(x, __VA_ARGS__) 
-#define Z_DEBUG_VA(x, ...) (void)(_z_dummy_arg)
-#define Z_DEBUG(x) (void)(_z_dummy_arg)
-#elif (ZENOH_DEBUG == 0)
-#define Z_DEBUG(x) (void)(_z_dummy_arg)
-#define Z_DEBUG_VA(x, ...) (void)(_z_dummy_arg)
-#define Z_ERROR(x, ...) (void)(_z_dummy_arg)
-#endif 
 
 # define Z_UNUSED_ARG(z) (void)(z)
 # define Z_UNUSED_ARG_2(z1, z2) (void)(z1); (void)(z2)
@@ -35,10 +20,15 @@ extern const int _z_dummy_arg;
 # define Z_UNUSED_ARG_5(z1, z2, z3, z4, z5) (void)(z1); (void)(z2); (void)(z3); (void)(z4); (void)(z5)
 
 #if (ZENOH_LINUX ==1) || (ZENOH_MACOS == 1) 
-#include "zenoh/unix/types.h"
+#include "zenoh/private/unix/types.h"
 #elif (ZENOH_CONTIKI == 1)
-#include "zenoh/contiki/types.h"
+#include "zenoh/private/contiki/types.h"
 #endif 
+
+#define Z_PUSH_MODE 0x01
+#define Z_PULL_MODE 0x02
+#define Z_PERIODIC_PUSH_MODE 0x03
+#define Z_PERIODIC_PULL_MODE 0x04
 
 #define Z_INT_RES_ID 0
 #define Z_STR_RES_ID 1
@@ -57,49 +47,11 @@ extern const int _z_dummy_arg;
 #define Z_ALL 2
 #define Z_NONE 3
 
-typedef  size_t  z_vle_t;
-Z_RESULT_DECLARE (z_vle_t, vle)
-
-typedef struct {
-    z_vle_t origin;
-    z_vle_t period;
-    z_vle_t duration;
-} z_temporal_property_t;
-
 typedef struct {  
   uint8_t kind;
   z_temporal_property_t tprop;
 } z_sub_mode_t;
-
-
-Z_ARRAY_DECLARE(uint8_t)
-Z_RESULT_DECLARE (z_array_uint8_t, array_uint8)
-
-typedef struct {
-  unsigned int r_pos;
-  unsigned int w_pos;
-  unsigned int capacity;
-  unsigned char* buf;
-} z_iobuf_t;
-
-z_iobuf_t z_iobuf_make(unsigned int capacity);
-z_iobuf_t z_iobuf_wrap(unsigned char *buf, unsigned int capacity);
-z_iobuf_t z_iobuf_wrap_wo(unsigned char *buf, unsigned int capacity, unsigned int rpos, unsigned int wpos);
-
-void z_iobuf_free(z_iobuf_t* buf);
-unsigned int z_iobuf_readable(const z_iobuf_t* buf);
-unsigned int z_iobuf_writable(const z_iobuf_t* buf);
-void z_iobuf_write(z_iobuf_t* buf, unsigned char b);
-void z_iobuf_write_slice(z_iobuf_t* buf, const uint8_t *bs, unsigned int offset, unsigned int length);
-void z_iobuf_write_bytes(z_iobuf_t* buf, const unsigned char *bs, unsigned int length);
-uint8_t z_iobuf_read(z_iobuf_t* buf);
-uint8_t* z_iobuf_read_n(z_iobuf_t* buf, unsigned int length);
-uint8_t* z_iobuf_read_to_n(z_iobuf_t* buf, unsigned char* dest, unsigned int length);
-void z_iobuf_put(z_iobuf_t* buf, unsigned char b, unsigned int pos);
-uint8_t z_iobuf_get(z_iobuf_t* buf, unsigned int pos);
-void z_iobuf_clear(z_iobuf_t *buf);
-z_array_uint8_t z_iobuf_to_array(z_iobuf_t* buf);
-void z_iobuf_compact(z_iobuf_t *buf);
+Z_RESULT_DECLARE (z_sub_mode_t, sub_mode)
 
 typedef struct {
   uint8_t clock_id[16];
@@ -134,9 +86,9 @@ typedef struct {
   z_res_id_t id; 
 } z_resource_id_t;
 
-typedef void (*z_reply_callback_t)(const z_reply_value_t *reply, void *arg);
+typedef void (*z_reply_handler_t)(const z_reply_value_t *reply, void *arg);
 
-typedef void (*subscriber_callback_t)(const z_resource_id_t *rid, const unsigned char *data, size_t length, const z_data_info_t *info, void *arg);
+typedef void (*z_data_handler_t)(const z_resource_id_t *rid, const unsigned char *data, size_t length, const z_data_info_t *info, void *arg);
 
 typedef struct {
   const char* rname;
@@ -149,9 +101,9 @@ typedef struct {
 
 Z_ARRAY_P_DECLARE_Z_TYPE(resource_t)
 
-typedef void (*replies_sender_t)(void* query_handle, z_array_resource_t replies);
-typedef void (*query_handler_t)(const char *rname, const char *predicate, replies_sender_t send_replies, void *query_handle, void *arg);
-typedef void (*on_disconnect_t)(void *z);
+typedef void (*z_replies_sender_t)(void* query_handle, z_array_resource_t replies);
+typedef void (*z_query_handler_t)(const char *rname, const char *predicate, z_replies_sender_t send_replies, void *query_handle, void *arg);
+typedef void (*z_on_disconnect_t)(void *z);
 
 typedef struct {
   z_socket_t sock;
@@ -165,7 +117,7 @@ typedef struct {
   z_array_uint8_t peer_pid;
   z_vle_t qid;
   char *locator;
-  on_disconnect_t on_disconnect;
+  z_on_disconnect_t on_disconnect;
   z_list_t *declarations;
   z_list_t *subscriptions;
   z_list_t *storages;
@@ -212,69 +164,5 @@ typedef struct {
   uint8_t kind;
   uint8_t nb;
 } z_query_dest_t;
-
-typedef struct {   
-  z_vle_t rid;
-  char* r_name;
-} z_res_decl_t;
-
-typedef struct {  
-  char *rname;
-  z_vle_t rid;
-  z_vle_t id;
-  subscriber_callback_t callback;
-  void *arg;
-}  z_subscription_t;
-
-typedef struct {  
-  char *rname;
-  z_vle_t rid;
-  z_vle_t id;
-  subscriber_callback_t callback;
-  query_handler_t handler;
-  void *arg;
-}  z_storage_t;
-
-typedef struct {  
-  char *rname;
-  z_vle_t rid;
-  z_vle_t id;
-  query_handler_t handler;
-  void *arg;
-}  z_eval_t;
-
-typedef struct {  
-  z_vle_t qid;
-  z_reply_callback_t callback;
-  void *arg;
-} z_replywaiter_t;
-
-z_vle_t z_get_entity_id(z_zenoh_t *z);
-z_vle_t z_get_resource_id(z_zenoh_t *z, const char *rname);
-int z_register_res_decl(z_zenoh_t *z, z_vle_t rid, const char *rname);
-z_res_decl_t *z_get_res_decl_by_rid(z_zenoh_t *z, z_vle_t rid);
-z_res_decl_t *z_get_res_decl_by_rname(z_zenoh_t *z, const char *rname);
-
-
-void z_register_subscription(z_zenoh_t *z, z_vle_t rid, z_vle_t id, subscriber_callback_t callback, void *arg);
-const char * z_get_resource_name(z_zenoh_t *z, z_vle_t rid);
-z_list_t * z_get_subscriptions_by_rid(z_zenoh_t *z, z_vle_t rid);
-z_list_t * z_get_subscriptions_by_rname(z_zenoh_t *z, const char *rname);
-void z_unregister_subscription(z_sub_t *s) ;
-
-void z_register_storage(z_zenoh_t *z, z_vle_t rid, z_vle_t id, subscriber_callback_t callback, query_handler_t handler, void *arg);
-z_list_t * z_get_storages_by_rid(z_zenoh_t *z, z_vle_t rid);
-z_list_t * z_get_storages_by_rname(z_zenoh_t *z, const char *rname);
-void z_unregister_storage(z_sto_t *s) ;
-
-void z_register_eval(z_zenoh_t *z, z_vle_t rid, z_vle_t id, query_handler_t handler, void *arg);
-z_list_t * z_get_evals_by_rid(z_zenoh_t *z, z_vle_t rid);
-z_list_t * z_get_evals_by_rname(z_zenoh_t *z, const char *rname);
-void z_unregister_eval(z_eva_t *s) ;
-
-int z_matching_remote_sub(z_zenoh_t *z, z_vle_t rid);
-
-void z_register_query(z_zenoh_t *z, z_vle_t qid, z_reply_callback_t callback, void *arg);
-z_replywaiter_t *z_get_query(z_zenoh_t *z, z_vle_t qid);
 
 #endif /* ZENOH_C_TYPES_H_ */ 

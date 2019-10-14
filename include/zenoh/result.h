@@ -16,8 +16,6 @@
 #define Z_FAILED_TO_OPEN_SESSION 0x0d
 #define Z_UNEXPECTED_MESSAGE 0x7f
 
-
-
 #define Z_RESULT_DECLARE(type, name) \
 typedef struct { \
   enum result_kind tag; \
@@ -26,6 +24,15 @@ typedef struct { \
     int error; \
   } value;\
 } z_ ## name ## _result_t;
+
+#define _Z_RESULT_DECLARE(type, name) \
+typedef struct { \
+  enum result_kind tag; \
+  union { \
+    type  name; \
+    int error; \
+  } value;\
+} _z_ ## name ## _result_t;
 
 #define Z_P_RESULT_DECLARE(type, name) \
 typedef struct { \
@@ -43,28 +50,44 @@ inline static void z_ ## name ## _p_result_free(z_ ## name ## _p_result_t *r) { 
     r->value.name = 0; \
 } 
 
+#define _Z_P_RESULT_DECLARE(type, name) \
+typedef struct { \
+  enum result_kind tag; \
+  union { \
+    type * name; \
+    int error; \
+  } value;\
+} _z_ ## name ## _p_result_t; \
+inline static void _z_ ## name ## _p_result_init(_z_ ## name ## _p_result_t *r) { \
+     r->value.name = (type *)malloc(sizeof(type)); \
+} \
+inline static void _z_ ## name ## _p_result_free(_z_ ## name ## _p_result_t *r) { \
+    free(r->value.name); \
+    r->value.name = 0; \
+} 
+
 #define ASSURE_RESULT(in_r, out_r, e) \
-  if (in_r.tag == Z_ERROR_TAG) { \
-    out_r.tag = Z_ERROR_TAG; \
+  if (in_r.tag == _Z_ERROR_TAG) { \
+    out_r.tag = _Z_ERROR_TAG; \
     out_r.value.error = e; \
     return out_r; \
   }
 
 #define ASSURE_P_RESULT(in_r, out_r, e) \
-  if (in_r.tag == Z_ERROR_TAG) { \
-    out_r->tag = Z_ERROR_TAG; \
+  if (in_r.tag == _Z_ERROR_TAG) { \
+    out_r->tag = _Z_ERROR_TAG; \
     out_r->value.error = e; \
     return; \
   }
 #define ASSERT_RESULT(r, msg) \
-  if (r.tag == Z_ERROR_TAG) { \
+  if (r.tag == _Z_ERROR_TAG) { \
     printf(msg); \
     printf("\n"); \
     exit(r.value.error); \
   }
 
 #define ASSERT_P_RESULT(r, msg) \
-  if (r.tag == Z_ERROR_TAG) { \
+  if (r.tag == _Z_ERROR_TAG) { \
     printf(msg); \
     printf("\n"); \
     exit(r.value.error); \
@@ -72,7 +95,7 @@ inline static void z_ ## name ## _p_result_free(z_ ## name ## _p_result_t *r) { 
 
 enum result_kind {
   Z_OK_TAG = 0,
-  Z_ERROR_TAG = 1   
+  _Z_ERROR_TAG = 1   
 };
 
 Z_RESULT_DECLARE (char*, string)
