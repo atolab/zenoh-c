@@ -5,7 +5,7 @@
 
 #define MAX_LEN 256
 
-void listener(const z_resource_id_t *rid, const unsigned char *data, size_t length, const z_data_info_t *info, void *arg) {
+void data_handler(const z_resource_id_t *rid, const unsigned char *data, size_t length, const z_data_info_t *info, void *arg) {
   Z_UNUSED_ARG_2(info, arg);
   char str[MAX_LEN];
   memcpy(&str, data, length < MAX_LEN ? length : MAX_LEN - 1);
@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
   printf("Declaring Subscriber on '%s'...\n", uri);
   z_sub_mode_t sm;
   sm.kind = Z_PUSH_MODE;
-  z_sub_p_result_t r = z_declare_subscriber(z, uri, &sm, listener, NULL);
+  z_sub_p_result_t r = z_declare_subscriber(z, uri, &sm, data_handler, NULL);
   ASSERT_P_RESULT(r,"Unable to declare subscriber\n");
   z_sub_t *sub = r.value.sub;
 
