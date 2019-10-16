@@ -67,27 +67,27 @@ inline static void _z_ ## name ## _p_result_free(_z_ ## name ## _p_result_t *r) 
 } 
 
 #define ASSURE_RESULT(in_r, out_r, e) \
-  if (in_r.tag == _Z_ERROR_TAG) { \
-    out_r.tag = _Z_ERROR_TAG; \
+  if (in_r.tag == Z_ERROR_TAG) { \
+    out_r.tag = Z_ERROR_TAG; \
     out_r.value.error = e; \
     return out_r; \
   }
 
 #define ASSURE_P_RESULT(in_r, out_r, e) \
-  if (in_r.tag == _Z_ERROR_TAG) { \
-    out_r->tag = _Z_ERROR_TAG; \
+  if (in_r.tag == Z_ERROR_TAG) { \
+    out_r->tag = Z_ERROR_TAG; \
     out_r->value.error = e; \
     return; \
   }
 #define ASSERT_RESULT(r, msg) \
-  if (r.tag == _Z_ERROR_TAG) { \
+  if (r.tag == Z_ERROR_TAG) { \
     printf(msg); \
     printf("\n"); \
     exit(r.value.error); \
   }
 
 #define ASSERT_P_RESULT(r, msg) \
-  if (r.tag == _Z_ERROR_TAG) { \
+  if (r.tag == Z_ERROR_TAG) { \
     printf(msg); \
     printf("\n"); \
     exit(r.value.error); \
@@ -95,7 +95,7 @@ inline static void _z_ ## name ## _p_result_free(_z_ ## name ## _p_result_t *r) 
 
 enum result_kind {
   Z_OK_TAG = 0,
-  _Z_ERROR_TAG = 1   
+  Z_ERROR_TAG = 1   
 };
 
 Z_RESULT_DECLARE (char*, string)

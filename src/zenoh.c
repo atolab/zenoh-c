@@ -35,8 +35,8 @@ z_open(char* locator, z_on_disconnect_t on_disconnect, const z_vec_t* ps) {
   srand(clock());
 
   z_socket_result_t r_sock = _z_open_tx_session(locator);    
-  if (r_sock.tag == _Z_ERROR_TAG) {  
-    r.tag = _Z_ERROR_TAG;
+  if (r_sock.tag == Z_ERROR_TAG) {  
+    r.tag = Z_ERROR_TAG;
     r.value.error = Z_IO_ERROR;
     return r;
   }
@@ -62,8 +62,8 @@ z_open(char* locator, z_on_disconnect_t on_disconnect, const z_vec_t* ps) {
   z_iobuf_clear(&rbuf);
   _z_message_p_result_t r_msg = _z_recv_msg(r_sock.value.socket, &rbuf);
   
-  if (r_msg.tag == _Z_ERROR_TAG) {
-    r.tag = _Z_ERROR_TAG;    
+  if (r_msg.tag == Z_ERROR_TAG) {
+    r.tag = Z_ERROR_TAG;    
     r.value.error = Z_FAILED_TO_OPEN_SESSION;
     z_iobuf_free(&wbuf);
     z_iobuf_free(&rbuf);

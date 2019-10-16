@@ -222,7 +222,7 @@ _z_declaration_decode_na(z_iobuf_t *buf, _z_declaration_result_t *r) {
       r->value.declaration.payload.commit.cid = z_iobuf_read(buf);
       break;
     default:
-      r->tag = _Z_ERROR_TAG;
+      r->tag = Z_ERROR_TAG;
       r->value.error = Z_MESSAGE_PARSE_ERROR;
       return;
   }  
@@ -259,13 +259,13 @@ _z_declare_decode_na(z_iobuf_t* buf, _z_declare_result_t *r) {
   r_decl = (_z_declaration_result_t*)malloc(sizeof(_z_declaration_result_t));
   for (unsigned int i = 0; i < len; ++i) {    
     _z_declaration_decode_na(buf, r_decl);
-    if (r_decl->tag != _Z_ERROR_TAG) 
+    if (r_decl->tag != Z_ERROR_TAG) 
       r->value.declare.declarations.elem[i] = r_decl->value.declaration; 
     else {
       r->value.declare.declarations.length = 0;
       free(r->value.declare.declarations.elem);        
       free(r_decl);
-      r->tag = _Z_ERROR_TAG;
+      r->tag = Z_ERROR_TAG;
       r->value.error = Z_MESSAGE_PARSE_ERROR;
       return;
     }
@@ -677,7 +677,7 @@ _z_message_decode_na(z_iobuf_t* buf, _z_message_p_result_t* r) {
       r->value.message->payload.declare = r_d.value.declare;
       break;
     default:
-      r->tag = _Z_ERROR_TAG;
+      r->tag = Z_ERROR_TAG;
       r->value.error = Z_MESSAGE_PARSE_ERROR;
       _Z_ERROR("WARNING: Trying to decode message with unknown ID(%d)\n", mid); 
 

@@ -42,7 +42,7 @@ _z_open_tx_session(const char *locator) {
   r.value.socket = socket(PF_INET, SOCK_STREAM, 0);
 
   if (r.value.socket < 0) {
-    r.tag = _Z_ERROR_TAG;
+    r.tag = Z_ERROR_TAG;
     r.value.error = r.value.socket;
     r.value.socket = 0;
     return r;
@@ -50,7 +50,7 @@ _z_open_tx_session(const char *locator) {
 
   int flags = 1;
   if(setsockopt(r.value.socket,SOL_SOCKET, SO_KEEPALIVE, (void *)&flags, sizeof(flags))==-1){
-    r.tag = _Z_ERROR_TAG;
+    r.tag = Z_ERROR_TAG;
     r.value.error = errno;
     close(r.value.socket);
     r.value.socket = 0;
@@ -68,7 +68,7 @@ _z_open_tx_session(const char *locator) {
 
 	if(inet_pton(AF_INET, addr, &serv_addr.sin_addr)<=0)
 	{
-    r.tag = _Z_ERROR_TAG;
+    r.tag = Z_ERROR_TAG;
     r.value.error = Z_INVALID_ADDRESS_ERROR;
     r.value.socket = 0;
     free(addr);
@@ -79,7 +79,7 @@ _z_open_tx_session(const char *locator) {
 
 
 	if( connect(r.value.socket, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
-    r.tag = _Z_ERROR_TAG;
+    r.tag = Z_ERROR_TAG;
     r.value.error = Z_TX_CONNECTION_ERROR;
     r.value.socket = 0;
     return r;
@@ -221,7 +221,7 @@ _z_recv_vle(z_socket_t sock) {
   } while ((buf[i++] > 0x7f) && (n != 0) && (i < 10));
 
   if (n == 0 || i > 10) {
-    r.tag = _Z_ERROR_TAG;
+    r.tag = Z_ERROR_TAG;
     r.value.error = Z_VLE_PARSE_ERROR;
     return r;
   }
@@ -244,7 +244,7 @@ _z_recv_msg_na(z_socket_t sock, z_iobuf_t* buf, _z_message_p_result_t *r) {
   size_t len = r_vle.value.vle;
   _Z_DEBUG_VA(">> \t msg len = %zu\n", len);
   if (z_iobuf_writable(buf) < len) {
-    r->tag = _Z_ERROR_TAG;
+    r->tag = Z_ERROR_TAG;
     r->value.error = Z_INSUFFICIENT_IOBUF_SIZE;
     return;
   }
@@ -265,13 +265,13 @@ _z_recv_msg(z_socket_t sock, z_iobuf_t* buf) {
   // _Z_DEBUG(">> recv_msg\n");
   // z_message_p_result_t r;
   // z_message_p_result_init(&r);
-  // r.tag = _Z_ERROR_TAG;
+  // r.tag = Z_ERROR_TAG;
   // z_vle_result_t r_vle = z_recv_vle(sock);
   // ASSURE_RESULT(r_vle, r, Z_VLE_PARSE_ERROR)
   // size_t len = r_vle.value.vle;
   // _Z_DEBUG_VA(">> \t msg len = %zu\n", len);
   // if (z_iobuf_writable(buf) < len) {
-  //   r.tag = _Z_ERROR_TAG;
+  //   r.tag = Z_ERROR_TAG;
   //   r.value.error = Z_INSUFFICIENT_IOBUF_SIZE;
   //   return r;
   // }
