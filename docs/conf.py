@@ -7,6 +7,7 @@ author = 'ATOLabs'
 release = '0.3.0'
 
 # -- General configuration ---------------------------------------------------
+master_doc = 'index'
 extensions = []
 language = 'c'
 
