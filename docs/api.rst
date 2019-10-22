@@ -230,14 +230,14 @@ Data Structures
       | ``Z_EVAL_FINAL`` the reply indicates that no more data is expected from the specified eval.
       | ``Z_REPLY_FINAL`` the reply indicates that no more replies are expected for the query.
 
-  .. c:member:: const unsigned char *stoid
+  .. c:member:: const unsigned char *srcid
 
     The unique identifier of the storage or eval that sent the reply when :c:member:`z_reply_value_t.kind` equals 
     ``Z_STORAGE_DATA``, ``Z_STORAGE_FINAL``, ``Z_EVAL_DATA`` or ``Z_EVAL_FINAL``.
 
-  .. c:member:: size_t stoid_length
+  .. c:member:: size_t srcid_length
 
-    The length of the :c:member:`z_reply_value_t.stoid` when :c:member:`z_reply_value_t.kind` equals 
+    The length of the :c:member:`z_reply_value_t.srcid` when :c:member:`z_reply_value_t.kind` equals 
     ``Z_STORAGE_DATA``, ``Z_STORAGE_FINAL``, ``Z_EVAL_DATA`` or ``Z_EVAL_FINAL``.
 
   .. c:member:: z_vle_t rsn

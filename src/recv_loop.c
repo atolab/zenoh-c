@@ -302,8 +302,8 @@ void handle_msg(z_zenoh_t *z, _z_message_p_result_t r) {
             rw = _z_get_query(z, r.value.message->payload.reply.qid);
             if (rw != 0) {
                 if (r.value.message->header & _Z_F_FLAG) {
-                    rvalue.stoid = r.value.message->payload.reply.stoid.elem;
-                    rvalue.stoid_length = r.value.message->payload.reply.stoid.length;
+                    rvalue.srcid = r.value.message->payload.reply.stoid.elem;
+                    rvalue.srcid_length = r.value.message->payload.reply.stoid.length;
                     rvalue.rsn = r.value.message->payload.reply.rsn;
                     if (strlen(r.value.message->payload.reply.rname) != 0) {
                         rvalue.rname = r.value.message->payload.reply.rname;
@@ -343,10 +343,10 @@ void handle_msg(z_zenoh_t *z, _z_message_p_result_t r) {
                     case Z_STORAGE_DATA:
                         free((void *)rvalue.data);
                         free((void *)rvalue.rname);
-                        free((void *)rvalue.stoid);
+                        free((void *)rvalue.srcid);
                         break;
                     case Z_STORAGE_FINAL:
-                        free((void *)rvalue.stoid);
+                        free((void *)rvalue.srcid);
                         break;
                     case Z_REPLY_FINAL:
                         break;

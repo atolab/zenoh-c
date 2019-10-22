@@ -643,8 +643,8 @@ void send_local_replies(void* query_handle, z_array_resource_t replies, char eva
     }else{
       rep.kind = Z_STORAGE_DATA;
     }
-    rep.stoid = handle->z->pid.elem;
-    rep.stoid_length = handle->z->pid.length;
+    rep.srcid = handle->z->pid.elem;
+    rep.srcid_length = handle->z->pid.length;
     rep.rsn = i;
     rep.rname = replies.elem[i]->rname;
     rep.info.flags = _Z_ENCODING | _Z_KIND;
@@ -660,8 +660,8 @@ void send_local_replies(void* query_handle, z_array_resource_t replies, char eva
   }else{
     rep.kind = Z_STORAGE_FINAL;
   }
-  rep.stoid = handle->z->pid.elem;
-  rep.stoid_length = handle->z->pid.length;
+  rep.srcid = handle->z->pid.elem;
+  rep.srcid_length = handle->z->pid.length;
   rep.rsn = i;
   handle->reply_handler(&rep, handle->arg);
 

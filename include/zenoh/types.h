@@ -67,8 +67,8 @@ typedef struct {
 
 typedef struct {
   char kind;
-  const unsigned char *stoid; 
-  size_t stoid_length; 
+  const unsigned char *srcid; 
+  size_t srcid_length; 
   z_vle_t rsn;
   const char* rname;
   const unsigned char *data;
