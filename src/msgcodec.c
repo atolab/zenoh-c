@@ -521,7 +521,7 @@ _z_reply_encode(z_iobuf_t *buf, const _z_reply_t* m, uint8_t header) {
   z_vle_encode(buf, m->qid);
 
   if(header & _Z_F_FLAG) {
-    z_array_uint8_encode(buf, &(m->stoid));
+    z_array_uint8_encode(buf, &(m->srcid));
     z_vle_encode(buf, m->rsn);
     z_string_encode(buf, m->rname);
     z_vle_t len = z_iobuf_readable(&m->payload_header);
@@ -543,9 +543,9 @@ void _z_reply_decode_na(z_iobuf_t *buf, uint8_t header, _z_reply_result_t *r) {
 
   if (header & _Z_F_FLAG)
   {
-    z_array_uint8_result_t r_stoid = z_array_uint8_decode(buf);
-    ASSURE_P_RESULT(r_stoid, r, Z_ARRAY_PARSE_ERROR)
-    r->value.reply.stoid = r_stoid.value.array_uint8;
+    z_array_uint8_result_t r_srcid = z_array_uint8_decode(buf);
+    ASSURE_P_RESULT(r_srcid, r, Z_ARRAY_PARSE_ERROR)
+    r->value.reply.srcid = r_srcid.value.array_uint8;
 
     z_vle_result_t r_vle = z_vle_decode(buf);
     ASSURE_P_RESULT(r_vle, r, Z_VLE_PARSE_ERROR)

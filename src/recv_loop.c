@@ -26,7 +26,7 @@ void send_replies(void* query_handle, z_array_p_resource_t replies, uint8_t eval
     msg.header = _Z_REPLY | _Z_F_FLAG | eval_flag;
     msg.payload.reply.qid = handle->qid;
     msg.payload.reply.qpid = handle->qpid;
-    msg.payload.reply.stoid = handle->z->pid;
+    msg.payload.reply.srcid = handle->z->pid;
 
     for(i = 0; i < replies.length; ++i)
     {
@@ -302,8 +302,8 @@ void handle_msg(z_zenoh_t *z, _z_message_p_result_t r) {
             rw = _z_get_query(z, r.value.message->payload.reply.qid);
             if (rw != 0) {
                 if (r.value.message->header & _Z_F_FLAG) {
-                    rvalue.srcid = r.value.message->payload.reply.stoid.elem;
-                    rvalue.srcid_length = r.value.message->payload.reply.stoid.length;
+                    rvalue.srcid = r.value.message->payload.reply.srcid.elem;
+                    rvalue.srcid_length = r.value.message->payload.reply.srcid.length;
                     rvalue.rsn = r.value.message->payload.reply.rsn;
                     if (strlen(r.value.message->payload.reply.rname) != 0) {
                         rvalue.rname = r.value.message->payload.reply.rname;
