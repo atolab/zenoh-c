@@ -13,7 +13,7 @@ typedef struct { \
 typedef struct { \
   unsigned int length; \
   T** elem; \
-} z_array_##T;
+} z_array_p_##T;
 
 #define Z_ARRAY_DECLARE_Z_TYPE(T) \
 typedef struct { \
@@ -25,13 +25,13 @@ typedef struct { \
 typedef struct { \
   unsigned int length; \
   z_##T** elem; \
-} z_array_##T;
+} z_array_p_##T;
 
 #define Z_ARRAY_S_DEFINE(T, arr, len) \
 z_array_##T arr = {len, (T*)malloc(len*sizeof(T))};
 
 #define Z_ARRAY_P_S_DEFINE(T, arr, len) \
-z_array_##T arr = {len, (T**)malloc(len*sizeof(T*))};
+z_array_p_##T arr = {len, (T**)malloc(len*sizeof(T*))};
 
 #define Z_ARRAY_S_INIT(T, arr, len) \
 arr.length = len; \

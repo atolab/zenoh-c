@@ -633,7 +633,7 @@ typedef struct {
   atomic_flag sent_final;
 } local_query_handle_t;
 
-void send_local_replies(void* query_handle, z_array_resource_t replies, char eval){
+void send_local_replies(void* query_handle, z_array_p_resource_t replies, char eval){
   unsigned int i;
   z_reply_value_t rep;
   local_query_handle_t *handle = (local_query_handle_t*)query_handle;
@@ -699,11 +699,11 @@ void send_local_replies(void* query_handle, z_array_resource_t replies, char eva
   }
 }
 
-void send_local_storage_replies(void* query_handle, z_array_resource_t replies){
+void send_local_storage_replies(void* query_handle, z_array_p_resource_t replies){
   send_local_replies(query_handle, replies, 0);
 }
 
-void send_local_eval_replies(void* query_handle, z_array_resource_t replies){
+void send_local_eval_replies(void* query_handle, z_array_p_resource_t replies){
   send_local_replies(query_handle, replies, 1);
 }
 

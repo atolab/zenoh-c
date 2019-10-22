@@ -101,7 +101,7 @@ typedef struct {
 
 Z_ARRAY_P_DECLARE_Z_TYPE(resource_t)
 
-typedef void (*z_replies_sender_t)(void* query_handle, z_array_resource_t replies);
+typedef void (*z_replies_sender_t)(void* query_handle, z_array_p_resource_t replies);
 typedef void (*z_query_handler_t)(const char *rname, const char *predicate, z_replies_sender_t send_replies, void *query_handle, void *arg);
 typedef void (*z_on_disconnect_t)(void *z);
 

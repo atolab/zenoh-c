@@ -18,7 +18,7 @@ typedef struct {
   atomic_flag sent_final;
 } query_handle_t;
 
-void send_replies(void* query_handle, z_array_resource_t replies, uint8_t eval_flag){
+void send_replies(void* query_handle, z_array_p_resource_t replies, uint8_t eval_flag){
     unsigned int i;
     int rsn = 0;
     query_handle_t *handle = (query_handle_t*)query_handle;
@@ -81,11 +81,11 @@ void send_replies(void* query_handle, z_array_resource_t replies, uint8_t eval_f
     }
 }
 
-void send_eval_replies(void* query_handle, z_array_resource_t replies){
+void send_eval_replies(void* query_handle, z_array_p_resource_t replies){
     send_replies(query_handle, replies, _Z_E_FLAG);
 }
 
-void send_storage_replies(void* query_handle, z_array_resource_t replies){
+void send_storage_replies(void* query_handle, z_array_p_resource_t replies){
     send_replies(query_handle, replies, 0);
 }
 

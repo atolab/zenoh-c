@@ -49,7 +49,7 @@ void sto_handler(const char *rname, const char *predicate, z_replies_sender_t se
 
   z_resource_t *p_resource = &resource;
 
-  z_array_resource_t replies;
+  z_array_p_resource_t replies;
   replies.length = 1;
   replies.elem = &p_resource;
 
