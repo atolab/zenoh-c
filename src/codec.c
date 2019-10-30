@@ -24,7 +24,7 @@ z_vle_decode(z_iobuf_t* buf) {
   do {
     c = z_iobuf_read(buf);
     _Z_DEBUG_VA("vle c = 0x%x\n",c);
-    r.value.vle = r.value.vle | ((c & 0x7f) << i);
+    r.value.vle = r.value.vle | (((z_vle_t)c & 0x7f) << i);
     _Z_DEBUG_VA("current vle  = %zu\n",r.value.vle);
     i += 7;
   } while (c > 0x7f); 
