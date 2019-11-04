@@ -4,6 +4,11 @@ build
 # vscode
 .vscode 
 
+# IntelliJ / CLion 
+.idea 
+cmake-build-debug
+cmake-build-release 
+
 # Prerequisites
 *.d
 
