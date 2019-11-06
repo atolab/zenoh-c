@@ -15,6 +15,27 @@ z_iobuf_t _z_payload_decode(z_iobuf_t *buf) {
 }
 
 void 
+_z_scout_encode(z_iobuf_t *buf, const _z_scout_t *m) {
+  z_iobuf_write(buf, _Z_SCOUT);
+  z_vle_encode(buf, m->mask);
+}
+
+void 
+z_scout_decode_na(z_iobuf_t *buf, _z_scout_result_t *r) {
+  r->tag = Z_OK_TAG;
+  z_vle_result_t r_vle = z_vle_decode(buf);
+  ASSURE_P_RESULT(r_vle, r, Z_VLE_PARSE_ERROR);  
+  r->value.scout.mask = r_vle.value.vle;  
+}
+
+_z_scout_result_t 
+z_scout_decode(z_iobuf_t *buf) {
+  _z_scout_result_t r;
+  z_scout_decode_na(buf, &r);
+  return r;
+}
+
+void 
 _z_open_encode(z_iobuf_t* buf, const _z_open_t* m) {
   z_iobuf_write(buf, m->version);  
   z_array_uint8_encode(buf, &(m->pid));

@@ -10,6 +10,7 @@
 #include "zenoh/private/net.h"
 #include "zenoh/private/msgcodec.h"
 #include "zenoh/private/logging.h"
+#include <sys/socket.h>
 
 // -- Some refactoring will be done to support multiple platforms / transports
 
@@ -26,6 +27,54 @@ void default_on_disconnect(void *vz) {
       return;
     }
   }
+}
+
+char* auto_select_iface() {
+  return ZENOH_LOCAL_HOST;
+}
+
+z_list_t*
+_z_scout_loop(z_socket_t socket, const z_iobuf_t* sbuf, const struct sockaddr *dest, socklen_t salen, size_t tries) {
+  Z_UNUSED_ARG(dest);
+  struct sockaddr *from  = (struct sockaddr*) malloc(2*sizeof(struct sockaddr_in*));
+  socklen_t flen = 0;
+  z_iobuf_t hbuf = z_iobuf_make(ZENOH_MAX_SCOUT_MSG_LEN);
+  z_list_t *ls = z_list_empty;
+  while (tries != 0) {    
+    tries -= 1;
+    _z_send_dgram_to(socket, sbuf, dest, salen);    
+    int len = _z_recv_dgram_from(socket, &hbuf, from, &flen);
+    if (len > 0) {
+      // Unmarshal hello and add locator to the list;
+      // printf("Received Hello!\n");
+      z_iobuf_free(&hbuf);
+      return ls;
+    }
+  }
+  z_iobuf_free(&hbuf);
+  return ls;
+}
+
+z_list_t*
+z_scout(char* iface, size_t tries, size_t period) {
+  Z_UNUSED_ARG_2(tries, period);
+  char *addr;
+  if (strcmp(iface, "auto") == 0)
+    addr = auto_select_iface();  
+  else 
+    addr = iface;
+
+  z_iobuf_t sbuf = z_iobuf_make(ZENOH_MAX_SCOUT_MSG_LEN);
+  _z_scout_t scout;
+  scout.mask = _Z_SCOUT_BROKER;
+  _z_scout_encode(&sbuf, &scout);
+  z_socket_result_t r = _z_create_udp_socket(addr, 0, period);
+  ASSERT_RESULT(r, "Unable to create scouting socket\n");
+  // Scout first on local node.
+  struct sockaddr_in *laddr = _z_make_socket_address(addr, ZENOH_SCOUT_PORT);
+  socklen_t salen = sizeof(struct sockaddr_in);
+  z_list_t *locs = _z_scout_loop(r.value.socket, &sbuf, (struct sockaddr *)laddr, salen, tries);
+  return locs;
 }
 
 z_zenoh_p_result_t 

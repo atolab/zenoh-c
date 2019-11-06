@@ -114,7 +114,7 @@ void handle_msg(z_zenoh_t *z, _z_message_p_result_t r) {
     mid = _Z_MID(r.value.message->header);
     switch (mid) {
         case _Z_STREAM_DATA:
-            _Z_DEBUG_VA("Received _Z_STREAM_DATA message %d\n", Z_MID(r.value.message->header));
+            _Z_DEBUG_VA("Received _Z_STREAM_DATA message %d\n", _Z_MID(r.value.message->header));
             rname = _z_get_resource_name(z, r.value.message->payload.stream_data.rid);
             if (rname != 0) {
                 subs = _z_get_subscriptions_by_rname(z, rname);
@@ -164,7 +164,7 @@ void handle_msg(z_zenoh_t *z, _z_message_p_result_t r) {
             z_iobuf_free(&r.value.message->payload.stream_data.payload_header);
             break;
         case _Z_COMPACT_DATA:
-            _Z_DEBUG_VA("Received _Z_COMPACT_DATA message %d\n", Z_MID(r.value.message->header));
+            _Z_DEBUG_VA("Received _Z_COMPACT_DATA message %d\n", _Z_MID(r.value.message->header));
             rname = _z_get_resource_name(z, r.value.message->payload.stream_data.rid);
             if (rname != 0) {
                 subs = _z_get_subscriptions_by_rname(z, rname);
@@ -206,7 +206,7 @@ void handle_msg(z_zenoh_t *z, _z_message_p_result_t r) {
             }
             break;
         case _Z_WRITE_DATA:
-            _Z_DEBUG_VA("Received _Z_WRITE_DATA message %d\n", Z_MID(r.value.message->header));
+            _Z_DEBUG_VA("Received _Z_WRITE_DATA message %d\n", _Z_MID(r.value.message->header));
             subs = _z_get_subscriptions_by_rname(z, r.value.message->payload.write_data.rname);
             stos = _z_get_storages_by_rname(z, r.value.message->payload.write_data.rname);
             if (subs != 0 || stos != 0) {

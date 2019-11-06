@@ -309,6 +309,9 @@ typedef struct {
   uint8_t header; 
 } _z_message_t;
 
+_Z_RESULT_DECLARE (_z_scout_t, scout)
+_Z_RESULT_DECLARE (_z_hello_t, hello)
+
 _Z_RESULT_DECLARE (_z_accept_t, accept)
 _Z_RESULT_DECLARE (_z_close_t, close)
 _Z_RESULT_DECLARE (_z_declare_t, declare)

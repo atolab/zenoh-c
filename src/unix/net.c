@@ -17,6 +17,77 @@
 #include "zenoh/private/msgcodec.h"
 #include "zenoh/private/logging.h"
 
+
+struct sockaddr_in * 
+_z_make_socket_address(const char* addr, int port) {
+  struct sockaddr_in *saddr = (struct sockaddr_in *)malloc(sizeof(struct sockaddr_in));
+  bzero(saddr, sizeof(struct sockaddr_in));  
+  saddr->sin_family = AF_INET;
+	saddr->sin_port = htons(port);
+  
+  if(inet_pton(AF_INET, addr, &(saddr->sin_addr))<=0) {
+    free(saddr);
+    return 0;
+  }
+  return saddr;
+}
+
+z_socket_result_t 
+_z_create_udp_socket(const char *addr, int port, int timeout_usec) {
+  z_socket_result_t r;
+  r.tag = Z_OK_TAG;
+  
+  _Z_DEBUG_VA("Binding UDP Socket to: %s:%d\n", addr, port);  
+  struct sockaddr_in saddr;
+
+  r.value.socket = socket(PF_INET, SOCK_DGRAM, 0);
+
+  if (r.value.socket < 0) {
+    r.tag = Z_ERROR_TAG;
+    r.value.error = r.value.socket;
+    r.value.socket = 0;
+    return r;
+  }
+
+  bzero(&saddr, sizeof(saddr));
+	saddr.sin_family = AF_INET;
+	saddr.sin_port = htons(port);
+
+	if(inet_pton(AF_INET, addr, &saddr.sin_addr)<=0)
+	{
+    r.tag = Z_ERROR_TAG;
+    r.value.error = Z_INVALID_ADDRESS_ERROR;
+    r.value.socket = 0;    
+    return r;
+	}
+
+
+	if(bind(r.value.socket, (struct sockaddr *)&saddr, sizeof(saddr)) < 0) {
+    r.tag = Z_ERROR_TAG;
+    r.value.error = Z_INVALID_ADDRESS_ERROR;
+    r.value.socket = 0;
+    return r;
+  }
+  struct timeval timeout;
+  timeout.tv_sec = 0;
+  timeout.tv_usec = timeout_usec;
+  if(setsockopt(r.value.socket,SOL_SOCKET, SO_RCVTIMEO, (void *)&timeout, sizeof(struct timeval))==-1){
+    r.tag = Z_ERROR_TAG;
+    r.value.error = errno;
+    close(r.value.socket);
+    r.value.socket = 0;
+    return r;
+  }
+  if(setsockopt(r.value.socket,SOL_SOCKET, SO_SNDTIMEO, (void *)&timeout, sizeof(struct timeval))==-1){
+    r.tag = Z_ERROR_TAG;
+    r.value.error = errno;
+    close(r.value.socket);
+    r.value.socket = 0;
+    return r;
+  }
+  return r;
+}
+
 z_socket_result_t
 _z_open_tx_session(const char *locator) {
   z_socket_result_t r;
@@ -133,7 +204,36 @@ int _z_send_iovec(z_socket_t sock, struct iovec* iov, int iovcnt) {
   }
   return 0;
 }
-int _z_send_buf(z_socket_t sock, z_iobuf_t* buf) {
+
+int 
+_z_send_dgram_to(z_socket_t sock, const z_iobuf_t* buf, const struct sockaddr *dest, socklen_t salen) {
+  int len =  z_iobuf_readable(buf);
+  uint8_t *ptr = buf->buf + buf->r_pos;
+  int n = len;
+  int wb;  
+  _Z_DEBUG("Sending data on socket....\n");
+  wb = sendto(sock, ptr, n, 0, dest, salen);
+  _Z_DEBUG_VA("Socket returned: %d\n", wb);
+  if (wb <= 0) {
+    _Z_DEBUG_VA("Error while sending data over socket [%d]\n", wb);
+    return -1;
+  }
+  return wb;
+}
+
+int 
+_z_recv_dgram_from(z_socket_t sock, z_iobuf_t* buf, struct sockaddr* from, socklen_t *salen) {
+  size_t writable = buf->capacity - buf->w_pos;
+  uint8_t *cp = buf->buf + buf->w_pos;
+  int rb = 0;    
+  rb = recvfrom(sock, cp, writable, 0, from, salen);
+  buf->w_pos = buf->w_pos +  rb;
+  return rb;
+}
+
+
+
+int _z_send_buf(z_socket_t sock, const z_iobuf_t* buf) {
   int len =  z_iobuf_readable(buf);
   uint8_t *ptr = buf->buf + buf->r_pos;
   int n = len;
@@ -147,7 +247,7 @@ int _z_send_buf(z_socket_t sock, z_iobuf_t* buf) {
   #endif
     _Z_DEBUG_VA("Socket returned: %d\n", wb);
     if (wb <= 0) {
-      _Z_DEBUG_VA("Broker closed connection.... [%d]\n", wb);
+      _Z_DEBUG_VA("Error while sending data over socket [%d]\n", wb);
       return -1;
     }
     n -= wb;

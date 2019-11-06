@@ -21,6 +21,13 @@ void _z_ ## name ## _decode_na(z_iobuf_t* buf, _z_ ##name ##_result_t *r)
 Z_DECLARE_ENCODE(sub_mode);
 Z_DECLARE_DECODE_NOH(sub_mode);
 
+_Z_DECLARE_ENCODE(scout);
+_Z_DECLARE_DECODE_NOH(scout);
+
+_Z_DECLARE_ENCODE(hello);
+_Z_DECLARE_DECODE_NOH(hello);
+
+
 _Z_DECLARE_ENCODE(open);
 _Z_DECLARE_DECODE_NOH(accept);
 

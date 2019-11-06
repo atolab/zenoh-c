@@ -16,7 +16,7 @@ void data_handler(const z_resource_id_t *rid, const unsigned char *data, size_t 
     printf(">> [Subscription listener] Received ('%s': '%s')\n", rid->id.rname, str);
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv) {  
   char *locator = strdup("tcp/127.0.0.1:7447");
   if (argc > 1) {
     locator = argv[1];
