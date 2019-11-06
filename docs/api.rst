@@ -1,3 +1,7 @@
+*************
+API Reference
+*************
+
 Result types
 ------------
 
@@ -431,8 +435,8 @@ Functions
     It may allow them to filter, transform and/or compute the queried data. 
   | **reply_handler** is the callback function that will be called on reception of the replies of the query. 
   | **arg** is a pointer that will be passed to the **reply_handler** function on each call. 
-  | **dest_storages** indicates which matching storages that should be destination of the query (see :c:type:`z_query_dest_t`).
-  | **dest_evals** indicates which matching evals that should be destination of the query (see :c:type:`z_query_dest_t`).
+  | **dest_storages** indicates which matching storages should be destination of the query (see :c:type:`z_query_dest_t`).
+  | **dest_evals** indicates which matching evals should be destination of the query (see :c:type:`z_query_dest_t`).
   
   Return 0 if the query was sent successfully.
 
