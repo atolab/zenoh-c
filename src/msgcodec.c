@@ -36,6 +36,44 @@ z_scout_decode(z_iobuf_t *buf) {
 }
 
 void 
+_z_hello_encode(z_iobuf_t *buf, const _z_hello_t *msg) {
+  z_iobuf_write(buf, _Z_HELLO);
+  z_iobuf_write(buf, msg->mask);
+  int len = z_vec_length(&msg->locators);
+  z_vle_encode(buf, len);
+  for (int i = 0; i < len; ++i) 
+    z_string_encode(buf, z_vec_get(&msg->locators, i));
+  
+}
+void 
+_z_hello_decode_na(z_iobuf_t *buf, _z_hello_result_t *r) {
+  z_vle_result_t r_mask;
+  z_vle_result_t r_n;
+  z_string_result_t r_l;
+  r->tag = Z_OK_TAG;
+  r->value.hello.locators.elem_ = 0;
+  r->value.hello.mask = 0;
+  r_mask = z_vle_decode(buf);
+  ASSURE_P_RESULT(r_mask, r, Z_VLE_PARSE_ERROR);
+  r->value.hello.mask = r_mask.value.vle;
+  r_n = z_vle_decode(buf);  
+  ASSURE_P_RESULT(r_n, r, Z_VLE_PARSE_ERROR);
+  int len = r_n.value.vle;
+  r->value.hello.locators = z_vec_make(len);  
+  for (int i = 0; i < len; ++i) {
+    r_l = z_string_decode(buf);
+    ASSURE_P_RESULT(r_l, r, Z_STRING_PARSE_ERROR);
+    z_vec_append(&r->value.hello.locators, r_l.value.string);
+  }   
+}
+_z_hello_result_t 
+z_hello_decode(z_iobuf_t *buf) {
+  _z_hello_result_t r;
+  _z_hello_decode_na(buf, &r);
+  return r;
+}
+
+void 
 _z_open_encode(z_iobuf_t* buf, const _z_open_t* m) {
   z_iobuf_write(buf, m->version);  
   z_array_uint8_encode(buf, &(m->pid));
@@ -642,6 +680,7 @@ _z_message_decode_na(z_iobuf_t* buf, _z_message_p_result_t* r) {
   _z_accept_result_t r_a;
   _z_close_result_t r_c;
   _z_declare_result_t r_d;
+  _z_hello_result_t r_h;
 
   uint8_t h = z_iobuf_read(buf);
   r->tag = Z_OK_TAG;
@@ -696,6 +735,12 @@ _z_message_decode_na(z_iobuf_t* buf, _z_message_p_result_t* r) {
       r_d = _z_declare_decode(buf);
       ASSURE_P_RESULT(r_d, r, Z_MESSAGE_PARSE_ERROR)
       r->value.message->payload.declare = r_d.value.declare;
+      break;
+    case _Z_HELLO:
+      r->tag = Z_OK_TAG;
+      r_h = z_hello_decode(buf);
+      ASSURE_P_RESULT(r_h, r, Z_MESSAGE_PARSE_ERROR)
+      r->value.message->payload.hello = r_h.value.hello;
       break;
     default:
       r->tag = Z_ERROR_TAG;

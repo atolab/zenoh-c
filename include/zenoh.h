@@ -12,7 +12,7 @@
 #define Z_INFO_PEER_KEY 0x01
 #define Z_INFO_PEER_PID_KEY 0x02
 
-z_list_t*
+z_vec_t
 z_scout(char* iface, size_t tries, size_t period);
 
 z_zenoh_p_result_t 

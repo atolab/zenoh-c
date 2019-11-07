@@ -111,7 +111,7 @@ typedef struct {
 /*------------------ Hello Message ------------------*/
 typedef struct {  
   z_vle_t mask;
-  z_vec_t *locators;  
+  z_vec_t locators;  
 } _z_hello_t;
 
 /*------------------ Open Message ------------------*/

@@ -17,7 +17,7 @@ void data_handler(const z_resource_id_t *rid, const unsigned char *data, size_t 
 }
 
 int main(int argc, char **argv) {  
-  char *locator = strdup("tcp/127.0.0.1:7447");
+  char *locator = 0;
   if (argc > 1) {
     locator = argv[1];
   }

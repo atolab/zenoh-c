@@ -33,20 +33,28 @@ char* auto_select_iface() {
   return ZENOH_LOCAL_HOST;
 }
 
-z_list_t*
-_z_scout_loop(z_socket_t socket, const z_iobuf_t* sbuf, const struct sockaddr *dest, socklen_t salen, size_t tries) {
-  Z_UNUSED_ARG(dest);
+z_vec_t
+_z_scout_loop(z_socket_t socket, const z_iobuf_t* sbuf, const struct sockaddr *dest, socklen_t salen, size_t tries) {  
   struct sockaddr *from  = (struct sockaddr*) malloc(2*sizeof(struct sockaddr_in*));
   socklen_t flen = 0;
   z_iobuf_t hbuf = z_iobuf_make(ZENOH_MAX_SCOUT_MSG_LEN);
-  z_list_t *ls = z_list_empty;
+  z_vec_t ls;
+  ls.capacity_ = 0;
+  ls.elem_ = 0;
   while (tries != 0) {    
     tries -= 1;
     _z_send_dgram_to(socket, sbuf, dest, salen);    
     int len = _z_recv_dgram_from(socket, &hbuf, from, &flen);
     if (len > 0) {
-      // Unmarshal hello and add locator to the list;
-      // printf("Received Hello!\n");
+      int header = z_iobuf_read(&hbuf);
+      if (_Z_MID(header) == _Z_HELLO) {
+        _z_hello_result_t r_h = z_hello_decode(&hbuf);
+        if (r_h.tag == Z_OK_TAG) {
+          ls = r_h.value.hello.locators;                
+        }
+      } else {
+        printf("Scouting loop received unexpected message\n");
+      }
       z_iobuf_free(&hbuf);
       return ls;
     }
@@ -55,16 +63,13 @@ _z_scout_loop(z_socket_t socket, const z_iobuf_t* sbuf, const struct sockaddr *d
   return ls;
 }
 
-z_list_t*
-z_scout(char* iface, size_t tries, size_t period) {
-  _z_select_scout_iface();
-  Z_UNUSED_ARG_2(tries, period);
-  char *addr;
-  if (strcmp(iface, "auto") == 0)
-    addr = auto_select_iface();  
-  else 
-    addr = iface;
-
+z_vec_t
+z_scout(char* iface, size_t tries, size_t period) {  
+  char *addr = iface;  
+  if ((iface == 0) || (strcmp(iface,"auto") == 0)) {    
+    addr = _z_select_scout_iface();    
+  }
+  
   z_iobuf_t sbuf = z_iobuf_make(ZENOH_MAX_SCOUT_MSG_LEN);
   _z_scout_t scout;
   scout.mask = _Z_SCOUT_BROKER;
@@ -74,12 +79,21 @@ z_scout(char* iface, size_t tries, size_t period) {
   // Scout first on local node.
   struct sockaddr_in *laddr = _z_make_socket_address(addr, ZENOH_SCOUT_PORT);
   socklen_t salen = sizeof(struct sockaddr_in);
-  z_list_t *locs = _z_scout_loop(r.value.socket, &sbuf, (struct sockaddr *)laddr, salen, tries);
-  return locs;
+  return _z_scout_loop(r.value.socket, &sbuf, (struct sockaddr *)laddr, salen, tries);
+  
 }
 
 z_zenoh_p_result_t 
 z_open(char* locator, z_on_disconnect_t on_disconnect, const z_vec_t* ps) {
+  if (locator == 0) {
+    z_vec_t locs = z_scout("auto", 3, 500000);
+    if (z_vec_length(&locs) > 0) {
+      locator = strdup((const char *)z_vec_get(&locs, 0));
+    }
+    else {
+      perror("Unable do scout a zenoh router. Please make sure one is running on your network!\n");
+    }
+  }
   z_zenoh_p_result_t r; 
   r.value.zenoh = 0;
   srand(clock());
