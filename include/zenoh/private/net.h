@@ -3,10 +3,16 @@
 
 #include "zenoh/types.h"
 #include "zenoh/private/msg.h"
+#include <sys/types.h>
 #include <sys/socket.h>
+#include <ifaddrs.h>
 #include <netinet/in.h>
+#include <sys/ioctl.h>
+#include <net/if.h>
 
 Z_RESULT_DECLARE (z_socket_t, socket)
+
+char * _z_select_scout_iface();
 
 z_socket_result_t _z_open_tx_session(const char *locator);
 

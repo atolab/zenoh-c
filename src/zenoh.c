@@ -57,6 +57,7 @@ _z_scout_loop(z_socket_t socket, const z_iobuf_t* sbuf, const struct sockaddr *d
 
 z_list_t*
 z_scout(char* iface, size_t tries, size_t period) {
+  _z_select_scout_iface();
   Z_UNUSED_ARG_2(tries, period);
   char *addr;
   if (strcmp(iface, "auto") == 0)

@@ -17,6 +17,51 @@
 #include "zenoh/private/msgcodec.h"
 #include "zenoh/private/logging.h"
 
+char * _z_select_scout_iface() {
+  char * eth_prefix = "en";
+  char * lo_prefix = "lo";
+  size_t len = 2;
+  char  *loopback = 0;
+  char  *iface = 0;
+  struct ifaddrs *ifap;
+  struct ifaddrs *current;
+  char host[NI_MAXHOST];
+
+  if (getifaddrs(&ifap) == -1) {
+    return 0;
+  } else {
+    current = ifap;
+    int family;
+    do {
+      family = current->ifa_addr->sa_family;
+
+      if (family == AF_INET) {
+        if (memcmp(current->ifa_name, eth_prefix, len) == 0) {
+          if ((current->ifa_flags & (IFF_MULTICAST | IFF_UP |IFF_RUNNING)) && !(current->ifa_flags & IFF_PROMISC)) {
+            getnameinfo(current->ifa_addr, 
+                  sizeof(struct sockaddr_in),
+                  host, NI_MAXHOST,
+                  NULL, 0, NI_NUMERICHOST);
+            _Z_DEBUG_VA("\t-- Interface: %s\tAddress: <%s>\n", current->ifa_name, host);
+            iface = host;
+          }
+        } else if (memcmp(current->ifa_name, lo_prefix, len) == 0) {
+          if ((current->ifa_flags & (IFF_UP |IFF_RUNNING)) && !(current->ifa_flags & IFF_PROMISC)) {
+            getnameinfo(current->ifa_addr, 
+                  sizeof(struct sockaddr_in),
+                  host, NI_MAXHOST,
+                  NULL, 0, NI_NUMERICHOST);
+            _Z_DEBUG_VA("\t-- Interface: %s\tAddress: <%s>\n", current->ifa_name, host);
+            loopback = host;
+          }
+        }
+      }
+      current = current->ifa_next;
+    } while ((iface == 0) || (current != 0));
+  }
+  freeifaddrs(ifap);
+  return (iface != 0) ? iface : loopback;
+}
 
 struct sockaddr_in * 
 _z_make_socket_address(const char* addr, int port) {
