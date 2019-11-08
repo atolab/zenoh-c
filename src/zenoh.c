@@ -86,7 +86,7 @@ z_scout(char* iface, size_t tries, size_t period) {
 z_zenoh_p_result_t 
 z_open(char* locator, z_on_disconnect_t on_disconnect, const z_vec_t* ps) {
   if (locator == 0) {
-    z_vec_t locs = z_scout("auto", 3, 500000);
+    z_vec_t locs = z_scout("auto", ZENOH_SCOUT_TRIES, ZENOH_SCOUT_TIMEOUT);
     if (z_vec_length(&locs) > 0) {
       locator = strdup((const char *)z_vec_get(&locs, 0));
     }
