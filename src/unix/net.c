@@ -57,7 +57,7 @@ char * _z_select_scout_iface() {
         }
       }
       current = current->ifa_next;
-    } while ((iface == 0) || (current != 0));
+    } while ((iface == 0) && (current != 0));
   }
   char * result = strdup((iface != 0) ? iface : loopback);
   freeifaddrs(ifap);
