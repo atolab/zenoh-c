@@ -100,7 +100,8 @@ z_open(char* locator, z_on_disconnect_t on_disconnect, const z_vec_t* ps) {
       locator = strdup((const char *)z_vec_get(&locs, 0));
     }
     else {
-      perror("Unable do scout a zenoh router. Please make sure one is running on your network!\n");
+      perror("Unable do scout a zenoh router ");
+      _Z_ERROR("%sPlease make sure one is running on your network!\n", "");
       r.tag = Z_ERROR_TAG;
       r.value.error = Z_TX_CONNECTION_ERROR;
       return r;

@@ -20,7 +20,7 @@ void query_handler(const char *rname, const char *predicate, z_replies_sender_t 
 }
 
 int main(int argc, char **argv) {
-  char *locator = strdup("tcp/127.0.0.1:7447");
+  char *locator = 0;
   if (argc > 1) {
     locator = argv[1];
   }
@@ -29,15 +29,15 @@ int main(int argc, char **argv) {
     uri = argv[2];
   }
 
-  printf("Connecting to %s...\n", locator);
+  printf("Openning session...\n");
   z_zenoh_p_result_t r_z = z_open(locator, 0, 0);
-  ASSERT_RESULT(r_z, "Unable to open session with broker")
+  ASSERT_RESULT(r_z, "Unable to open session.\n")
   z_zenoh_t *z = r_z.value.zenoh;
   z_start_recv_loop(z);
 
   printf("Declaring Eval on '%s'...\n", uri);
   z_eval_p_result_t r = z_declare_eval(z, uri, query_handler, uri);
-  ASSERT_P_RESULT(r, "Unable to declare eval\n");  
+  ASSERT_P_RESULT(r, "Unable to declare eval.\n");  
   z_eva_t *eval = r.value.eval;
 
   char c = 0;

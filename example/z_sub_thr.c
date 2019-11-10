@@ -36,20 +36,20 @@ void data_handler(const z_resource_id_t *rid, const unsigned char *data, size_t 
 }
 
 int main(int argc, char **argv) {
-  char *locator = strdup("tcp/127.0.0.1:7447");
+  char *locator = 0;
   if (argc > 1) {
     locator = argv[1];
   }
 
   z_zenoh_p_result_t r_z = z_open(locator, 0, 0);
-  ASSERT_RESULT(r_z, "Unable to open session with broker")
+  ASSERT_RESULT(r_z, "Unable to open session.\n")
   z_zenoh_t *z = r_z.value.zenoh;
   z_start_recv_loop(z);  
 
   z_sub_mode_t sm;
   sm.kind = Z_PUSH_MODE;
   z_sub_p_result_t r = z_declare_subscriber(z, "/test/thr", &sm, data_handler, NULL);
-  ASSERT_P_RESULT(r, "Unable to declare pub\n");
+  ASSERT_P_RESULT(r, "Unable to declare subscriber.\n");
   z_sub_t *sub = r.value.sub;
   
   sleep(60);

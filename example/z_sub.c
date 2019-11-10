@@ -26,9 +26,9 @@ int main(int argc, char **argv) {
     uri = argv[2];
   }
 
-  printf("Connecting to %s...\n", locator);
+  printf("Openning session...\n");
   z_zenoh_p_result_t r_z = z_open(locator, 0, 0);
-  ASSERT_RESULT(r_z, "Unable to open session with broker")
+  ASSERT_RESULT(r_z, "Unable to open session.\n")
   z_zenoh_t *z = r_z.value.zenoh;
   z_start_recv_loop(z);
 
@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
   z_sub_mode_t sm;
   sm.kind = Z_PUSH_MODE;
   z_sub_p_result_t r = z_declare_subscriber(z, uri, &sm, data_handler, NULL);
-  ASSERT_P_RESULT(r,"Unable to declare subscriber\n");
+  ASSERT_P_RESULT(r,"Unable to declare subscriber.\n");
   z_sub_t *sub = r.value.sub;
 
   char c = 0;
