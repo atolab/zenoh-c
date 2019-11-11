@@ -29,10 +29,6 @@ void default_on_disconnect(void *vz) {
   }
 }
 
-char* auto_select_iface() {
-  return ZENOH_LOCAL_HOST;
-}
-
 z_vec_t
 _z_scout_loop(z_socket_t socket, const z_iobuf_t* sbuf, const struct sockaddr *dest, socklen_t salen, size_t tries) {    
   struct sockaddr *from  = (struct sockaddr*) malloc(2*sizeof(struct sockaddr_in*));
@@ -88,6 +84,7 @@ z_scout(char* iface, size_t tries, size_t period) {
     // We did not find broker on the local host, thus Scout in the LAN 
     locs = _z_scout_loop(r.value.socket, &sbuf, (struct sockaddr *)maddr, salen, tries);    
   }
+  z_iobuf_free(&sbuf);
   return locs;
 }
 

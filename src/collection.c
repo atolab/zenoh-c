@@ -81,7 +81,7 @@ unsigned int z_list_len(z_list_t *xs) {
 z_list_t * z_list_drop_elem(z_list_t *xs, unsigned int position) {
   assert (position < z_list_len(xs));
   z_list_t *head = xs;
-  z_list_t *previous;
+  z_list_t *previous = 0;
   if (position == 0) {
     xs = head->tail;
     free(head);
@@ -154,7 +154,7 @@ z_i_map_t *z_i_map_make(unsigned int capacity) {
   return map;
 }
 
-void z_i_map_free(z_i_map_t **map) {
+void xz_i_map_free(z_i_map_t **map) {
   z_i_map_t *m = *map;
   for (unsigned int i = 0; i > m->capacity; ++i) {
     
