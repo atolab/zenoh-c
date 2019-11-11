@@ -4,7 +4,7 @@
 #include "zenoh/recv_loop.h"
 
 int main(int argc, char **argv) {
-  char *locator = strdup("tcp/127.0.0.1:7447");
+  char *locator = 0;
   if (argc > 1) {
     locator = argv[1];
   }
@@ -17,15 +17,15 @@ int main(int argc, char **argv) {
     value = argv[3];
   }
 
-  printf("Connecting to %s...\n", locator);
+  printf("Openning session...\n");
   z_zenoh_p_result_t r_z = z_open(locator, 0, 0);
-  ASSERT_RESULT(r_z, "Unable to open session with broker")
+  ASSERT_RESULT(r_z, "Unable to open session.\n")
   z_zenoh_t *z = r_z.value.zenoh;
   z_start_recv_loop(z);  
   
   printf("Declaring Publisher on '%s'...\n", uri);
   z_pub_p_result_t r = z_declare_publisher(z, uri);
-  ASSERT_P_RESULT(r, "Unable to declare pub\n");  
+  ASSERT_P_RESULT(r, "Unable to declare publisher.\n");  
   z_pub_t *pub = r.value.pub;
 
   char buf[256];

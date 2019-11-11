@@ -4,13 +4,13 @@
 #include "zenoh/recv_loop.h"
 
 int main(int argc, char **argv) {
-  char *locator = strdup("tcp/127.0.0.1:7447");
+  char *locator = 0;
   if (argc < 2) {
     printf("USAGE:\n\tz_pub_thr <payload-size> [<zenoh-locator>]\n\n");
     exit(-1);
   }
   size_t len = atoi(argv[1]);  
-  printf("Running throughput test for payload of %zu bytes\n", len);
+  printf("Running throughput test for payload of %zu bytes.\n", len);
   if (argc > 2) {
     locator = argv[2];
   }  
@@ -24,7 +24,7 @@ int main(int argc, char **argv) {
   z_start_recv_loop(z);  
 
   z_pub_p_result_t rp = z_declare_publisher(z, "/test/thr");
-  ASSERT_P_RESULT(rp, "Unable to declare publisher");
+  ASSERT_P_RESULT(rp, "Unable to declare publisher.\n");
   z_pub_t *pub = rp.value.pub;
     
   while (1) {      

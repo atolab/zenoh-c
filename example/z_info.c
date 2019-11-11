@@ -13,7 +13,7 @@ char *hexdump(z_array_uint8_t array) {
 }
 
 int main(int argc, char **argv) {
-  char *locator = strdup("tcp/127.0.0.1:7447");
+  char *locator = 0;
   if (argc > 1) {
     locator = argv[1];
   }
@@ -22,9 +22,9 @@ int main(int argc, char **argv) {
   z_vec_append(&ps, z_property_make_from_str(Z_USER_KEY, "user"));
   z_vec_append(&ps, z_property_make_from_str(Z_PASSWD_KEY, "password"));
 
-  printf("Connecting to %s...\n", locator);
+  printf("Openning session...\n");
   z_zenoh_p_result_t r_z = z_open(locator, 0, &ps);
-  ASSERT_RESULT(r_z, "Unable to open session with broker")
+  ASSERT_RESULT(r_z, "Unable to open session.\n")
   z_zenoh_t *z = r_z.value.zenoh;
 
   z_vec_t info = z_info(z);

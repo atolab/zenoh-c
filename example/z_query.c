@@ -31,7 +31,7 @@ void reply_handler(const z_reply_value_t *reply, void *arg) {
 }
 
 int main(int argc, char **argv) {
-  char *locator = strdup("tcp/127.0.0.1:7447");
+  char *locator = 0;
   if (argc > 1) {
     locator = argv[1];
   }
@@ -40,16 +40,16 @@ int main(int argc, char **argv) {
     uri = argv[2];
   }
 
-  printf("Connecting to %s...\n", locator);
+  printf("Openning session...\n");
   z_zenoh_p_result_t r_z = z_open(locator, 0, 0);
-  ASSERT_RESULT(r_z, "Unable to open session with broker")
+  ASSERT_RESULT(r_z, "Unable to open session.\n")
   z_zenoh_t *z = r_z.value.zenoh;
   z_start_recv_loop(z);
 
   printf("Sending Query '%s'...\n", uri);
   z_query_dest_t dest_all = {Z_ALL, 0};
   if (z_query_wo(z, uri, "", reply_handler, NULL, dest_all, dest_all) != 0) {
-    printf("Unable to query\n");
+    printf("Unable to query.\n");
     return -1;
   }
 

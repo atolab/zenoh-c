@@ -10,7 +10,7 @@ int main() {
       printf("Locator: %s\n", (char*)z_vec_get(&locs, i));
     }
   } else {
-    printf("Did not find any zenoh routers.\n");
+    printf("Did not find any zenoh router.\n");
   }
   return 0;
 }
