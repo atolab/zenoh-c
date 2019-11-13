@@ -286,9 +286,10 @@ Functions
 
 .. c:function:: z_zenoh_p_result_t z_open(char* locator, z_on_disconnect_t on_disconnect, const z_vec_t *ps)
 
-  Open a zenoh session with the infrastructure component (zenoh router, zenoh broker, ...) reachable at location **locator**. 
+  Open a zenoh session. 
   
-  | **locator** is a string representation of a network endpoint. A typical locator looks like this : ``tcp/127.0.0.1:7447``. 
+  | **locator** is a string representing the network endpoint to which establish the session. A typical locator looks like this : ``tcp/127.0.0.1:7447``. 
+    If ``NULL``, :c:func:`z_open` will scout and try to establish the session automatically.
   | **on_disconnect** is a function that will be called each time the client API is disconnected from the infrastructure. It can be set to ``NULL``. 
   | **ps** is a :c:type:`vector<z_vec_t>` of :c:type:`z_property_t` that will be used to establish and configure the zenoh session. 
     **ps** will typically contain the ``username`` and ``password`` informations needed to establish the zenoh session with a secured infrastructure. 
