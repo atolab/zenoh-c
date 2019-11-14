@@ -31,13 +31,13 @@ void reply_handler(const z_reply_value_t *reply, void *arg) {
 }
 
 int main(int argc, char **argv) {
-  char *locator = 0;
-  if (argc > 1) {
-    locator = argv[1];
-  }
   char *uri = "/demo/example/**";
+  if (argc > 1) {
+    uri = argv[1];
+  }
+  char *locator = 0;
   if (argc > 2) {
-    uri = argv[2];
+    locator = argv[2];
   }
 
   printf("Openning session...\n");

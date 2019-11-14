@@ -3,17 +3,17 @@
 #include "zenoh.h"
 
 int main(int argc, char **argv) {
-  char *locator = 0;
-  if (argc > 1) {
-    locator = argv[1];
-  }
   char *uri = "/demo/example/zenoh-c-write";
-  if (argc > 2) {
-    uri = argv[2];
+  if (argc > 1) {
+    uri = argv[1];
   }
   char *value = "Write from C!";
+  if (argc > 2) {
+    value = argv[2];
+  }
+  char *locator = 0;
   if (argc > 3) {
-    value = argv[3];
+    locator = argv[3];
   }
 
   printf("Openning session...\n");

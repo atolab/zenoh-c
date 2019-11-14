@@ -20,13 +20,13 @@ void query_handler(const char *rname, const char *predicate, z_replies_sender_t 
 }
 
 int main(int argc, char **argv) {
-  char *locator = 0;
-  if (argc > 1) {
-    locator = argv[1];
-  }
   char *uri = "/demo/example/zenoh-c-eval";
+  if (argc > 1) {
+    uri = argv[1];
+  }
+  char *locator = 0;
   if (argc > 2) {
-    uri = argv[2];
+    locator = argv[2];
   }
 
   printf("Openning session...\n");

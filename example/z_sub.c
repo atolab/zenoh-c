@@ -16,14 +16,14 @@ void data_handler(const z_resource_id_t *rid, const unsigned char *data, size_t 
     printf(">> [Subscription listener] Received ('%s': '%s')\n", rid->id.rname, str);
 }
 
-int main(int argc, char **argv) {  
-  char *locator = 0;
-  if (argc > 1) {
-    locator = argv[1];
-  }
+int main(int argc, char **argv) {
   char *uri = "/demo/example/**";
+  if (argc > 1) {
+    uri = argv[1];
+  }
+  char *locator = 0;
   if (argc > 2) {
-    uri = argv[2];
+    locator = argv[2];
   }
 
   printf("Openning session...\n");
