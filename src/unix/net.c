@@ -151,8 +151,8 @@ _z_open_tx_session(const char *locator) {
   int status;
   char ip_addr[INET6_ADDRSTRLEN];
   struct sockaddr_in *remote;
-  struct addrinfo hints, *res;
-  status=getaddrinfo(addr_name, s_port, &hints, &res);
+  struct addrinfo *res;
+  status=getaddrinfo(addr_name, s_port, NULL, &res);
   if (status == 0 && res != NULL) {
     void *addr;
     remote = (struct sockaddr_in *)res->ai_addr;
