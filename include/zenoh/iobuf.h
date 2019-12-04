@@ -3,8 +3,8 @@
 
 #include <stdint.h>
 #include <stdlib.h>
-#include "zenoh/result.h"
 #include "zenoh/collection.h"
+#include "zenoh/result.h"
 
 typedef  size_t  z_vle_t;
 Z_RESULT_DECLARE (z_vle_t, vle)
