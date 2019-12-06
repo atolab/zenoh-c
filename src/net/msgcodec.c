@@ -75,7 +75,7 @@ z_hello_decode(z_iobuf_t *buf) {
 void 
 _zn_open_encode(z_iobuf_t* buf, const _zn_open_t* m) {
   z_iobuf_write(buf, m->version);  
-  z_array_uint8_encode(buf, &(m->pid));
+  z_uint8_array_encode(buf, &(m->pid));
   z_vle_encode(buf, m->lease);
   z_vle_encode(buf, 0); // no locators
   // TODO: Encode properties if present
@@ -86,10 +86,10 @@ _zn_accept_decode_na(z_iobuf_t* buf, _zn_accept_result_t *r) {
 
   r->tag = Z_OK_TAG;  
 
-  z_array_uint8_result_t r_cpid = z_array_uint8_decode(buf);
+  z_uint8_array_result_t r_cpid = z_uint8_array_decode(buf);
   ASSURE_P_RESULT(r_cpid, r, Z_ARRAY_PARSE_ERROR) 
 
-  z_array_uint8_result_t r_bpid = z_array_uint8_decode(buf);
+  z_uint8_array_result_t r_bpid = z_uint8_array_decode(buf);
   ASSURE_P_RESULT(r_bpid, r, Z_ARRAY_PARSE_ERROR)
 
   z_vle_result_t r_vle = z_vle_decode(buf);
@@ -97,8 +97,8 @@ _zn_accept_decode_na(z_iobuf_t* buf, _zn_accept_result_t *r) {
   
   // TODO: Decode Properties
 
-  r->value.accept.client_pid = r_cpid.value.array_uint8;
-  r->value.accept.broker_pid = r_bpid.value.array_uint8;
+  r->value.accept.client_pid = r_cpid.value.uint8_array;
+  r->value.accept.broker_pid = r_bpid.value.uint8_array;
   r->value.accept.lease = r_vle.value.vle;
 }
 
@@ -111,16 +111,16 @@ _zn_accept_decode(z_iobuf_t* buf) {
 
 void 
 _zn_close_encode(z_iobuf_t* buf, const _zn_close_t* m) { 
-  z_array_uint8_encode(buf, &(m->pid));
+  z_uint8_array_encode(buf, &(m->pid));
   z_iobuf_write(buf, m->reason);
 }
 
 void 
 _zn_close_decode_na(z_iobuf_t* buf, _zn_close_result_t *r) {   
   r->tag = Z_OK_TAG;
-  z_array_uint8_result_t ar =  z_array_uint8_decode(buf);
+  z_uint8_array_result_t ar =  z_uint8_array_decode(buf);
   ASSURE_P_RESULT(ar, r, Z_ARRAY_PARSE_ERROR)
-  r->value.close.pid = ar.value.array_uint8;
+  r->value.close.pid = ar.value.uint8_array;
   r->value.close.reason = z_iobuf_read(buf);  
 }
 
@@ -540,7 +540,7 @@ _zn_pull_encode(z_iobuf_t *buf, const _zn_pull_t* m) {
 
 void
 _zn_query_encode(z_iobuf_t *buf, const _zn_query_t* m) {
-  z_array_uint8_encode(buf, &(m->pid));
+  z_uint8_array_encode(buf, &(m->pid));
   z_vle_encode(buf, m->qid);
   z_string_encode(buf, m->rname);
   z_string_encode(buf, m->predicate);
@@ -549,9 +549,9 @@ _zn_query_encode(z_iobuf_t *buf, const _zn_query_t* m) {
 void _zn_query_decode_na(z_iobuf_t *buf, _zn_query_result_t *r) {
   r->tag = Z_OK_TAG;
 
-  z_array_uint8_result_t r_pid = z_array_uint8_decode(buf);
+  z_uint8_array_result_t r_pid = z_uint8_array_decode(buf);
   ASSURE_P_RESULT(r_pid, r, Z_ARRAY_PARSE_ERROR)
-  r->value.query.pid = r_pid.value.array_uint8;
+  r->value.query.pid = r_pid.value.uint8_array;
 
   z_vle_result_t r_qid = z_vle_decode(buf);
   ASSURE_P_RESULT(r_qid, r, Z_VLE_PARSE_ERROR)
@@ -575,11 +575,11 @@ _zn_query_decode(z_iobuf_t *buf) {
 
 void
 _zn_reply_encode(z_iobuf_t *buf, const _zn_reply_t* m, uint8_t header) {
-  z_array_uint8_encode(buf, &(m->qpid));
+  z_uint8_array_encode(buf, &(m->qpid));
   z_vle_encode(buf, m->qid);
 
   if(header & _ZN_F_FLAG) {
-    z_array_uint8_encode(buf, &(m->srcid));
+    z_uint8_array_encode(buf, &(m->srcid));
     z_vle_encode(buf, m->rsn);
     z_string_encode(buf, m->rname);
     z_vle_t len = z_iobuf_readable(&m->payload_header);
@@ -591,9 +591,9 @@ _zn_reply_encode(z_iobuf_t *buf, const _zn_reply_t* m, uint8_t header) {
 void _zn_reply_decode_na(z_iobuf_t *buf, uint8_t header, _zn_reply_result_t *r) {
   r->tag = Z_OK_TAG;
 
-  z_array_uint8_result_t r_qpid = z_array_uint8_decode(buf);
+  z_uint8_array_result_t r_qpid = z_uint8_array_decode(buf);
   ASSURE_P_RESULT(r_qpid, r, Z_ARRAY_PARSE_ERROR)
-  r->value.reply.qpid = r_qpid.value.array_uint8;
+  r->value.reply.qpid = r_qpid.value.uint8_array;
 
   z_vle_result_t r_qid = z_vle_decode(buf);
   ASSURE_P_RESULT(r_qid, r, Z_VLE_PARSE_ERROR)
@@ -601,9 +601,9 @@ void _zn_reply_decode_na(z_iobuf_t *buf, uint8_t header, _zn_reply_result_t *r) 
 
   if (header & _ZN_F_FLAG)
   {
-    z_array_uint8_result_t r_srcid = z_array_uint8_decode(buf);
+    z_uint8_array_result_t r_srcid = z_uint8_array_decode(buf);
     ASSURE_P_RESULT(r_srcid, r, Z_ARRAY_PARSE_ERROR)
-    r->value.reply.srcid = r_srcid.value.array_uint8;
+    r->value.reply.srcid = r_srcid.value.uint8_array;
 
     z_vle_result_t r_vle = z_vle_decode(buf);
     ASSURE_P_RESULT(r_vle, r, Z_VLE_PARSE_ERROR)

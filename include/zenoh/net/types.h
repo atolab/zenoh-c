@@ -92,9 +92,9 @@ typedef struct {
   void *context;
 } zn_resource_t;
 
-ZN_ARRAY_P_DECLARE_ZN_TYPE(resource_t)
+ZN_ARRAY_P_DECLARE(resource)
 
-typedef void (*zn_replies_sender_t)(void* query_handle, zn_array_p_resource_t replies);
+typedef void (*zn_replies_sender_t)(void* query_handle, zn_resource_p_array_t replies);
 typedef void (*zn_query_handler_t)(const char *rname, const char *predicate, zn_replies_sender_t send_replies, void *query_handle, void *arg);
 typedef void (*zn_on_disconnect_t)(void *z);
 
@@ -106,8 +106,8 @@ typedef struct {
   z_vle_t eid;
   z_iobuf_t wbuf;
   z_iobuf_t rbuf;
-  z_array_uint8_t pid;
-  z_array_uint8_t peer_pid;
+  z_uint8_array_t pid;
+  z_uint8_array_t peer_pid;
   z_vle_t qid;
   char *locator;
   zn_on_disconnect_t on_disconnect;

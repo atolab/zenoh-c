@@ -3,79 +3,77 @@
 
 #define DEFAULT_I_MAP_CAPACITY 64
 
-#define Z_ARRAY_DECLARE(T) \
+#define ARRAY_DECLARE(type, name, prefix) \
 typedef struct { \
   unsigned int length; \
-  T* elem; \
-} z_array_##T;
+  type* elem; \
+} prefix##name##_array_t;
+#define Z_ARRAY_DECLARE(name) ARRAY_DECLARE(z_##name##_t, name, z_)
+#define _Z_ARRAY_DECLARE(name) ARRAY_DECLARE(_z_##name##_t, name, _z_)
 
-#define Z_ARRAY_P_DECLARE(T) \
+#define ARRAY_P_DECLARE(type, name, prefix) \
 typedef struct { \
   unsigned int length; \
-  T** elem; \
-} z_array_p_##T;
+  type** elem; \
+} prefix##name##_p_array_t;
+#define Z_ARRAY_P_DECLARE(name) ARRAY_P_DECLARE(z_##name##_t, name, z_)
+#define _Z_ARRAY_P_DECLARE(name) ARRAY_P_DECLARE(_z_##name##_t, name, _z_)
 
-#define Z_ARRAY_DECLARE_Z_TYPE(T) \
-typedef struct { \
-  unsigned int length; \
-  z_##T* elem; \
-} z_array_##T;
+#define ARRAY_S_DEFINE(type, name, prefix, arr, len) \
+prefix##name##_array_t arr = {len, (type*)malloc(len*sizeof(type))};
+#define Z_ARRAY_S_DEFINE(name, arr, len) ARRAY_S_DEFINE(z_##name##_t, name, z_, arr, len)
+#define _Z_ARRAY_S_DEFINE(name, arr, len) ARRAY_S_DEFINE(_z_##name##_t, name, _z_, arr, len)
 
-#define Z_ARRAY_P_DECLARE_Z_TYPE(T) \
-typedef struct { \
-  unsigned int length; \
-  z_##T** elem; \
-} z_array_p_##T;
+#define ARRAY_P_S_DEFINE(type, name, prefix, arr, len) \
+prefix##name##_array_t arr = {len, (type**)malloc(len*sizeof(type*))};
+#define Z_ARRAY_P_S_DEFINE(name, arr, len) ARRAY_P_S_DEFINE(z_##name##_t, name, z_, arr, len)
+#define _Z_ARRAY_P_S_DEFINE(name, arr, len) ARRAY_P_S_DEFINE(_z_##name##_t, name, _z_, arr, len)
 
-#define Z_ARRAY_S_DEFINE(T, arr, len) \
-z_array_##T arr = {len, (T*)malloc(len*sizeof(T))};
-
-#define Z_ARRAY_P_S_DEFINE(T, arr, len) \
-z_array_p_##T arr = {len, (T**)malloc(len*sizeof(T*))};
-
-#define Z_ARRAY_S_INIT(T, arr, len) \
-arr.length = len; \
-arr.elem =  (T*)malloc(len*sizeof(T));
-
-#define Z_ARRAY_P_S_INIT(T, arr, len) \
-arr.length = len; \
-arr.elem =  (T**)malloc(len*sizeof(T*));
-
-#define Z_ARRAY_H_INIT(T, arr, len) \
-arr->length = len; \
-arr->elem =  (T*)malloc(len*sizeof(T))
-
-#define Z_ARRAY_S_COPY(T, dst, src) \
-dst.length = src.length; \
-dst.elem = (T*)malloc(dst.length*sizeof(T)); \
-memcpy(dst.elem, src.elem, dst.length);
-
-#define Z_ARRAY_H_COPY(T, dst, src) \
-dst->length = src->length; \
-dst->elem =  (T*)malloc(dst->length*sizeof(T)); \
-memcpy(dst->elem, src->elem, dst->length);
-
-#define Z_ARRAY_S_Z_TYPE_DEFINE(T, arr, len) \
-z_array_##T arr = {len, (z_##T*)malloc(len*sizeof(z_##T))};
-
-
-#define Z_ARRAY_H_DEFINE(T, arr, len) \
+#define ARRAY_H_DEFINE(T, arr, len) \
 z_array_##T * arr = (z_array_##T*)malloc(sizeof(z_array_##T)); \
 arr->length = len; \
 arr->elem = (T*)malloc(len*sizeof(T));
+#define Z_ARRAY_H_DEFINE(name, arr, len) ARRAY_H_DEFINE(z_##name##_t, name, z_, arr, len)
+#define _Z_ARRAY_H_DEFINE(name, arr, len) ARRAY_H_DEFINE(_z_##name##_t, name, _z_, arr, len)
 
-#define Z_ARRAY_H_Z_TYPE_DEFINE(T, arr, len) \
-z_array_##T * arr = (z_array_##T*)malloc(sizeof(z_array_##T)); \
+#define ARRAY_S_INIT(T, arr, len) \
+arr.length = len; \
+arr.elem =  (T*)malloc(len*sizeof(T));
+#define Z_ARRAY_S_INIT(name, arr, len) ARRAY_S_INIT(z_##name##_t, arr, len)
+#define _Z_ARRAY_S_INIT(name, arr, len) ARRAY_S_INIT(_z_##name##_t, arr, len)
+
+#define ARRAY_P_S_INIT(T, arr, len) \
+arr.length = len; \
+arr.elem =  (T**)malloc(len*sizeof(T*));
+#define Z_ARRAY_P_S_INIT(name, arr, len) ARRAY_P_S_INIT(z_##name##_t, arr, len)
+#define _Z_ARRAY_P_S_INIT(name, arr, len) ARRAY_P_S_INIT(_z_##name##_t, arr, len)
+
+#define ARRAY_H_INIT(T, arr, len) \
 arr->length = len; \
-arr->elem = (z_##T*)malloc(len*sizeof(z_##T));
+arr->elem =  (T*)malloc(len*sizeof(T))
+#define Z_ARRAY_H_INIT(name, arr, len) ARRAY_H_INIT(z_##name##_t, arr, len)
+#define _Z_ARRAY_H_INIT(name, arr, len) ARRAY_H_INIT(_z_##name##_t, arr, len)
 
+#define ARRAY_S_COPY(T, dst, src) \
+dst.length = src.length; \
+dst.elem = (T*)malloc(dst.length*sizeof(T)); \
+memcpy(dst.elem, src.elem, dst.length);
+#define Z_ARRAY_S_COPY(name, dst, src) ARRAY_S_COPY(z_##name##_t, dst, src)
+#define _Z_ARRAY_S_COPY(name, dst, src) ARRAY_S_COPY(_z_##name##_t, dst, src)
 
-#define Z_ARRAY_S_FREE(arr) \
+#define ARRAY_H_COPY(T, dst, src) \
+dst->length = src->length; \
+dst->elem =  (T*)malloc(dst->length*sizeof(T)); \
+memcpy(dst->elem, src->elem, dst->length);
+#define Z_ARRAY_H_COPY(name, dst, src) ARRAY_H_COPY(z_##name##_t, dst, src)
+#define _Z_ARRAY_H_COPY(name, dst, src) ARRAY_H_COPY(_z_##name##_t, dst, src)
+
+#define ARRAY_S_FREE(arr) \
 free(arr.elem); \
 arr.elem = 0; \
 arr.length = 0;
 
-#define Z_ARRAY_H_FREE(arr) \
+#define ARRAY_H_FREE(arr) \
 free(arr->elem); \
 arr->elem = 0; \
 arr->length = 0

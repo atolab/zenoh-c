@@ -31,24 +31,24 @@ z_vle_decode(z_iobuf_t* buf) {
 } 
 
 void 
-z_array_uint8_encode(z_iobuf_t* buf, const z_array_uint8_t* bs) {
+z_uint8_array_encode(z_iobuf_t* buf, const z_uint8_array_t* bs) {
   z_vle_encode(buf, bs->length);
   z_iobuf_write_slice(buf, bs->elem, 0,  bs->length);
 }
 
 void
-z_array_uint8_decode_na(z_iobuf_t* buf, z_array_uint8_result_t *r) {  
+z_uint8_array_decode_na(z_iobuf_t* buf, z_uint8_array_result_t *r) {  
   r->tag = Z_OK_TAG;
   z_vle_result_t r_vle = z_vle_decode(buf);
   ASSURE_P_RESULT(r_vle, r, Z_VLE_PARSE_ERROR)
-  r->value.array_uint8.length = (unsigned int)r_vle.value.vle;  
-  r->value.array_uint8.elem = z_iobuf_read_n(buf, r->value.array_uint8.length); 
+  r->value.uint8_array.length = (unsigned int)r_vle.value.vle;  
+  r->value.uint8_array.elem = z_iobuf_read_n(buf, r->value.uint8_array.length); 
 }
 
-z_array_uint8_result_t 
-z_array_uint8_decode(z_iobuf_t* buf) {  
-  z_array_uint8_result_t r;
-  z_array_uint8_decode_na(buf, &r);
+z_uint8_array_result_t 
+z_uint8_array_decode(z_iobuf_t* buf) {  
+  z_uint8_array_result_t r;
+  z_uint8_array_decode_na(buf, &r);
   return r;  
 }
 

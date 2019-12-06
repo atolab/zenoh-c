@@ -12,12 +12,12 @@ void z_do_nothing() { }
 typedef struct {
   zn_session_t *z;
   z_vle_t qid;
-  z_array_uint8_t qpid;
+  z_uint8_array_t qpid;
   atomic_int nb_qhandlers;
   atomic_flag sent_final;
 } query_handle_t;
 
-void send_replies(void* query_handle, zn_array_p_resource_t replies, uint8_t eval_flag){
+void send_replies(void* query_handle, zn_resource_p_array_t replies, uint8_t eval_flag){
     unsigned int i;
     int rsn = 0;
     query_handle_t *handle = (query_handle_t*)query_handle;
@@ -80,11 +80,11 @@ void send_replies(void* query_handle, zn_array_p_resource_t replies, uint8_t eva
     }
 }
 
-void send_eval_replies(void* query_handle, zn_array_p_resource_t replies){
+void send_eval_replies(void* query_handle, zn_resource_p_array_t replies){
     send_replies(query_handle, replies, _ZN_E_FLAG);
 }
 
-void send_storage_replies(void* query_handle, zn_array_p_resource_t replies){
+void send_storage_replies(void* query_handle, zn_resource_p_array_t replies){
     send_replies(query_handle, replies, 0);
 }
 

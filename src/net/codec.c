@@ -6,19 +6,19 @@
 
 void zn_property_encode(z_iobuf_t* buf, const zn_property_t* m) {
   z_vle_encode(buf, m->id);
-  z_array_uint8_encode(buf, &m->value);
+  z_uint8_array_encode(buf, &m->value);
 }
 
 void zn_property_decode_na(z_iobuf_t* buf, zn_property_result_t *r) {
   z_vle_result_t r_vle;
-  z_array_uint8_result_t r_a8;
+  z_uint8_array_result_t r_a8;
   r->tag = Z_OK_TAG;
   r_vle = z_vle_decode(buf);
   ASSURE_P_RESULT(r_vle, r, Z_VLE_PARSE_ERROR);
-  r_a8 = z_array_uint8_decode(buf);
+  r_a8 = z_uint8_array_decode(buf);
   ASSURE_P_RESULT(r_a8, r, Z_ARRAY_PARSE_ERROR);
   r->value.property.id = r_vle.value.vle;
-  r->value.property.value = r_a8.value.array_uint8;
+  r->value.property.value = r_a8.value.uint8_array;
 }
 zn_property_result_t zn_property_decode(z_iobuf_t* buf) {
   zn_property_result_t r;

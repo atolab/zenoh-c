@@ -42,7 +42,7 @@ void data_handler(const zn_resource_id_t *rid, const unsigned char *data, size_t
 void query_handler(const char *rname, const char *predicate, zn_replies_sender_t send_replies, void *query_handle, void *arg) {
   Z_UNUSED_ARG(arg);
   printf(">> [Query handler   ] Handling '%s?%s'\n", rname, predicate);
-  zn_array_p_resource_t replies;
+  zn_resource_p_array_t replies;
   z_list_t *matching_samples = 0;
 
   z_list_t *samples = stored;

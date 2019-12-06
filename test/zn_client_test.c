@@ -78,7 +78,7 @@ void z1_sto1_handler(const char *rname, const char *predicate, zn_replies_sender
 
   zn_resource_t *p_resource = &resource;
 
-  zn_array_p_resource_t replies;
+  zn_resource_p_array_t replies;
   replies.length = 1;
   replies.elem = &p_resource;
 
@@ -96,7 +96,7 @@ void z2_sto1_handler(const char *rname, const char *predicate, zn_replies_sender
 
   zn_resource_t *p_resource = &resource;
 
-  zn_array_p_resource_t replies;
+  zn_resource_p_array_t replies;
   replies.length = 1;
   replies.elem = &p_resource;
 
@@ -115,7 +115,7 @@ void z1_eval1_handler(const char *rname, const char *predicate, zn_replies_sende
 
   zn_resource_t *p_resource = &resource;
 
-  zn_array_p_resource_t replies;
+  zn_resource_p_array_t replies;
   replies.length = 1;
   replies.elem = &p_resource;
 
@@ -134,7 +134,7 @@ void z2_eval1_handler(const char *rname, const char *predicate, zn_replies_sende
 
   zn_resource_t *p_resource = &resource;
 
-  zn_array_p_resource_t replies;
+  zn_resource_p_array_t replies;
   replies.length = 1;
   replies.elem = &p_resource;
 

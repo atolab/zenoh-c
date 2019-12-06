@@ -9,8 +9,8 @@
 typedef  size_t  z_vle_t;
 Z_RESULT_DECLARE (z_vle_t, vle)
 
-Z_ARRAY_DECLARE(uint8_t)
-Z_RESULT_DECLARE (z_array_uint8_t, array_uint8)
+ARRAY_DECLARE(uint8_t, uint8, z_)
+Z_RESULT_DECLARE (z_uint8_array_t, uint8_array)
 
 typedef struct {
   unsigned int r_pos;
@@ -35,7 +35,7 @@ uint8_t* z_iobuf_read_to_n(z_iobuf_t* buf, unsigned char* dest, unsigned int len
 void z_iobuf_put(z_iobuf_t* buf, unsigned char b, unsigned int pos);
 uint8_t z_iobuf_get(z_iobuf_t* buf, unsigned int pos);
 void z_iobuf_clear(z_iobuf_t *buf);
-z_array_uint8_t z_iobuf_to_array(z_iobuf_t* buf);
+z_uint8_array_t z_iobuf_to_array(z_iobuf_t* buf);
 void z_iobuf_compact(z_iobuf_t *buf);
 
 #endif /* ZENOH_C_IOBUF_H_ */

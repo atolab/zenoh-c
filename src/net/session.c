@@ -116,7 +116,7 @@ zn_open(char* locator, zn_on_disconnect_t on_disconnect, const z_vec_t* ps) {
   
   r.tag = Z_OK_TAG;
 
-  Z_ARRAY_S_DEFINE(uint8_t, pid, ZENOH_NET_PID_LENGTH);   
+  ARRAY_S_DEFINE(uint8_t, uint8, z_, pid, ZENOH_NET_PID_LENGTH);   
   for (int i = 0; i < ZENOH_NET_PID_LENGTH; ++i) 
     pid.elem[i] = rand() % 255;
 
@@ -152,7 +152,7 @@ zn_open(char* locator, zn_on_disconnect_t on_disconnect, const z_vec_t* ps) {
   r.value.session->rbuf = rbuf;
   r.value.session->wbuf = wbuf;
   r.value.session->pid = pid;
-  Z_ARRAY_S_COPY(uint8_t, r.value.session->peer_pid, r_msg.value.message->payload.accept.broker_pid);
+  ARRAY_S_COPY(uint8_t, r.value.session->peer_pid, r_msg.value.message->payload.accept.broker_pid);
   r.value.session->qid = 0;
   r.value.session->locator = strdup(locator);
   r.value.session->on_disconnect = on_disconnect != 0 ? on_disconnect : &default_on_disconnect;
@@ -173,7 +173,7 @@ zn_open(char* locator, zn_on_disconnect_t on_disconnect, const z_vec_t* ps) {
 z_vec_t zn_info(zn_session_t *z) {
   z_vec_t res = z_vec_make(3);
   zn_property_t *pid = zn_property_make(ZN_INFO_PID_KEY, z->pid);
-  z_array_uint8_t locator;
+  z_uint8_array_t locator;
   locator.length = strlen(z->locator) + 1;
   locator.elem = (uint8_t *)z->locator;
   zn_property_t *peer = zn_property_make(ZN_INFO_PEER_KEY, locator);
@@ -212,7 +212,7 @@ zn_declare_subscriber(zn_session_t *z, const char *resource,  const zn_sub_mode_
   msg.header = _ZN_DECLARE;
   msg.payload.declare.sn = z->sn++;
   int dnum = 3;
-  Z_ARRAY_S_DEFINE(_zn_declaration_t, decl, dnum)
+  _ZN_ARRAY_S_DEFINE(declaration, decl, dnum)
   
   int rid = _zn_get_resource_id(z, resource);
   r.value.sub->rid = rid;
@@ -235,7 +235,7 @@ zn_declare_subscriber(zn_session_t *z, const char *resource,  const zn_sub_mode_
       z->on_disconnect(z);
       _zn_send_msg(z->sock, &z->wbuf, &msg);
   } 
-  Z_ARRAY_S_FREE(decl);
+  ARRAY_S_FREE(decl);
   _zn_register_res_decl(z, rid, resource);
   _zn_register_subscription(z, rid, id, data_handler, arg);
   // -- This will be refactored to use mvars
@@ -250,7 +250,7 @@ int zn_undeclare_subscriber(zn_sub_t *sub) {
     msg.header = _ZN_DECLARE;
     msg.payload.declare.sn = sub->z->sn++;
     int dnum = 2;
-    Z_ARRAY_S_DEFINE(_zn_declaration_t, decl, dnum)
+    _ZN_ARRAY_S_DEFINE(declaration, decl, dnum)
     
     decl.elem[0].header = _ZN_FORGET_SUBSCRIBER_DECL;
     decl.elem[0].payload.forget_sub.rid = sub->rid;
@@ -265,7 +265,7 @@ int zn_undeclare_subscriber(zn_sub_t *sub) {
         sub->z->on_disconnect(sub->z);
         _zn_send_msg(sub->z->sock, &sub->z->wbuf, &msg);
     } 
-    Z_ARRAY_S_FREE(decl);
+    ARRAY_S_FREE(decl);
   }
   z_list_free(&subs);
   // TODO free subscription
@@ -285,7 +285,7 @@ zn_declare_storage(zn_session_t *z, const char *resource, zn_data_handler_t data
   msg.header = _ZN_DECLARE;
   msg.payload.declare.sn = z->sn++;
   int dnum = 3;
-  Z_ARRAY_S_DEFINE(_zn_declaration_t, decl, dnum)
+  _ZN_ARRAY_S_DEFINE(declaration, decl, dnum)
   
   int rid = _zn_get_resource_id(z, resource);
   r.value.sto->rid = rid;
@@ -306,7 +306,7 @@ zn_declare_storage(zn_session_t *z, const char *resource, zn_data_handler_t data
       z->on_disconnect(z);
       _zn_send_msg(z->sock, &z->wbuf, &msg);
   } 
-  Z_ARRAY_S_FREE(decl);
+  ARRAY_S_FREE(decl);
   _zn_register_res_decl(z, rid, resource);
   _zn_register_storage(z, rid, id, data_handler, query_handler, arg);
   // -- This will be refactored to use mvars
@@ -321,7 +321,7 @@ int zn_undeclare_storage(zn_sto_t *sto) {
     msg.header = _ZN_DECLARE;
     msg.payload.declare.sn = sto->z->sn++;
     int dnum = 2;
-    Z_ARRAY_S_DEFINE(_zn_declaration_t, decl, dnum)
+    _ZN_ARRAY_S_DEFINE(declaration, decl, dnum)
     
     decl.elem[0].header = _ZN_FORGET_STORAGE_DECL;
     decl.elem[0].payload.forget_sto.rid = sto->rid;
@@ -336,7 +336,7 @@ int zn_undeclare_storage(zn_sto_t *sto) {
         sto->z->on_disconnect(sto->z);
         _zn_send_msg(sto->z->sock, &sto->z->wbuf, &msg);
     } 
-    Z_ARRAY_S_FREE(decl);
+    ARRAY_S_FREE(decl);
   }
   z_list_free(&stos);
   // TODO free storages
@@ -356,7 +356,7 @@ zn_declare_eval(zn_session_t *z, const char *resource, zn_query_handler_t query_
   msg.header = _ZN_DECLARE;
   msg.payload.declare.sn = z->sn++;
   int dnum = 3;
-  Z_ARRAY_S_DEFINE(_zn_declaration_t, decl, dnum)
+  _ZN_ARRAY_S_DEFINE(declaration, decl, dnum)
   
   int rid = _zn_get_resource_id(z, resource);
   r.value.eval->rid = rid;
@@ -377,7 +377,7 @@ zn_declare_eval(zn_session_t *z, const char *resource, zn_query_handler_t query_
       z->on_disconnect(z);
       _zn_send_msg(z->sock, &z->wbuf, &msg);
   } 
-  Z_ARRAY_S_FREE(decl);
+  ARRAY_S_FREE(decl);
   _zn_register_res_decl(z, rid, resource);
   _zn_register_eval(z, rid, id, query_handler, arg);
   // -- This will be refactored to use mvars
@@ -392,7 +392,7 @@ int zn_undeclare_eval(zn_eva_t *eval) {
     msg.header = _ZN_DECLARE;
     msg.payload.declare.sn = eval->z->sn++;
     int dnum = 2;
-    Z_ARRAY_S_DEFINE(_zn_declaration_t, decl, dnum)
+    _ZN_ARRAY_S_DEFINE(declaration, decl, dnum)
     
     decl.elem[0].header = _ZN_FORGET_EVAL_DECL;
     decl.elem[0].payload.forget_eval.rid = eval->rid;
@@ -407,7 +407,7 @@ int zn_undeclare_eval(zn_eva_t *eval) {
         eval->z->on_disconnect(eval->z);
         _zn_send_msg(eval->z->sock, &eval->z->wbuf, &msg);
     } 
-    Z_ARRAY_S_FREE(decl);
+    ARRAY_S_FREE(decl);
   }
   z_list_free(&evals);
   // TODO free evals
@@ -426,7 +426,7 @@ zn_declare_publisher(zn_session_t *z, const char *resource) {
   msg.header = _ZN_DECLARE;
   msg.payload.declare.sn = z->sn++;
   int dnum = 3;
-  Z_ARRAY_S_DEFINE(_zn_declaration_t, decl, dnum)
+  _ZN_ARRAY_S_DEFINE(declaration, decl, dnum)
     
   int rid = _zn_get_resource_id(z, resource);
   r.value.pub->rid = rid;
@@ -447,7 +447,7 @@ zn_declare_publisher(zn_session_t *z, const char *resource) {
       z->on_disconnect(z);
       _zn_send_msg(z->sock, &z->wbuf, &msg);
   }
-  Z_ARRAY_S_FREE(decl);
+  ARRAY_S_FREE(decl);
   _zn_register_res_decl(z, rid, resource);
   // -- This will be refactored to use mvars
   return r;  
@@ -458,7 +458,7 @@ int zn_undeclare_publisher(zn_pub_t *pub) {
   msg.header = _ZN_DECLARE;
   msg.payload.declare.sn = pub->z->sn++;
   int dnum = 2;
-  Z_ARRAY_S_DEFINE(_zn_declaration_t, decl, dnum)
+  _ZN_ARRAY_S_DEFINE(declaration, decl, dnum)
   
   decl.elem[0].header = _ZN_FORGET_PUBLISHER_DECL;
   decl.elem[0].payload.forget_pub.rid = pub->rid;
@@ -473,7 +473,7 @@ int zn_undeclare_publisher(zn_pub_t *pub) {
       pub->z->on_disconnect(pub->z);
       _zn_send_msg(pub->z->sock, &pub->z->wbuf, &msg);
   } 
-  Z_ARRAY_S_FREE(decl);
+  ARRAY_S_FREE(decl);
 
   // TODO manage multi publishers
   return 0;
@@ -706,7 +706,7 @@ typedef struct {
   atomic_flag sent_final;
 } local_query_handle_t;
 
-void send_local_replies(void* query_handle, zn_array_p_resource_t replies, char eval){
+void send_local_replies(void* query_handle, zn_resource_p_array_t replies, char eval){
   unsigned int i;
   zn_reply_value_t rep;
   local_query_handle_t *handle = (local_query_handle_t*)query_handle;
@@ -772,11 +772,11 @@ void send_local_replies(void* query_handle, zn_array_p_resource_t replies, char 
   }
 }
 
-void send_local_storage_replies(void* query_handle, zn_array_p_resource_t replies){
+void send_local_storage_replies(void* query_handle, zn_resource_p_array_t replies){
   send_local_replies(query_handle, replies, 0);
 }
 
-void send_local_eval_replies(void* query_handle, zn_array_p_resource_t replies){
+void send_local_eval_replies(void* query_handle, zn_resource_p_array_t replies){
   send_local_replies(query_handle, replies, 1);
 }
 

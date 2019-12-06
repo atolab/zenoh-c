@@ -117,21 +117,21 @@ typedef struct {
 /*------------------ Open Message ------------------*/
 typedef struct {  
   uint8_t version;  
-  z_array_uint8_t pid; 
+  z_uint8_array_t pid; 
   z_vle_t lease;    
   // z_vec_t *locators; 
 } _zn_open_t;
 
 /*------------------ Accept Message ------------------*/
 typedef struct {    
-  z_array_uint8_t client_pid;
-  z_array_uint8_t broker_pid; 
+  z_uint8_array_t client_pid;
+  z_uint8_array_t broker_pid; 
   z_vle_t lease;   
 } _zn_accept_t;
 
 /*------------------ Close Message ------------------*/
 typedef struct {  
-  z_array_uint8_t pid;
+  z_uint8_array_t pid;
   uint8_t reason;
 } _zn_close_t; 
 
@@ -214,12 +214,12 @@ typedef struct {
   uint8_t header; 
 } _zn_declaration_t;
 
-Z_ARRAY_DECLARE(_zn_declaration_t)
+_ZN_ARRAY_DECLARE(declaration)
 
 /*------------------ Declare Messages ------------------*/
 typedef struct  {  
   z_vle_t sn;
-  z_array__zn_declaration_t declarations;
+  _zn_declaration_array_t declarations;
 } _zn_declare_t;
 
 
@@ -267,7 +267,7 @@ typedef struct {
 
 /*------------------ Query Message ------------------*/
 typedef struct {
-  z_array_uint8_t pid; 
+  z_uint8_array_t pid; 
   z_vle_t qid;
   char* rname;
   char* predicate;
@@ -275,9 +275,9 @@ typedef struct {
 
 /*------------------ Reply Message ------------------*/
 typedef struct {
-  z_array_uint8_t qpid; 
+  z_uint8_array_t qpid; 
   z_vle_t qid;
-  z_array_uint8_t srcid;
+  z_uint8_array_t srcid;
   z_vle_t rsn;
   char* rname;
   z_iobuf_t payload_header;

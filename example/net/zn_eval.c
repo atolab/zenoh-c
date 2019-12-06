@@ -13,7 +13,7 @@ void query_handler(const char *rname, const char *predicate, zn_replies_sender_t
   resource.encoding = 0;
   resource.kind = 0;
   zn_resource_t *p_resource = &resource;
-  zn_array_p_resource_t replies = {1, &p_resource};
+  zn_resource_p_array_t replies = {1, &p_resource};
 
   send_replies(query_handle, replies);
 }
