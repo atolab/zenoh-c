@@ -3,14 +3,8 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include "zenoh/types.h"
 #include "zenoh/collection.h"
-#include "zenoh/result.h"
-
-typedef  size_t  z_vle_t;
-Z_RESULT_DECLARE (z_vle_t, vle)
-
-ARRAY_DECLARE(uint8_t, uint8, z_)
-Z_RESULT_DECLARE (z_uint8_array_t, uint8_array)
 
 typedef struct {
   unsigned int r_pos;

@@ -1,12 +1,9 @@
 #ifndef ZENOH_C_NET_TYPES_H_
 #define ZENOH_C_NET_TYPES_H_
 
-#include <stdlib.h>
-#include <stdint.h>
 #include <string.h>
 #include "zenoh/iobuf.h"
 #include "zenoh/mvar.h"
-#include "zenoh/net/types.h"
 #include "zenoh/net/result.h"
 #include "zenoh/net/collection.h"
 #include "zenoh/net/config.h"
@@ -45,11 +42,6 @@ typedef struct {
   zn_temporal_property_t tprop;
 } zn_sub_mode_t;
 ZN_RESULT_DECLARE (zn_sub_mode_t, sub_mode)
-
-typedef struct {
-  uint8_t clock_id[16];
-  z_vle_t time;
-} z_timestamp_t;
 
 typedef struct {
   unsigned int flags;  
