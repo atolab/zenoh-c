@@ -4,15 +4,15 @@
 
 #define MAX_LEN 256
 
-void data_handler(const zn_resource_id_t *rid, const unsigned char *data, size_t length, const zn_data_info_t *info, void *arg) {
+void data_handler(const zn_resource_key_t *rkey, const unsigned char *data, size_t length, const zn_data_info_t *info, void *arg) {
   Z_UNUSED_ARG_2(info, arg);
   char str[MAX_LEN];
   memcpy(&str, data, length < MAX_LEN ? length : MAX_LEN - 1);
   str[length < MAX_LEN ? length : MAX_LEN - 1] = 0;
-  if (rid->kind == ZN_INT_RES_ID) 
-    printf(">> [Subscription listener] Received (#%zu: '%s')\n", rid->id.rid, str);
+  if (rkey->kind == ZN_INT_RES_KEY) 
+    printf(">> [Subscription listener] Received (#%zu: '%s')\n", rkey->key.rid, str);
   else
-    printf(">> [Subscription listener] Received ('%s': '%s')\n", rid->id.rname, str);
+    printf(">> [Subscription listener] Received ('%s': '%s')\n", rkey->key.rname, str);
 }
 
 int main(int argc, char **argv) {

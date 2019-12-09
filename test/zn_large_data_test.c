@@ -20,18 +20,18 @@ z_mvar_t *sto_mvar = 0;
 resource rep_last_res;
 z_mvar_t *rep_mvar = 0;
 
-void sub_listener(const zn_resource_id_t *rid, const unsigned char *data, size_t length, const zn_data_info_t *info, void *arg) {    
+void sub_listener(const zn_resource_key_t *rkey, const unsigned char *data, size_t length, const zn_data_info_t *info, void *arg) {    
   Z_UNUSED_ARG_2(info, arg);
-  sub_last_res.name = strdup(rid->id.rname);
+  sub_last_res.name = strdup(rkey->key.rname);
   sub_last_res.data = malloc(length);
   memcpy(sub_last_res.data, data, length);
   sub_last_res.length = length;
   z_mvar_put(sub_mvar, &sub_last_res);
 }
 
-void sto_listener(const zn_resource_id_t *rid, const unsigned char *data, size_t length, const zn_data_info_t *info, void *arg) {    
+void sto_listener(const zn_resource_key_t *rkey, const unsigned char *data, size_t length, const zn_data_info_t *info, void *arg) {    
   Z_UNUSED_ARG_2(info, arg);
-  sto_last_res.name = strdup(rid->id.rname);
+  sto_last_res.name = strdup(rkey->key.rname);
   sto_last_res.data = malloc(length);
   memcpy(sto_last_res.data, data, length);
   sto_last_res.length = length;

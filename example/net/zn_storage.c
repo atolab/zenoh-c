@@ -22,16 +22,16 @@ int remove_data(void *elem, void*args){
   return 0;
 }
 
-void data_handler(const zn_resource_id_t *rid, const unsigned char *data, size_t length, const zn_data_info_t *info, void *arg) {    
+void data_handler(const zn_resource_key_t *rkey, const unsigned char *data, size_t length, const zn_data_info_t *info, void *arg) {    
   Z_UNUSED_ARG_2(info, arg);
   char str[MAX_LEN];
   memcpy(&str, data, length < MAX_LEN ? length : MAX_LEN - 1);
   str[length < MAX_LEN ? length : MAX_LEN - 1] = 0;
-  printf(">> [Storage listener] Received ('%20s' : '%s')\n", rid->id.rname, str);
-  stored = z_list_remove(stored, remove_data, rid->id.rname);
+  printf(">> [Storage listener] Received ('%20s' : '%s')\n", rkey->key.rname, str);
+  stored = z_list_remove(stored, remove_data, rkey->key.rname);
 
   sample_t *sample = (sample_t *)malloc(sizeof(sample_t));
-  sample->rname = strdup(rid->id.rname);
+  sample->rname = strdup(rkey->key.rname);
   sample->data = malloc(length);
   memcpy(sample->data, data, length);
   sample->length = length;

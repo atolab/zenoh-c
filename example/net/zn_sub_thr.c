@@ -16,7 +16,7 @@ void print_stats(volatile struct timeval *start, volatile struct timeval *stop) 
   printf("%f msgs/sec\n", thpt);
 }
 
-void data_handler(const zn_resource_id_t *rid, const unsigned char *data, size_t length, const zn_data_info_t *info, void *arg) {      
+void data_handler(const zn_resource_key_t *rid, const unsigned char *data, size_t length, const zn_data_info_t *info, void *arg) {      
   Z_UNUSED_ARG_5(rid, data, length, info, arg);
   
   struct timeval tv;

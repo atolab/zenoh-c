@@ -32,37 +32,37 @@ z_mvar_t *storage_replies_mvar = 0;
 z_list_t *eval_replies = 0;
 z_mvar_t *eval_replies_mvar = 0;
 
-void z1_sub1_listener(const zn_resource_id_t *rid, const unsigned char *data, size_t length, const zn_data_info_t *info, void *arg) {    
+void z1_sub1_listener(const zn_resource_key_t *rkey, const unsigned char *data, size_t length, const zn_data_info_t *info, void *arg) {    
   Z_UNUSED_ARG_3(length, info, arg);
-  z1_sub1_last_res.name = strdup(rid->id.rname);
+  z1_sub1_last_res.name = strdup(rkey->key.rname);
   z1_sub1_last_res.data = *data;
   z_mvar_put(z1_sub1_mvar, &z1_sub1_last_res);
 }
 
-void z2_sub1_listener(const zn_resource_id_t *rid, const unsigned char *data, size_t length, const zn_data_info_t *info, void *arg) {    
+void z2_sub1_listener(const zn_resource_key_t *rkey, const unsigned char *data, size_t length, const zn_data_info_t *info, void *arg) {    
   Z_UNUSED_ARG_3(length, info, arg);
-  z2_sub1_last_res.name = strdup(rid->id.rname);
+  z2_sub1_last_res.name = strdup(rkey->key.rname);
   z2_sub1_last_res.data = *data;
   z_mvar_put(z2_sub1_mvar, &z2_sub1_last_res);
 }
 
-void z3_sub1_listener(const zn_resource_id_t *rid, const unsigned char *data, size_t length, const zn_data_info_t *info, void *arg) {    
+void z3_sub1_listener(const zn_resource_key_t *rkey, const unsigned char *data, size_t length, const zn_data_info_t *info, void *arg) {    
   Z_UNUSED_ARG_3(length, info, arg);
-  z3_sub1_last_res.name = strdup(rid->id.rname);
+  z3_sub1_last_res.name = strdup(rkey->key.rname);
   z3_sub1_last_res.data = *data;
   z_mvar_put(z3_sub1_mvar, &z3_sub1_last_res);
 }
 
-void z1_sto1_listener(const zn_resource_id_t *rid, const unsigned char *data, size_t length, const zn_data_info_t *info, void *arg) {    
+void z1_sto1_listener(const zn_resource_key_t *rkey, const unsigned char *data, size_t length, const zn_data_info_t *info, void *arg) {    
   Z_UNUSED_ARG_3(length, info, arg);
-  z1_sto1_last_res.name = strdup(rid->id.rname);
+  z1_sto1_last_res.name = strdup(rkey->key.rname);
   z1_sto1_last_res.data = *data;
   z_mvar_put(z1_sto1_mvar, &z1_sto1_last_res);
 }
 
-void z2_sto1_listener(const zn_resource_id_t *rid, const unsigned char *data, size_t length, const zn_data_info_t *info, void *arg) {    
+void z2_sto1_listener(const zn_resource_key_t *rkey, const unsigned char *data, size_t length, const zn_data_info_t *info, void *arg) {    
   Z_UNUSED_ARG_3(length, info, arg);
-  z2_sto1_last_res.name = strdup(rid->id.rname);
+  z2_sto1_last_res.name = strdup(rkey->key.rname);
   z2_sto1_last_res.data = *data;
   z_mvar_put(z2_sto1_mvar, &z2_sto1_last_res);
 }

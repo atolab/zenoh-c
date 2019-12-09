@@ -20,8 +20,8 @@
 #define ZN_PERIODIC_PUSH_MODE 0x03
 #define ZN_PERIODIC_PULL_MODE 0x04
 
-#define ZN_INT_RES_ID 0
-#define ZN_STR_RES_ID 1
+#define ZN_INT_RES_KEY 0
+#define ZN_STR_RES_KEY 1
 
 #define ZN_DEST_STORAGES_KEY 0x10
 #define ZN_DEST_EVALS_KEY 0x11
@@ -68,16 +68,16 @@ typedef struct {
 typedef union {  
   z_vle_t rid;
   char *rname;
-} zn_res_id_t;
+} zn_res_key_t;
 
 typedef struct {
   int kind;
-  zn_res_id_t id; 
-} zn_resource_id_t;
+  zn_res_key_t key; 
+} zn_resource_key_t;
 
 typedef void (*zn_reply_handler_t)(const zn_reply_value_t *reply, void *arg);
 
-typedef void (*zn_data_handler_t)(const zn_resource_id_t *rid, const unsigned char *data, size_t length, const zn_data_info_t *info, void *arg);
+typedef void (*zn_data_handler_t)(const zn_resource_key_t *rkey, const unsigned char *data, size_t length, const zn_data_info_t *info, void *arg);
 
 typedef struct {
   const char* rname;

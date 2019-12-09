@@ -92,7 +92,7 @@ void handle_msg(zn_session_t *z, _zn_message_p_result_t r) {
     _zn_payload_header_result_t r_ph;
     zn_data_info_t info;
     _zn_declaration_t * decls;
-    zn_resource_id_t rid;    
+    zn_resource_key_t rkey;    
     const char *rname;
     uint8_t mid;    
     z_list_t *subs;
@@ -118,12 +118,12 @@ void handle_msg(zn_session_t *z, _zn_message_p_result_t r) {
             if (rname != 0) {
                 subs = _zn_get_subscriptions_by_rname(z, rname);
                 stos = _zn_get_storages_by_rname(z, rname);
-                rid.kind = ZN_STR_RES_ID;
-                rid.id.rname = (char *)rname;
+                rkey.kind = ZN_STR_RES_KEY;
+                rkey.key.rname = (char *)rname;
             } else {
                 subs = _zn_get_subscriptions_by_rid(z, r.value.message->payload.stream_data.rid);
-                rid.kind = ZN_INT_RES_ID;
-                rid.id.rid = r.value.message->payload.stream_data.rid;
+                rkey.kind = ZN_INT_RES_KEY;
+                rkey.key.rid = r.value.message->payload.stream_data.rid;
             }
             
             if (subs != 0 || stos != 0) {
@@ -138,13 +138,13 @@ void handle_msg(zn_session_t *z, _zn_message_p_result_t r) {
                     lit = subs;
                     while (lit != z_list_empty) {
                         sub = z_list_head(lit);
-                        sub->data_handler(&rid, r_ph.value.payload_header.payload.buf, z_iobuf_readable(&r_ph.value.payload_header.payload), &info, sub->arg);
+                        sub->data_handler(&rkey, r_ph.value.payload_header.payload.buf, z_iobuf_readable(&r_ph.value.payload_header.payload), &info, sub->arg);
                         lit = z_list_tail(lit);
                     }
                     lit = stos;
                     while (lit != z_list_empty) {
                         sto = z_list_head(lit);
-                        sto->data_handler(&rid, r_ph.value.payload_header.payload.buf, z_iobuf_readable(&r_ph.value.payload_header.payload), &info, sto->arg);
+                        sto->data_handler(&rkey, r_ph.value.payload_header.payload.buf, z_iobuf_readable(&r_ph.value.payload_header.payload), &info, sto->arg);
                         lit = z_list_tail(lit);
                     }
                     free(r_ph.value.payload_header.payload.buf);
@@ -168,12 +168,12 @@ void handle_msg(zn_session_t *z, _zn_message_p_result_t r) {
             if (rname != 0) {
                 subs = _zn_get_subscriptions_by_rname(z, rname);
                 stos = _zn_get_storages_by_rname(z, rname);
-                rid.kind = ZN_STR_RES_ID;
-                rid.id.rname = (char *)rname;
+                rkey.kind = ZN_STR_RES_KEY;
+                rkey.key.rname = (char *)rname;
             } else {
                 subs = _zn_get_subscriptions_by_rid(z, r.value.message->payload.stream_data.rid);
-                rid.kind = ZN_INT_RES_ID;
-                rid.id.rid = r.value.message->payload.stream_data.rid;
+                rkey.kind = ZN_INT_RES_KEY;
+                rkey.key.rid = r.value.message->payload.stream_data.rid;
             }
             
             if (subs != 0 || stos != 0) {
@@ -182,7 +182,7 @@ void handle_msg(zn_session_t *z, _zn_message_p_result_t r) {
                 while (lit != z_list_empty) {
                     sub = z_list_head(lit);
                     sub->data_handler(
-                        &rid,
+                        &rkey,
                         r.value.message->payload.compact_data.payload.buf,
                         z_iobuf_readable(&r.value.message->payload.compact_data.payload),
                         &info,
@@ -193,7 +193,7 @@ void handle_msg(zn_session_t *z, _zn_message_p_result_t r) {
                 while (lit != z_list_empty) {
                     sto = z_list_head(lit);
                     sto->data_handler(
-                        &rid,
+                        &rkey,
                         r.value.message->payload.compact_data.payload.buf,
                         z_iobuf_readable(&r.value.message->payload.compact_data.payload),
                         &info,
@@ -209,8 +209,8 @@ void handle_msg(zn_session_t *z, _zn_message_p_result_t r) {
             subs = _zn_get_subscriptions_by_rname(z, r.value.message->payload.write_data.rname);
             stos = _zn_get_storages_by_rname(z, r.value.message->payload.write_data.rname);
             if (subs != 0 || stos != 0) {
-                rid.kind = ZN_STR_RES_ID;
-                rid.id.rname = r.value.message->payload.write_data.rname;
+                rkey.kind = ZN_STR_RES_KEY;
+                rkey.key.rname = r.value.message->payload.write_data.rname;
                 _Z_DEBUG("Decoding Payload Header");
                 _zn_payload_header_decode_na(&r.value.message->payload.write_data.payload_header, &r_ph);
                 if (r_ph.tag == Z_OK_TAG) {
@@ -223,7 +223,7 @@ void handle_msg(zn_session_t *z, _zn_message_p_result_t r) {
                     while (subs != z_list_empty) {
                         sub = (_zn_sub_t *) z_list_head(subs);
                         sub->data_handler(
-                            &rid,
+                            &rkey,
                             r_ph.value.payload_header.payload.buf,
                             z_iobuf_readable(&r_ph.value.payload_header.payload),
                             &info,
@@ -233,7 +233,7 @@ void handle_msg(zn_session_t *z, _zn_message_p_result_t r) {
                     while (stos != z_list_empty) {
                         sto = (_zn_sto_t *) z_list_head(stos);
                         sto->data_handler(
-                            &rid,
+                            &rkey,
                             r_ph.value.payload_header.payload.buf,
                             z_iobuf_readable(&r_ph.value.payload_header.payload),
                             &info,

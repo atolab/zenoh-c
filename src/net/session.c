@@ -481,7 +481,7 @@ int zn_undeclare_publisher(zn_pub_t *pub) {
 
 int zn_stream_compact_data(zn_pub_t *pub, const unsigned char *data, size_t length) { 
   const char *rname = _zn_get_resource_name(pub->z, pub->rid);
-  zn_resource_id_t rid;
+  zn_resource_key_t rkey;
   _zn_sub_t *sub;
   _zn_sto_t *sto;
   z_list_t *subs = z_list_empty;
@@ -490,12 +490,12 @@ int zn_stream_compact_data(zn_pub_t *pub, const unsigned char *data, size_t leng
   if (rname != 0) {
     subs = _zn_get_subscriptions_by_rname(pub->z, rname);
     stos = _zn_get_storages_by_rname(pub->z, rname);
-    rid.kind = ZN_STR_RES_ID;
-    rid.id.rname = (char *)rname;
+    rkey.kind = ZN_STR_RES_KEY;
+    rkey.key.rname = (char *)rname;
   } else {
     subs = _zn_get_subscriptions_by_rid(pub->z, pub->rid);
-    rid.kind = ZN_INT_RES_ID;
-    rid.id.rid = pub->rid;
+    rkey.kind = ZN_INT_RES_KEY;
+    rkey.key.rid = pub->rid;
   }
 
   if (subs != 0 || stos != 0) {    
@@ -506,7 +506,7 @@ int zn_stream_compact_data(zn_pub_t *pub, const unsigned char *data, size_t leng
       xs = subs;
       while (xs != z_list_empty) {
         sub = z_list_head(xs);
-        sub->data_handler(&rid, data, length, &info, sub->arg);
+        sub->data_handler(&rkey, data, length, &info, sub->arg);
         xs = z_list_tail(xs);
       }
       z_list_free(&subs); 
@@ -516,7 +516,7 @@ int zn_stream_compact_data(zn_pub_t *pub, const unsigned char *data, size_t leng
       xs = stos;
       while (xs != z_list_empty) {
         sto = z_list_head(xs);
-        sto->data_handler(&rid, data, length, &info, sto->arg);
+        sto->data_handler(&rkey, data, length, &info, sto->arg);
         xs = z_list_tail(xs);
       }
       z_list_free(&stos); 
@@ -545,7 +545,7 @@ int zn_stream_compact_data(zn_pub_t *pub, const unsigned char *data, size_t leng
 int 
 zn_stream_data_wo(zn_pub_t *pub, const unsigned char *data, size_t length, uint8_t encoding, uint8_t kind) {
   const char *rname = _zn_get_resource_name(pub->z, pub->rid);
-  zn_resource_id_t rid;
+  zn_resource_key_t rkey;
   _zn_sub_t *sub;
   _zn_sto_t *sto;
   z_list_t *subs = z_list_empty;
@@ -554,12 +554,12 @@ zn_stream_data_wo(zn_pub_t *pub, const unsigned char *data, size_t length, uint8
   if (rname != 0) {
     subs = _zn_get_subscriptions_by_rname(pub->z, rname);
     stos = _zn_get_storages_by_rname(pub->z, rname);
-    rid.kind = ZN_STR_RES_ID;
-    rid.id.rname = (char *)rname;
+    rkey.kind = ZN_STR_RES_KEY;
+    rkey.key.rname = (char *)rname;
   } else {
     subs = _zn_get_subscriptions_by_rid(pub->z, pub->rid);
-    rid.kind = ZN_INT_RES_ID;
-    rid.id.rid = pub->rid;
+    rkey.kind = ZN_INT_RES_KEY;
+    rkey.key.rid = pub->rid;
   }
 
   if (subs != 0 || stos != 0) {    
@@ -572,7 +572,7 @@ zn_stream_data_wo(zn_pub_t *pub, const unsigned char *data, size_t length, uint8
       xs = subs;
       while (xs != z_list_empty) {
         sub = z_list_head(xs);
-        sub->data_handler(&rid, data, length, &info, sub->arg);
+        sub->data_handler(&rkey, data, length, &info, sub->arg);
         xs = z_list_tail(xs);
       }
       z_list_free(&subs); 
@@ -582,7 +582,7 @@ zn_stream_data_wo(zn_pub_t *pub, const unsigned char *data, size_t length, uint8
       xs = stos;
       while (xs != z_list_empty) {
         sto = z_list_head(xs);
-        sto->data_handler(&rid, data, length, &info, sto->arg);
+        sto->data_handler(&rkey, data, length, &info, sto->arg);
         xs = z_list_tail(xs);
       }
       z_list_free(&stos); 
@@ -632,21 +632,21 @@ int zn_write_data_wo(zn_session_t *z, const char* resource, const unsigned char 
   z_list_t *stos = _zn_get_storages_by_rname(z, resource);
   _zn_sub_t *sub;
   _zn_sto_t *sto;
-  zn_resource_id_t rid;
-  rid.kind = ZN_STR_RES_ID;
-  rid.id.rname = (char *)resource;
+  zn_resource_key_t rkey;
+  rkey.kind = ZN_STR_RES_KEY;
+  rkey.key.rname = (char *)resource;
   zn_data_info_t info;
   info.flags = _ZN_ENCODING | _ZN_KIND;
   info.encoding = encoding;
   info.kind = kind;  
   while (subs != 0) {
     sub = z_list_head(subs);
-    sub->data_handler(&rid, payload, length, &info, sub->arg);
+    sub->data_handler(&rkey, payload, length, &info, sub->arg);
     subs = z_list_tail(subs);
   }
   while (stos != 0) {
     sto = z_list_head(stos);
-    sto->data_handler(&rid, payload, length, &info, sto->arg);
+    sto->data_handler(&rkey, payload, length, &info, sto->arg);
     stos = z_list_tail(stos);
   }
   _zn_payload_header_t ph;

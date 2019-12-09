@@ -128,26 +128,26 @@ Vectors
 Data Structures
 ---------------
 
-.. c:type:: struct zn_resource_id_t
+.. c:type:: struct zn_resource_key_t
 
-  Data structure representing a resource id.
+  Data structure representing a resource key.
 
   .. c:member:: int kind
 
     One of the following kinds:
 
-      | ``ZN_INT_RES_ID``
-      | ``ZN_STR_RES_ID``
+      | ``ZN_INT_RES_KEY``
+      | ``ZN_STR_RES_KEY``
 
-  .. c:member:: union zn_res_id_t id
+  .. c:member:: union zn_res_key_t key
 
     .. c:member:: z_vle_t rid
 
-      A numerical resource id when :c:member:`zn_resource_id_t.kind` equals ``ZN_INT_RES_ID``.
+      A resource id (integer) when :c:member:`zn_resource_key_t.kind` equals ``ZN_INT_RES_KEY``.
 
     .. c:member:: char *rname
 
-      A string resource id when :c:member:`zn_resource_id_t.kind` equals ``ZN_STR_RES_ID``.
+      A resource name (string) when :c:member:`zn_resource_key_t.kind` equals ``ZN_STR_RES_KEY``.
 
 .. c:type:: struct zn_sub_mode_t
 
