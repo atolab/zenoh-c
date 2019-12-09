@@ -97,9 +97,9 @@
 #define _ZN_SRC_SN 0x02
 #define _ZN_BRK_ID 0x04
 #define _ZN_BRK_SN 0x08
-#define _ZN_T_STAMP 0x10
-#define _ZN_KIND 0x20
-#define _ZN_ENCODING 0x40
+#define _ZN_T_STAMP ZN_T_STAMP
+#define _ZN_KIND ZN_KIND
+#define _ZN_ENCODING ZN_ENCODING
 
 #define _HAS_PROPERTIES (m) (m.properties != 0) 
 

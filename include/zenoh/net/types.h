@@ -37,6 +37,10 @@
 #define ZN_ALL 2
 #define ZN_NONE 3
 
+#define ZN_T_STAMP 0x10
+#define ZN_KIND 0x20
+#define ZN_ENCODING 0x40
+
 typedef struct {  
   uint8_t kind;
   zn_temporal_property_t tprop;
