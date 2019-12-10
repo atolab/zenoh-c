@@ -286,71 +286,71 @@ Functions
 
 .. c:function:: zn_session_p_result_t zn_open(char* locator, zn_on_disconnect_t on_disconnect, const z_vec_t *ps)
 
-  Open a zenoh net session. 
+  Open a zenoh-net session. 
   
   | **locator** is a string representing the network endpoint to which establish the session. A typical locator looks like this : ``tcp/127.0.0.1:7447``. 
     If ``NULL``, :c:func:`zn_open` will scout and try to establish the session automatically.
   | **on_disconnect** is a function that will be called each time the client API is disconnected from the infrastructure. It can be set to ``NULL``. 
-  | **ps** is a :c:type:`vector<z_vec_t>` of :c:type:`zn_property_t` that will be used to establish and configure the zenoh net session. 
-    **ps** will typically contain the ``username`` and ``password`` informations needed to establish the zenoh net session with a secured infrastructure. 
+  | **ps** is a :c:type:`vector<z_vec_t>` of :c:type:`zn_property_t` that will be used to establish and configure the zenoh-net session. 
+    **ps** will typically contain the ``username`` and ``password`` informations needed to establish the zenoh-net session with a secured infrastructure. 
     It can be set to ``NULL``. 
   
-  Return a handle to the zenoh net session.
+  Return a handle to the zenoh-net session.
 
 .. c:function:: z_vec_t zn_info(zn_session_t *z)
 
-  Return a :c:type:`vector<z_vec_t>` of :c:type:`zn_property_t` containing various informations about the established zenoh net session 
+  Return a :c:type:`vector<z_vec_t>` of :c:type:`zn_property_t` containing various informations about the established zenoh-net session 
   represented by **z**.
 
 .. c:function:: zn_sub_p_result_t zn_declare_subscriber(zn_session_t *z, const char* resource, const zn_sub_mode_t *sm, zn_data_handler_t data_handler, void *arg)
 
-  Declare a subscribtion for all published data matching the provided resource selector **resource** in session **z**. 
+  Declare a subscribtion for all published data matching the provided resource name **resource** in session **z**. 
   
-  | **z** is the zenoh net session.
-  | **resource** is the resource selection to subscribe to.
+  | **z** is the zenoh-net session.
+  | **resource** is the resource name to subscribe to.
   | **sm** is the subscription mode. 
-  | **data_handler** is the callback function that will be called each time a data matching the subscribed **resource** selection is received. 
+  | **data_handler** is the callback function that will be called each time a data matching the subscribed resource name **resource** is received. 
   | **arg** is a pointer that will be passed to the **data_handler** on each call. 
   
-  Return a zenoh net subscriber.
+  Return a zenoh-net subscriber.
 
 .. c:function:: zn_pub_p_result_t zn_declare_publisher(zn_session_t *z, const char *resource)
 
-  Declare a publication for resource selector **resource** in session **z**.
+  Declare a publication for resource name **resource** in session **z**.
 
-  | **z** is the zenoh net session.
+  | **z** is the zenoh-net session.
   | **resource** is the resource name to publish.
   
-  Return a zenoh net publisher.
+  Return a zenoh-net publisher.
   
 .. c:function:: zn_sto_p_result_t zn_declare_storage(zn_session_t *z, const char* resource, zn_data_handler_t data_handler, zn_query_handler_t query_handler, void *arg)
 
-  Declare a storage for all data matching the provided resource selector **resource** in session **z**. 
+  Declare a storage for all data matching the provided resource name **resource** in session **z**. 
   
-  | **z** is the zenoh net session.
+  | **z** is the zenoh-net session.
   | **resource** is the resource selection to store.
-  | **data_handler** is the callback function that will be called each time a data matching the stored **resource** is received. 
-  | **query_handler** is the callback function that will be called each time a query for data matching the stored **resource** is received. 
+  | **data_handler** is the callback function that will be called each time a data matching the stored resource name **resource** is received. 
+  | **query_handler** is the callback function that will be called each time a query for data matching the stored resource name **resource** is received. 
     The **query_handler** function MUST call the provided **send_replies** function with the resulting data. **send_replies** can be called with an empty array. 
   | **arg** is a pointer that will be passed to the **data_handler** and the **query_handler** on each call. 
   
-  Return a zenoh net storage.
+  Return a zenoh-net storage.
 
 .. c:function:: zn_eval_p_result_t zn_declare_eval(zn_session_t *z, const char* resource, zn_query_handler_t query_handler, void *arg)
   
-  Declare an eval able to provide data matching the provided resource selector **resource** in session **z**. 
+  Declare an eval able to provide data matching the provided resource name **resource** in session **z**. 
   
-  | **z** is the zenoh net session.
+  | **z** is the zenoh-net session.
   | **resource** is the resource to evaluate.
-  | **query_handler** is the callback function that will be called each time a query for data matching the evaluated **resource** is received.
+  | **query_handler** is the callback function that will be called each time a query for data matching the evaluated resource name **resource** is received.
     The **query_handler** function MUST call the provided **send_replies** function with the resulting data. **send_replies** can be called with an empty array. 
   | **arg** is a pointer that will be passed to the **query_handler** function on each call. 
   
-  Return a zenoh net eval.
+  Return a zenoh-net eval.
 
 .. c:function:: int zn_stream_compact_data(zn_pub_t *pub, const unsigned char *payload, size_t len)
 
-  Send data in a *compact_data* message for the resource selection published by publisher **pub**. 
+  Send data in a *compact_data* message for the resource published by publisher **pub**. 
   
   | **pub** is the publisher to use to send data. 
   | **payload** is a pointer to the data to be sent. 
@@ -360,7 +360,7 @@ Functions
 
 .. c:function:: int zn_stream_data(zn_pub_t *pub, const unsigned char *payload, size_t len)
 
-  Send data in a *stream_data* message for the resource selection published by publisher **pub**. 
+  Send data in a *stream_data* message for the resource published by publisher **pub**. 
   
   | **pub** is the publisher to use to send data. 
   | **payload** is a pointer to the data to be sent. 
@@ -370,7 +370,7 @@ Functions
 
 .. c:function:: int zn_stream_data_wo(zn_pub_t *pub, const unsigned char *payload, size_t len, uint8_t encoding, uint8_t kind)
 
-  Send data in a *stream_data* message for the resource selection published by publisher **pub**. 
+  Send data in a *stream_data* message for the resource published by publisher **pub**. 
   
   | **pub** is the publisher to use to send data. 
   | **payload** is a pointer to the data to be sent. 
@@ -382,9 +382,9 @@ Functions
 
 .. c:function:: int zn_write_data(zn_session_t *z, const char* resource, const unsigned char *payload, size_t length)
 
-  Send data in a *write_data* message for the resource selector **resource**. 
+  Send data in a *write_data* message for the resource **resource**. 
   
-  | **z** is the zenoh net session.
+  | **z** is the zenoh-net session.
   | **resource** is the resource name of the data to be sent.
   | **payload** is a pointer to the data to be sent. 
   | **len** is the size of the data to be sent. 
@@ -393,9 +393,9 @@ Functions
 
 .. c:function:: int zn_write_data_wo(zn_session_t *z, const char* resource, const unsigned char *payload, size_t length, uint8_t encoding, uint8_t kind)
 
-  Send data in a *write_data* message for the resource selector **resource**. 
+  Send data in a *write_data* message for the resource **resource**. 
   
-  | **z** is the zenoh net session.
+  | **z** is the zenoh-net session.
   | **resource** is the resource name of the data to be sent.
   | **payload** is a pointer to the data to be sent. 
   | **len** is the size of the data to be sent. 
@@ -415,9 +415,9 @@ Functions
 
 .. c:function:: int zn_query(zn_session_t *z, const char* resource, const char* predicate, zn_reply_handler_t reply_handler, void *arg)
 
-  Query data matching resource selector **resource** in session **z**. 
+  Query data matching resource name **resource** in session **z**. 
   
-  | **z** is the zenoh net session.
+  | **z** is the zenoh-net session.
   | **resource** is the resource to query.
   | **predicate** is a string that will be  propagated to the storages and evals that should provide the queried data. 
     It may allow them to filter, transform and/or compute the queried data. 
@@ -428,9 +428,9 @@ Functions
 
 .. c:function:: int zn_query_wo(zn_session_t *z, const char* resource, const char* predicate, zn_reply_handler_t reply_handler, void *arg, zn_query_dest_t dest_storages, zn_query_dest_t dest_evals)
 
-  Query data matching resource selector **resource** in session **z**. 
+  Query data matching resource name **resource** in session **z**. 
   
-  | **z** is the zenoh net session.
+  | **z** is the zenoh-net session.
   | **resource** is the resource selection to query.
   | **predicate** is a string that will be  propagated to the storages and evals that should provide the queried data. 
     It may allow them to filter, transform and/or compute the queried data. 
@@ -475,9 +475,9 @@ Functions
 
 .. c:function:: int zn_close(zn_session_t *z)
 
-  Close the zenoh net session *z*.
+  Close the zenoh-net session *z*.
   
-  | **z** is the zenoh net session to close.
+  | **z** is the zenoh-net session to close.
 
   Return 0 when successful.
 
@@ -523,4 +523,4 @@ Handlers
   Function to pass as argument of :c:func:`zn_open`. 
   It will be called each time the client API is disconnected from the infrastructure.
   
-  | **z** is the zenoh net session.
+  | **z** is the zenoh-net session.
