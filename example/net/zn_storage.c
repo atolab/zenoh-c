@@ -49,7 +49,7 @@ void query_handler(const char *rname, const char *predicate, zn_replies_sender_t
   sample_t *sample;
   while (samples != z_list_empty) {
     sample = (sample_t *) z_list_head(samples);
-    if(intersect((char *)rname, sample->rname))
+    if(zn_rname_intersect((char *)rname, sample->rname))
     {
       matching_samples = z_list_cons(matching_samples, sample);
     }

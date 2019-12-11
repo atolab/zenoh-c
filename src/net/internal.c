@@ -142,7 +142,7 @@ _zn_get_subscriptions_by_rname(zn_session_t *z, const char *rname) {
     do {      
       sub = (_zn_sub_t *)z_list_head(subs);
       subs = z_list_tail(subs);            
-      if (intersect(sub->rname, (char *)rname)) {        
+      if (zn_rname_intersect(sub->rname, (char *)rname)) {
         xs = z_list_cons(xs, sub);
       }       
     } while (subs != 0);          
@@ -211,7 +211,7 @@ _zn_get_storages_by_rname(zn_session_t *z, const char *rname) {
     do {
       sto = (_zn_sto_t *)z_list_head(stos);
       stos = z_list_tail(stos);
-      if (intersect(sto->rname, (char *)rname)) {
+      if (zn_rname_intersect(sto->rname, (char *)rname)) {
         xs = z_list_cons(xs, sto);
       }
     } while (stos != 0);
@@ -279,7 +279,7 @@ _zn_get_evals_by_rname(zn_session_t *z, const char *rname) {
     do {
       eval = (_zn_eva_t *)z_list_head(evals);
       evals = z_list_tail(evals);
-      if (intersect(eval->rname, (char *)rname)) {
+      if (zn_rname_intersect(eval->rname, (char *)rname)) {
         xs = z_list_cons(xs, eval);
       }
     } while (evals != 0);

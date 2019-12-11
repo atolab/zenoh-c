@@ -37,4 +37,4 @@ char *next(char *str){
     return strchr(str, 0);
 }
 
-DEFINE_INTERSECT(intersect, END, WILD, next, chunk_intersect)
+DEFINE_INTERSECT(zn_rname_intersect, END, WILD, next, chunk_intersect)
