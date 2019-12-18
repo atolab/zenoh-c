@@ -35,7 +35,7 @@ zn_declare_eval(zn_session_t *z, const char* resource, zn_query_handler_t query_
 
 int zn_stream_compact_data(zn_pub_t *pub, const unsigned char *payload, size_t len);
 int zn_stream_data(zn_pub_t *pub, const unsigned char *payload, size_t len);
-int zn_write_data(zn_session_t *z, const char* resource, const unsigned char *payload, size_t length);
+int zn_write_data(zn_session_t *z, const char* resource, const unsigned char *payload, size_t len);
 
 int zn_stream_data_wo(zn_pub_t *pub, const unsigned char *payload, size_t len, uint8_t encoding, uint8_t kind);
 int zn_write_data_wo(zn_session_t *z, const char* resource, const unsigned char *payload, size_t len, uint8_t encoding, uint8_t kind);
