@@ -172,11 +172,14 @@ Data Structures
 
   .. c:member:: z_vle_t time
 
-    The time.
+    The time as a 64-bit long, where:
+
+        - The higher 32-bit represent the number of seconds since midnight, January 1, 1970 UTC
+        - The lower 32-bit represent a fraction of 1 second.
 
   .. c:member:: uint8_t clock_id[16]
 
-    The unique identifyer of the clock that generated this timestamp.
+    The unique identifier of the clock that generated this timestamp.
 
 .. c:type:: struct zn_data_info_t
 
@@ -264,7 +267,7 @@ Data Structures
     The length of the received :c:member:`zn_reply_value_t.data` when :c:member:`zn_reply_value_t.kind` equals 
     ``ZN_STORAGE_DATA`` or ``ZN_EVAL_DATA``.
 
-  .. c:member:: zN_data_info_t info
+  .. c:member:: zn_data_info_t info
 
     Some meta information about the received :c:member:`zn_reply_value_t.data` when :c:member:`zn_reply_value_t.kind` equals 
     ``ZN_STORAGE_DATA`` or ``ZN_EVAL_DATA``.
@@ -304,7 +307,7 @@ Functions
 
 .. c:function:: zn_sub_p_result_t zn_declare_subscriber(zn_session_t *z, const char* resource, const zn_sub_mode_t *sm, zn_data_handler_t data_handler, void *arg)
 
-  Declare a subscribtion for all published data matching the provided resource name **resource** in session **z**. 
+  Declare a subscription for all published data matching the provided resource name **resource** in session **z**. 
   
   | **z** is the zenoh-net session.
   | **resource** is the resource name to subscribe to.
@@ -406,10 +409,10 @@ Functions
 
 .. c:function:: int zn_pull(zn_sub_t *sub)
 
-  Pull data for the `ZN_PULL_MODE` or `ZN_PERIODIC_PULL_MODE` subscribtion **sub**. The pulled data will be provided 
+  Pull data for the `ZN_PULL_MODE` or `ZN_PERIODIC_PULL_MODE` subscription **sub**. The pulled data will be provided 
   by calling the **data_handler** function provided to the `c.zn_declare_subscriber`_ function.
 
-  | **sub** is the subscribtion to pull from.
+  | **sub** is the subscription to pull from.
   
   Return 0 if pull was successful.
 
@@ -431,7 +434,7 @@ Functions
   Query data matching resource name **resource** in session **z**. 
   
   | **z** is the zenoh-net session.
-  | **resource** is the resource selection to query.
+  | **resource** is the resource to query.
   | **predicate** is a string that will be  propagated to the storages and evals that should provide the queried data. 
     It may allow them to filter, transform and/or compute the queried data. 
   | **reply_handler** is the callback function that will be called on reception of the replies of the query. 
