@@ -2,9 +2,9 @@
 
 # -- Project information -----------------------------------------------------
 project = 'zenoh-c'
-copyright = '2019, ATOLabs'
+copyright = '2020, ATOLabs'
 author = 'ATOLabs'
-release = '0.3.0'
+release = '0.4.0'
 
 # -- General configuration ---------------------------------------------------
 master_doc = 'index'
