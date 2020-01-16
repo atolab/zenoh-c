@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2014, 2020 Contributors to the Eclipse Foundation
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0, or the Apache License, Version 2.0
+ * which is available at https://www.apache.org/licenses/LICENSE-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
+ *
+ * Contributors: Julien Enoch, ADLINK Technology Inc.
+ * Initial implementation of Eclipse Zenoh.
+ */
+
 #include <string.h>
 #include <assert.h>
 #include "zenoh/iobuf.h"
@@ -6,28 +23,28 @@ z_iobuf_t z_iobuf_wrap_wo(unsigned char *buf, unsigned int capacity, unsigned in
   assert(rpos <= capacity && wpos <= capacity);
   z_iobuf_t iobuf;
   iobuf.r_pos = rpos;
-  iobuf.w_pos = wpos; 
+  iobuf.w_pos = wpos;
   iobuf.capacity = capacity;
-  iobuf.buf = buf;  
+  iobuf.buf = buf;
   return iobuf;
 }
 
-z_iobuf_t 
+z_iobuf_t
 z_iobuf_wrap(uint8_t *buf, unsigned int capacity) {
-  return z_iobuf_wrap_wo(buf, capacity, 0, 0);  
+  return z_iobuf_wrap_wo(buf, capacity, 0, 0);
 }
 
 
 z_iobuf_t z_iobuf_make(unsigned int capacity) {
-  return z_iobuf_wrap((uint8_t*)malloc(capacity), capacity);  
+  return z_iobuf_wrap((uint8_t*)malloc(capacity), capacity);
 }
 
 
-void z_iobuf_free(z_iobuf_t* buf) {  
+void z_iobuf_free(z_iobuf_t* buf) {
   buf->r_pos = 0;
   buf->w_pos = 0;
   buf->capacity = 0;
-  free(buf->buf);  
+  free(buf->buf);
   buf = 0;
 }
 
@@ -40,38 +57,38 @@ unsigned int z_iobuf_writable(const z_iobuf_t* iob) {
 
 void z_iobuf_write(z_iobuf_t* iob, uint8_t b) {
   assert(iob->w_pos < iob->capacity);
-  iob->buf[iob->w_pos++] = b; 
+  iob->buf[iob->w_pos++] = b;
 }
 
 void z_iobuf_write_slice(z_iobuf_t* iob, const uint8_t* bs, unsigned int offset, unsigned int length) {
-  assert(z_iobuf_writable(iob) >= length); 
+  assert(z_iobuf_writable(iob) >= length);
   memcpy(iob->buf + iob->w_pos, bs + offset, length);
   iob->w_pos += length;
 }
 
 void z_iobuf_write_bytes(z_iobuf_t* iob, const unsigned char *bs, unsigned int length) {
-  assert(z_iobuf_writable(iob) >= length); 
+  assert(z_iobuf_writable(iob) >= length);
   memcpy(iob->buf + iob->w_pos, bs, length);
   iob->w_pos += length;
 }
 
 uint8_t z_iobuf_read(z_iobuf_t* iob) {
   assert(iob->r_pos < iob->w_pos);
-  return iob->buf[iob->r_pos++]; 
+  return iob->buf[iob->r_pos++];
 }
 
 
 uint8_t* z_iobuf_read_to_n(z_iobuf_t* iob, uint8_t* dst, unsigned int length) {
-  assert(z_iobuf_readable(iob) >= length);  
+  assert(z_iobuf_readable(iob) >= length);
   memcpy(dst, iob->buf + iob->r_pos, length);
   iob->r_pos += length;
   return dst;
-  
+
 }
 
-uint8_t* z_iobuf_read_n(z_iobuf_t* iob, unsigned int length) {  
+uint8_t* z_iobuf_read_n(z_iobuf_t* iob, unsigned int length) {
   uint8_t* dst = (uint8_t*)malloc(length);
-  return z_iobuf_read_to_n(iob, dst, length);  
+  return z_iobuf_read_to_n(iob, dst, length);
 }
 
 
@@ -100,7 +117,7 @@ void z_iobuf_compact(z_iobuf_t *buf) {
     return;
   }
   size_t len = buf->w_pos - buf->r_pos;
-  uint8_t *cp = buf->buf + buf->r_pos; 
+  uint8_t *cp = buf->buf + buf->r_pos;
   memcpy(buf->buf, cp, len);
   buf->r_pos = 0;
   buf->w_pos = len;

@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2014, 2020 Contributors to the Eclipse Foundation
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0, or the Apache License, Version 2.0
+ * which is available at https://www.apache.org/licenses/LICENSE-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
+ *
+ * Contributors: Julien Enoch, ADLINK Technology Inc.
+ * Initial implementation of Eclipse Zenoh.
+ */
+
 #include <pthread.h>
 #include <time.h>
 #include <stdlib.h>
@@ -10,12 +27,12 @@
 char msg[256];
 
 void *sleep_and_fill(void *m) {
-  
+
   z_mvar_t *mv = (z_mvar_t*)m;
-  for (int i = 0; i < 10; ++i) {      
+  for (int i = 0; i < 10; ++i) {
     usleep(250000);
     printf("Producing round #%d\n", i);
-    sprintf(msg, "Goodie #%d", i); 
+    sprintf(msg, "Goodie #%d", i);
     z_mvar_put(mv, msg);
   }
   return 0;
@@ -23,7 +40,7 @@ void *sleep_and_fill(void *m) {
 
 void *sleep_and_consume(void *m) {
   z_mvar_t *mv = (z_mvar_t*)m;
-  for (int i = 0; i < 10; ++i) {  
+  for (int i = 0; i < 10; ++i) {
     printf("Consuming round #%d\n", i);
     usleep(250000);
     char *msg = (char *)z_mvar_get(mv);
@@ -40,12 +57,12 @@ int main(int argc, char **argv) {
   z_mvar_t *mv = z_mvar_empty();
   pthread_t producer;
   pthread_t consumer;
-  pthread_create(&producer, 0, sleep_and_fill, mv);    
-  pthread_create(&consumer, 0, sleep_and_consume, mv);    
+  pthread_create(&producer, 0, sleep_and_fill, mv);
+  pthread_create(&consumer, 0, sleep_and_consume, mv);
   pthread_join(consumer, NULL);
   pthread_join(producer, NULL);
-  
-  
+
+
   return 0;
 }
 

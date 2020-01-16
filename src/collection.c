@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2014, 2020 Contributors to the Eclipse Foundation
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0, or the Apache License, Version 2.0
+ * which is available at https://www.apache.org/licenses/LICENSE-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
+ *
+ * Contributors: Julien Enoch, ADLINK Technology Inc.
+ * Initial implementation of Eclipse Zenoh.
+ */
+
 #include "zenoh/collection.h"
 #include <stdlib.h>
 #include <string.h>
@@ -14,14 +31,14 @@ inline z_vec_t z_vec_make(unsigned int capacity) {
 }
 
 z_vec_t z_vec_clone(const z_vec_t* v) {
-  z_vec_t u = z_vec_make(v->capacity_);  
-  for (unsigned int i = 0; i < v->length_; ++i) 
+  z_vec_t u = z_vec_make(v->capacity_);
+  for (unsigned int i = 0; i < v->length_; ++i)
     z_vec_append(&u, v->elem_[i]);
   return u;
 }
 
-void z_vec_free(z_vec_t* v) {    
-  for (unsigned int i = 0; i < v->length_; ++i) 
+void z_vec_free(z_vec_t* v) {
+  for (unsigned int i = 0; i < v->length_; ++i)
     free(v->elem_[i]);
   v->length_ = 0;
   v-> capacity_ = 0;
@@ -35,7 +52,7 @@ void z_vec_append(z_vec_t* v, void* e) {
   if (v->length_ == v->capacity_) {
     v->capacity_ = v->capacity_ + v->capacity_;
     v->elem_ = realloc(v->elem_, v->capacity_);
-  } 
+  }
   v->elem_[v->length_] = e;
   v->length_ = v->length_ + 1;
 }
@@ -52,7 +69,7 @@ z_list_t * z_list_of(void *x) {
   z_list_t *xs = (z_list_t *)malloc(sizeof(z_list_t));
   bzero(xs, sizeof(z_list_t));
   xs->elem = x;
-  return xs;  
+  return xs;
 }
 
 z_list_t * z_list_cons(z_list_t *xs, void *x) {
@@ -87,7 +104,7 @@ z_list_t * z_list_drop_elem(z_list_t *xs, unsigned int position) {
     free(head);
     return xs;
   }
-  
+
   unsigned int idx = 0;
   while (idx < position) {
     previous = xs;
@@ -102,22 +119,22 @@ z_list_t * z_list_drop_elem(z_list_t *xs, unsigned int position) {
 
 z_list_t *z_list_remove(z_list_t *xs, z_list_predicate predicate, void *arg) {
   z_list_t *prev = xs;
-  z_list_t *current = xs;  
-  if (xs == z_list_empty) 
+  z_list_t *current = xs;
+  if (xs == z_list_empty)
     return xs;
   while (current != z_list_empty) {
     // head removal
     if (predicate(current->elem, arg) == 1) {
-      if (xs == current) {        
+      if (xs == current) {
         xs = xs->tail;
         free (current);
-        return xs;        
-      } 
+        return xs;
+      }
       // tail removal
-      else if (current->elem == z_list_empty) {        
+      else if (current->elem == z_list_empty) {
         prev->tail = z_list_empty;
         free(current);
-      } 
+      }
       // middle removal
       else {
         prev->tail = current->tail;
@@ -150,14 +167,14 @@ z_i_map_t *z_i_map_make(unsigned int capacity) {
   memset(map->elems, 0, capacity * sizeof(z_list_t*));
   map->capacity = capacity;
   map->n = 0;
-  
+
   return map;
 }
 
 void xz_i_map_free(z_i_map_t **map) {
   z_i_map_t *m = *map;
   for (unsigned int i = 0; i > m->capacity; ++i) {
-    
+
   }
 }
 
@@ -169,33 +186,33 @@ void z_i_map_set(z_i_map_t *map, int k, void *v) {
     entry = (z_i_map_entry_t *)malloc(sizeof(z_i_map_entry_t));
     entry->key = k;
     entry->value = v;
-    map->elems[idx] = z_list_cons(z_list_empty, entry);  
+    map->elems[idx] = z_list_cons(z_list_empty, entry);
     map->n++;
-  } else {    
+  } else {
     while (xs != z_list_empty) {
       entry = (z_i_map_entry_t *)xs->elem;
       if (entry->key == k) {
-        entry->value = v;           
+        entry->value = v;
         break;
-      }   
-      else 
+      }
+      else
         xs = xs->tail;
     }
     if (xs == z_list_empty) {
       entry = (z_i_map_entry_t *)malloc(sizeof(z_i_map_entry_t));
       entry->key = k;
       entry->value = v;
-      map->elems[idx] = z_list_cons(map->elems[idx], entry);  
+      map->elems[idx] = z_list_cons(map->elems[idx], entry);
       map->n++;
-    }       
+    }
   }
 }
 
-void *z_i_map_get(z_i_map_t *map, int k) {  
+void *z_i_map_get(z_i_map_t *map, int k) {
   z_i_map_entry_t *entry = 0;
   unsigned int idx = k % map->capacity;
   z_list_t *xs = map->elems[idx];
-  
+
   while (xs != z_list_empty) {
     entry = (z_i_map_entry_t *)xs->elem;
     if (entry->key == k)
@@ -217,7 +234,7 @@ void z_i_map_remove(z_i_map_t *map, int k) {
   z_i_map_entry_t e;
   e.key = k;
   unsigned int l = z_list_len(map->elems[idx]);
-  map->elems[idx] = z_list_remove(map->elems[idx], key_predicate, &e);  
+  map->elems[idx] = z_list_remove(map->elems[idx], key_predicate, &e);
   map->n -= l - z_list_len(map->elems[idx]);
 }
 unsigned int z_i_map_capacity(z_i_map_t *map) {

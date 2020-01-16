@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2014, 2020 Contributors to the Eclipse Foundation
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0, or the Apache License, Version 2.0
+ * which is available at https://www.apache.org/licenses/LICENSE-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
+ *
+ * Contributors: Julien Enoch, ADLINK Technology Inc.
+ * Initial implementation of Eclipse Zenoh.
+ */
+
 #ifndef ZENOH_C_NET_MSG_H
 #define ZENOH_C_NET_MSG_H
 
@@ -70,7 +87,7 @@
 #define _ZN_SCOUT_BROKER 0x01
 
 
-/* Declaration Id */ 
+/* Declaration Id */
 
 #define _ZN_RESOURCE_DECL  0x01
 #define _ZN_PUBLISHER_DECL  0x02
@@ -101,91 +118,91 @@
 #define _ZN_KIND ZN_KIND
 #define _ZN_ENCODING ZN_ENCODING
 
-#define _HAS_PROPERTIES (m) (m.properties != 0) 
+#define _HAS_PROPERTIES (m) (m.properties != 0)
 
 /*------------------ Scout Message ------------------*/
-typedef struct {  
-  z_vle_t mask;  
+typedef struct {
+  z_vle_t mask;
 } _zn_scout_t;
 
 /*------------------ Hello Message ------------------*/
-typedef struct {  
+typedef struct {
   z_vle_t mask;
-  z_vec_t locators;  
+  z_vec_t locators;
 } _zn_hello_t;
 
 /*------------------ Open Message ------------------*/
-typedef struct {  
-  uint8_t version;  
-  z_uint8_array_t pid; 
-  z_vle_t lease;    
-  // z_vec_t *locators; 
+typedef struct {
+  uint8_t version;
+  z_uint8_array_t pid;
+  z_vle_t lease;
+  // z_vec_t *locators;
 } _zn_open_t;
 
 /*------------------ Accept Message ------------------*/
-typedef struct {    
+typedef struct {
   z_uint8_array_t client_pid;
-  z_uint8_array_t broker_pid; 
-  z_vle_t lease;   
+  z_uint8_array_t broker_pid;
+  z_vle_t lease;
 } _zn_accept_t;
 
 /*------------------ Close Message ------------------*/
-typedef struct {  
+typedef struct {
   z_uint8_array_t pid;
   uint8_t reason;
-} _zn_close_t; 
+} _zn_close_t;
 
 /*------------------  Resource Declaration Message ------------------*/
 // in types.h
 
 /*------------------ Delcare Publisher ------------------*/
-typedef struct {   
-  z_vle_t rid;    
+typedef struct {
+  z_vle_t rid;
 } _zn_pub_decl_t;
 
 /*------------------ Forget Publisher Message ------------------*/
-typedef struct {   
-  z_vle_t rid; 
+typedef struct {
+  z_vle_t rid;
 } _zn_forget_pub_decl_t;
 
 /*------------------ Declare Storage ------------------*/
-typedef struct {   
-  z_vle_t rid;    
+typedef struct {
+  z_vle_t rid;
 } _zn_storage_decl_t;
 
 /*------------------ Forget Storage Message ------------------*/
-typedef struct {   
-  z_vle_t rid; 
+typedef struct {
+  z_vle_t rid;
 } _zn_forget_sto_decl_t;
 
 /*------------------ Declare Eval ------------------*/
-typedef struct {   
-  z_vle_t rid;    
+typedef struct {
+  z_vle_t rid;
 } _zn_eval_decl_t;
 
 /*------------------ Forget Eval Message ------------------*/
-typedef struct {   
-  z_vle_t rid; 
+typedef struct {
+  z_vle_t rid;
 } _zn_forget_eval_decl_t;
 
 /*------------------ Declare Subscriber Message ------------------*/
-typedef struct {   
-  z_vle_t rid;  
-  zn_sub_mode_t sub_mode;  
+typedef struct {
+  z_vle_t rid;
+  zn_sub_mode_t sub_mode;
 } _zn_sub_decl_t;
 
 /*------------------ Forget Subscriber Message ------------------*/
-typedef struct {   
-  z_vle_t rid; 
+typedef struct {
+  z_vle_t rid;
 } _zn_forget_sub_decl_t;
 
 /*------------------ Declaration Commit Message ------------------*/
-typedef struct {  
+typedef struct {
   uint8_t cid;
 } _zn_commit_decl_t;
 
 /*------------------ Declaration Result  Message ------------------*/
-typedef struct {  
+typedef struct {
   uint8_t cid;
   uint8_t status;
 } _zn_result_decl_t;
@@ -196,7 +213,7 @@ typedef struct {
  *  The declaration of the structure does not follow this
  *  convention for alignement purposes.
  */
-typedef struct {  
+typedef struct {
   z_vec_t* properties;
   union {
     _zn_res_decl_t resource;
@@ -210,21 +227,21 @@ typedef struct {
     _zn_forget_eval_decl_t forget_eval;
     _zn_commit_decl_t commit;
     _zn_result_decl_t result;
-  } payload;  
-  uint8_t header; 
+  } payload;
+  uint8_t header;
 } _zn_declaration_t;
 
 _ZN_ARRAY_DECLARE(declaration)
 
 /*------------------ Declare Messages ------------------*/
-typedef struct  {  
+typedef struct  {
   z_vle_t sn;
   _zn_declaration_array_t declarations;
 } _zn_declare_t;
 
 
 /*------------------ Compact Data Message ------------------*/
-typedef struct {  
+typedef struct {
   z_vle_t sn;
   z_vle_t rid;
   z_iobuf_t payload;
@@ -232,27 +249,27 @@ typedef struct {
 
 
 /*------------------ Payload Header ------------------*/
-typedef struct {  
+typedef struct {
   z_vle_t src_sn;
   z_vle_t brk_sn;
   z_vle_t kind;
   z_vle_t encoding;
   uint8_t src_id[16];
   uint8_t brk_id[16];
-  uint8_t flags;  
+  uint8_t flags;
   z_timestamp_t tstamp;
   z_iobuf_t payload;
 } _zn_payload_header_t;
 
 /*------------------ StreamData Message ------------------*/
-typedef struct {  
+typedef struct {
   z_vle_t sn;
   z_vle_t rid;
   z_iobuf_t payload_header;
 } _zn_stream_data_t;
 
 /*------------------ Write Data Message ------------------*/
-typedef struct {  
+typedef struct {
   z_vle_t sn;
   char* rname;
   z_iobuf_t payload_header;
@@ -267,7 +284,7 @@ typedef struct {
 
 /*------------------ Query Message ------------------*/
 typedef struct {
-  z_uint8_array_t pid; 
+  z_uint8_array_t pid;
   z_vle_t qid;
   char* rname;
   char* predicate;
@@ -275,7 +292,7 @@ typedef struct {
 
 /*------------------ Reply Message ------------------*/
 typedef struct {
-  z_uint8_array_t qpid; 
+  z_uint8_array_t qpid;
   z_vle_t qid;
   z_uint8_array_t srcid;
   z_vle_t rsn;
@@ -291,7 +308,7 @@ typedef struct {
  *  convention for alignement purposes.
  */
 typedef struct {
-  const z_vec_t* properties;  
+  const z_vec_t* properties;
   union {
     _zn_open_t open;
     _zn_accept_t accept;
@@ -306,7 +323,7 @@ typedef struct {
     _zn_scout_t scout;
     _zn_hello_t hello;
   } payload;
-  uint8_t header; 
+  uint8_t header;
 } _zn_message_t;
 
 _ZN_RESULT_DECLARE (_zn_scout_t, scout)

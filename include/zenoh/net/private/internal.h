@@ -1,9 +1,26 @@
+/*
+ * Copyright (c) 2014, 2020 Contributors to the Eclipse Foundation
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0, or the Apache License, Version 2.0
+ * which is available at https://www.apache.org/licenses/LICENSE-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
+ *
+ * Contributors: Julien Enoch, ADLINK Technology Inc.
+ * Initial implementation of Eclipse Zenoh.
+ */
+
 #ifndef ZENOH_C_NET_INTERNAL_H
 #define ZENOH_C_NET_INTERNAL_H
 
 #include "zenoh/net/types.h"
 
-typedef struct {   
+typedef struct {
   z_vle_t rid;
   char* r_name;
 } _zn_res_decl_t;
@@ -32,7 +49,7 @@ void _zn_unregister_eval(zn_eva_t *s) ;
 
 int _zn_matching_remote_sub(zn_session_t *z, z_vle_t rid);
 
-typedef struct {  
+typedef struct {
   z_vle_t qid;
   zn_reply_handler_t reply_handler;
   void *arg;
@@ -41,7 +58,7 @@ typedef struct {
 void _zn_register_query(zn_session_t *z, z_vle_t qid, zn_reply_handler_t reply_handler, void *arg);
 _zn_replywaiter_t *_zn_get_query(zn_session_t *z, z_vle_t qid);
 
-typedef struct {  
+typedef struct {
   char *rname;
   z_vle_t rid;
   z_vle_t id;
@@ -49,7 +66,7 @@ typedef struct {
   void *arg;
 }  _zn_sub_t;
 
-typedef struct {  
+typedef struct {
   char *rname;
   z_vle_t rid;
   z_vle_t id;
@@ -58,7 +75,7 @@ typedef struct {
   void *arg;
 }  _zn_sto_t;
 
-typedef struct {  
+typedef struct {
   char *rname;
   z_vle_t rid;
   z_vle_t id;

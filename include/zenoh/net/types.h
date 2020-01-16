@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2014, 2020 Contributors to the Eclipse Foundation
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0, or the Apache License, Version 2.0
+ * which is available at https://www.apache.org/licenses/LICENSE-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
+ *
+ * Contributors: Julien Enoch, ADLINK Technology Inc.
+ * Initial implementation of Eclipse Zenoh.
+ */
+
 #ifndef ZENOH_C_NET_TYPES_H_
 #define ZENOH_C_NET_TYPES_H_
 
@@ -9,11 +26,11 @@
 #include "zenoh/net/config.h"
 #include "zenoh/net/property.h"
 
-#if (ZENOH_LINUX ==1) || (ZENOH_MACOS == 1) 
+#if (ZENOH_LINUX ==1) || (ZENOH_MACOS == 1)
 #include "zenoh/net/private/unix/types.h"
 #elif (ZENOH_CONTIKI == 1)
 #include "zenoh/net/private/contiki/types.h"
-#endif 
+#endif
 
 #define ZN_PUSH_MODE 0x01
 #define ZN_PULL_MODE 0x02
@@ -41,23 +58,23 @@
 #define ZN_KIND 0x20
 #define ZN_ENCODING 0x40
 
-typedef struct {  
+typedef struct {
   uint8_t kind;
   zn_temporal_property_t tprop;
 } zn_sub_mode_t;
 ZN_RESULT_DECLARE (zn_sub_mode_t, sub_mode)
 
 typedef struct {
-  unsigned int flags;  
+  unsigned int flags;
   z_timestamp_t tstamp;
   uint8_t encoding;
-  unsigned short kind;  
+  unsigned short kind;
 } zn_data_info_t;
 
 typedef struct {
   char kind;
-  const unsigned char *srcid; 
-  size_t srcid_length; 
+  const unsigned char *srcid;
+  size_t srcid_length;
   z_vle_t rsn;
   const char* rname;
   const unsigned char *data;
@@ -65,14 +82,14 @@ typedef struct {
   zn_data_info_t info;
 } zn_reply_value_t;
 
-typedef union {  
+typedef union {
   z_vle_t rid;
   char *rname;
 } zn_res_key_t;
 
 typedef struct {
   int kind;
-  zn_res_key_t key; 
+  zn_res_key_t key;
 } zn_resource_key_t;
 
 typedef void (*zn_reply_handler_t)(const zn_reply_value_t *reply, void *arg);
@@ -154,4 +171,4 @@ typedef struct {
   uint8_t nb;
 } zn_query_dest_t;
 
-#endif /* ZENOH_C_NET_TYPES_H_ */ 
+#endif /* ZENOH_C_NET_TYPES_H_ */

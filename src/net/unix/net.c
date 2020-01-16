@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2014, 2020 Contributors to the Eclipse Foundation
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0, or the Apache License, Version 2.0
+ * which is available at https://www.apache.org/licenses/LICENSE-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
+ *
+ * Contributors: Olivier Hecart, ADLINK Technology Inc.
+ * Initial implementation of Eclipse Zenoh.
+ */
+
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netinet/in.h>
@@ -37,7 +54,7 @@ char * _zn_select_scout_iface() {
       if (family == AF_INET) {
         if (memcmp(current->ifa_name, eth_prefix, len) == 0) {
           if ((current->ifa_flags & (IFF_MULTICAST | IFF_UP |IFF_RUNNING)) && !(current->ifa_flags & IFF_PROMISC)) {
-            getnameinfo(current->ifa_addr, 
+            getnameinfo(current->ifa_addr,
                   sizeof(struct sockaddr_in),
                   host, NI_MAXHOST,
                   NULL, 0, NI_NUMERICHOST);
@@ -46,7 +63,7 @@ char * _zn_select_scout_iface() {
           }
         } else if (memcmp(current->ifa_name, lo_prefix, len) == 0) {
           if ((current->ifa_flags & (IFF_UP |IFF_RUNNING)) && !(current->ifa_flags & IFF_PROMISC)) {
-            getnameinfo(current->ifa_addr, 
+            getnameinfo(current->ifa_addr,
                   sizeof(struct sockaddr_in),
                   host, NI_MAXHOST,
                   NULL, 0, NI_NUMERICHOST);
@@ -63,13 +80,13 @@ char * _zn_select_scout_iface() {
   return result;
 }
 
-struct sockaddr_in * 
+struct sockaddr_in *
 _zn_make_socket_address(const char* addr, int port) {
   struct sockaddr_in *saddr = (struct sockaddr_in *)malloc(sizeof(struct sockaddr_in));
-  bzero(saddr, sizeof(struct sockaddr_in));  
+  bzero(saddr, sizeof(struct sockaddr_in));
   saddr->sin_family = AF_INET;
 	saddr->sin_port = htons(port);
-  
+
   if(inet_pton(AF_INET, addr, &(saddr->sin_addr))<=0) {
     free(saddr);
     return 0;
@@ -77,12 +94,12 @@ _zn_make_socket_address(const char* addr, int port) {
   return saddr;
 }
 
-_zn_socket_result_t 
+_zn_socket_result_t
 _zn_create_udp_socket(const char *addr, int port, int timeout_usec) {
   _zn_socket_result_t r;
   r.tag = Z_OK_TAG;
-  
-  _Z_DEBUG_VA("Binding UDP Socket to: %s:%d\n", addr, port);  
+
+  _Z_DEBUG_VA("Binding UDP Socket to: %s:%d\n", addr, port);
   struct sockaddr_in saddr;
 
   r.value.socket = socket(PF_INET, SOCK_DGRAM, 0);
@@ -102,7 +119,7 @@ _zn_create_udp_socket(const char *addr, int port, int timeout_usec) {
 	{
     r.tag = Z_ERROR_TAG;
     r.value.error = ZN_INVALID_ADDRESS_ERROR;
-    r.value.socket = 0;    
+    r.value.socket = 0;
     return r;
 	}
 
@@ -258,12 +275,12 @@ int _zn_send_iovec(_zn_socket_t sock, struct iovec* iov, int iovcnt) {
   return 0;
 }
 
-int 
+int
 _zn_send_dgram_to(_zn_socket_t sock, const z_iobuf_t* buf, const struct sockaddr *dest, socklen_t salen) {
   int len =  z_iobuf_readable(buf);
   uint8_t *ptr = buf->buf + buf->r_pos;
   int n = len;
-  int wb;  
+  int wb;
   _Z_DEBUG("Sending data on socket....\n");
   wb = sendto(sock, ptr, n, 0, dest, salen);
   _Z_DEBUG_VA("Socket returned: %d\n", wb);
@@ -274,11 +291,11 @@ _zn_send_dgram_to(_zn_socket_t sock, const z_iobuf_t* buf, const struct sockaddr
   return wb;
 }
 
-int 
+int
 _zn_recv_dgram_from(_zn_socket_t sock, z_iobuf_t* buf, struct sockaddr* from, socklen_t *salen) {
   size_t writable = buf->capacity - buf->w_pos;
   uint8_t *cp = buf->buf + buf->w_pos;
-  int rb = 0;    
+  int rb = 0;
   rb = recvfrom(sock, cp, writable, 0, from, salen);
   buf->w_pos = buf->w_pos +  rb;
   return rb;

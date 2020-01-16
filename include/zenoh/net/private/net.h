@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2014, 2020 Contributors to the Eclipse Foundation
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0, or the Apache License, Version 2.0
+ * which is available at https://www.apache.org/licenses/LICENSE-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
+ *
+ * Contributors: Julien Enoch, ADLINK Technology Inc.
+ * Initial implementation of Eclipse Zenoh.
+ */
+
 #ifndef ZENOH_C_NET_H
 #define ZENOH_C_NET_H
 
@@ -16,10 +33,10 @@ char * _zn_select_scout_iface();
 
 _zn_socket_result_t _zn_open_tx_session(const char *locator);
 
-struct sockaddr_in * 
+struct sockaddr_in *
 _zn_make_socket_address(const char* addr, int port);
 
-_zn_socket_result_t 
+_zn_socket_result_t
 _zn_create_udp_socket(const char *addr, int port, int recv_timeout);
 
 int _zn_recv_dgram_from(_zn_socket_t sock, z_iobuf_t* buf, struct sockaddr* from, socklen_t *salen);

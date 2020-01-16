@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2014, 2020 Contributors to the Eclipse Foundation
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0, or the Apache License, Version 2.0
+ * which is available at https://www.apache.org/licenses/LICENSE-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
+ *
+ * Contributors: Julien Enoch, ADLINK Technology Inc.
+ * Initial implementation of Eclipse Zenoh.
+ */
+
 #ifndef ZENOH_C_RESULT_H
 #define ZENOH_C_RESULT_H
 
@@ -30,7 +47,7 @@ inline static void prefix ## _ ## name ## _p_result_init(prefix ## _ ## name ## 
 inline static void prefix ## _ ## name ## _p_result_free(prefix ## _ ## name ## _p_result_t *r) { \
     free(r->value.name); \
     r->value.name = 0; \
-} 
+}
 #define Z_P_RESULT_DECLARE(type, name) P_RESULT_DECLARE(type, name, z)
 #define _Z_P_RESULT_DECLARE(type, name) P_RESULT_DECLARE(type, name, _z)
 
@@ -63,7 +80,7 @@ inline static void prefix ## _ ## name ## _p_result_free(prefix ## _ ## name ## 
 
 enum result_kind {
   Z_OK_TAG = 0,
-  Z_ERROR_TAG = 1   
+  Z_ERROR_TAG = 1
 };
 
 #endif /* ZENOH_C_RESULT_H */

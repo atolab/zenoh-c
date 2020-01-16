@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2014, 2020 Contributors to the Eclipse Foundation
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0, or the Apache License, Version 2.0
+ * which is available at https://www.apache.org/licenses/LICENSE-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
+ *
+ * Contributors: Julien Enoch, ADLINK Technology Inc.
+ * Initial implementation of Eclipse Zenoh.
+ */
+
 #include <assert.h>
 #include "zenoh/rname.h"
 #include "zenoh/net/private/internal.h"
@@ -25,16 +42,16 @@ int _zn_register_res_decl(zn_session_t *z, z_vle_t rid, const char *rname) {
   _zn_res_decl_t *rd_bid = _zn_get_res_decl_by_rid(z, rid);
   _zn_res_decl_t *rd_brn = _zn_get_res_decl_by_rname(z, rname);
 
-  if (rd_bid == 0 && rd_brn == 0) {  
+  if (rd_bid == 0 && rd_brn == 0) {
     _zn_res_decl_t *rdecl = (_zn_res_decl_t *) malloc(sizeof(_zn_res_decl_t));
     rdecl->rid = rid;
-    rdecl->r_name = strdup(rname); 
-    z->declarations = z_list_cons(z->declarations, rdecl);   
+    rdecl->r_name = strdup(rname);
+    z->declarations = z_list_cons(z->declarations, rdecl);
     return 0;
-  } 
-  else if (rd_bid == rd_brn) 
+  }
+  else if (rd_bid == rd_brn)
     return 0;
-  else return 1;  
+  else return 1;
 }
 
 _zn_res_decl_t *_zn_get_res_decl_by_rid(zn_session_t *z, z_vle_t rid) {
@@ -44,10 +61,10 @@ _zn_res_decl_t *_zn_get_res_decl_by_rid(zn_session_t *z, z_vle_t rid) {
   else {
     _zn_res_decl_t *decl = (_zn_res_decl_t *)z_list_head(z->declarations);
     z_list_t *decls = z_list_tail(z->declarations);
-    while (decls != 0 && decl->rid != rid) {      
+    while (decls != 0 && decl->rid != rid) {
       decl = z_list_head(decls);
-      decls = z_list_tail(decls);  
-    }    
+      decls = z_list_tail(decls);
+    }
     if (decl->rid == rid) return decl;
     else return 0;
   }
@@ -60,10 +77,10 @@ _zn_res_decl_t *_zn_get_res_decl_by_rname(zn_session_t *z, const char *rname) {
     _zn_res_decl_t *decl = (_zn_res_decl_t *)z_list_head(z->declarations);
     z_list_t *decls = z_list_tail(z->declarations);
 
-    while (decls != 0 && strcmp(decl->r_name, rname) != 0) {      
+    while (decls != 0 && strcmp(decl->r_name, rname) != 0) {
       decl = z_list_head(decls);
-      decls = z_list_tail(decls);  
-    }    
+      decls = z_list_tail(decls);
+    }
     if (strcmp(decl->r_name, rname) == 0) return decl;
     else return 0;
   }
@@ -113,18 +130,18 @@ _zn_get_subscriptions_by_rid(zn_session_t *z, z_vle_t rid) {
   z_list_t *subs = z_list_empty;
   if (z->subscriptions == 0) {
     return subs;
-  }  
+  }
   else {
     _zn_sub_t *sub = 0;
     z_list_t *subs = z->subscriptions;
     z_list_t *xs = z_list_empty;
-    do {      
+    do {
       sub = (_zn_sub_t *)z_list_head(subs);
-      subs = z_list_tail(subs);            
-      if (sub->rid == rid) {        
+      subs = z_list_tail(subs);
+      if (sub->rid == rid) {
         xs = z_list_cons(xs, sub);
-      }       
-    } while (subs != 0);          
+      }
+    } while (subs != 0);
     return xs;
   }
 }
@@ -134,18 +151,18 @@ _zn_get_subscriptions_by_rname(zn_session_t *z, const char *rname) {
   z_list_t *subs = z_list_empty;
   if (z->subscriptions == 0) {
     return subs;
-  }  
+  }
   else {
     _zn_sub_t *sub = 0;
     z_list_t *subs = z->subscriptions;
     z_list_t *xs = z_list_empty;
-    do {      
+    do {
       sub = (_zn_sub_t *)z_list_head(subs);
-      subs = z_list_tail(subs);            
+      subs = z_list_tail(subs);
       if (zn_rname_intersect(sub->rname, (char *)rname)) {
         xs = z_list_cons(xs, sub);
-      }       
-    } while (subs != 0);          
+      }
+    } while (subs != 0);
     return xs;
   }
 }
@@ -288,7 +305,7 @@ _zn_get_evals_by_rname(zn_session_t *z, const char *rname) {
 }
 
 int _zn_matching_remote_sub(zn_session_t *z, z_vle_t rid) {
-  return z_i_map_get(z->remote_subs, rid) != 0 ? 1 : 0;   
+  return z_i_map_get(z->remote_subs, rid) != 0 ? 1 : 0;
 }
 
 void _zn_register_query(zn_session_t *z, z_vle_t qid, zn_reply_handler_t reply_handler, void *arg) {
@@ -306,10 +323,10 @@ _zn_replywaiter_t *_zn_get_query(zn_session_t *z, z_vle_t qid) {
   else {
     _zn_replywaiter_t *rw = (_zn_replywaiter_t *)z_list_head(z->replywaiters);
     z_list_t *rws = z_list_tail(z->replywaiters);
-    while (rws != 0 && rw->qid != qid) {      
+    while (rws != 0 && rw->qid != qid) {
       rw = z_list_head(rws);
-      rws = z_list_tail(rws);  
-    }    
+      rws = z_list_tail(rws);
+    }
     if (rw->qid == qid) return rw;
     else return 0;
   }

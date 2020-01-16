@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2014, 2020 Contributors to the Eclipse Foundation
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0, or the Apache License, Version 2.0
+ * which is available at https://www.apache.org/licenses/LICENSE-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
+ *
+ * Contributors: Julien Enoch, ADLINK Technology Inc.
+ * Initial implementation of Eclipse Zenoh.
+ */
+
 #ifndef ZENOH_C_NET_SESSION_H
 #define ZENOH_C_NET_SESSION_H
 
@@ -15,22 +32,22 @@
 z_vec_t
 zn_scout(char* iface, size_t tries, size_t period);
 
-zn_session_p_result_t 
+zn_session_p_result_t
 zn_open(char* locator, zn_on_disconnect_t on_disconnect, const z_vec_t *ps);
 
 z_vec_t
 zn_info(zn_session_t *z);
 
-zn_sub_p_result_t 
+zn_sub_p_result_t
 zn_declare_subscriber(zn_session_t *z, const char* resource, const zn_sub_mode_t *sm, zn_data_handler_t data_handler, void *arg);
 
-zn_pub_p_result_t 
+zn_pub_p_result_t
 zn_declare_publisher(zn_session_t *z, const char *resource);
 
-zn_sto_p_result_t 
+zn_sto_p_result_t
 zn_declare_storage(zn_session_t *z, const char* resource, zn_data_handler_t data_handler, zn_query_handler_t query_handler, void *arg);
 
-zn_eval_p_result_t 
+zn_eval_p_result_t
 zn_declare_eval(zn_session_t *z, const char* resource, zn_query_handler_t query_handler, void *arg);
 
 int zn_stream_compact_data(zn_pub_t *pub, const unsigned char *payload, size_t len);

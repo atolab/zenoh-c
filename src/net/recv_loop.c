@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2014, 2020 Contributors to the Eclipse Foundation
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0, or the Apache License, Version 2.0
+ * which is available at https://www.apache.org/licenses/LICENSE-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
+ *
+ * Contributors: Julien Enoch, ADLINK Technology Inc.
+ * Initial implementation of Eclipse Zenoh.
+ */
+
 #include <stdio.h>
 #include <stdatomic.h>
 #include "zenoh/private/logging.h"
@@ -76,7 +93,7 @@ void send_replies(void* query_handle, zn_resource_p_array_t replies, uint8_t eva
             _Z_DEBUG("Trying to reconnect....\n");
             handle->z->on_disconnect(handle->z);
             _zn_send_msg(handle->z->sock, &handle->z->wbuf, &msg);
-        }    
+        }
     }
 }
 
@@ -92,9 +109,9 @@ void handle_msg(zn_session_t *z, _zn_message_p_result_t r) {
     _zn_payload_header_result_t r_ph;
     zn_data_info_t info;
     _zn_declaration_t * decls;
-    zn_resource_key_t rkey;    
+    zn_resource_key_t rkey;
     const char *rname;
-    uint8_t mid;    
+    uint8_t mid;
     z_list_t *subs;
     z_list_t *stos;
     z_list_t *evals;
@@ -102,8 +119,8 @@ void handle_msg(zn_session_t *z, _zn_message_p_result_t r) {
     _zn_sub_t *sub;
     _zn_sto_t *sto;
     _zn_eva_t *eval;
-    _zn_replywaiter_t *rw;    
-    zn_reply_value_t rvalue; 
+    _zn_replywaiter_t *rw;
+    zn_reply_value_t rvalue;
     _zn_res_decl_t *rd;
     unsigned int i;
     rname = 0;
@@ -125,7 +142,7 @@ void handle_msg(zn_session_t *z, _zn_message_p_result_t r) {
                 rkey.kind = ZN_INT_RES_KEY;
                 rkey.key.rid = r.value.message->payload.stream_data.rid;
             }
-            
+
             if (subs != 0 || stos != 0) {
                 _zn_payload_header_decode_na(&r.value.message->payload.stream_data.payload_header, &r_ph);
                 if (r_ph.tag == Z_OK_TAG) {
@@ -156,7 +173,7 @@ void handle_msg(zn_session_t *z, _zn_message_p_result_t r) {
                         _Z_DEBUG("Unable to parse StreamData Message Payload Header\n");
                     } while (0);
                 }
-                
+
             } else {
                 _Z_DEBUG_VA("No subscription found for resource %zu\n", r.value.message->payload.stream_data.rid);
             }
@@ -175,7 +192,7 @@ void handle_msg(zn_session_t *z, _zn_message_p_result_t r) {
                 rkey.kind = ZN_INT_RES_KEY;
                 rkey.key.rid = r.value.message->payload.stream_data.rid;
             }
-            
+
             if (subs != 0 || stos != 0) {
                 info.flags = 0;
                 lit = subs;
@@ -272,7 +289,7 @@ void handle_msg(zn_session_t *z, _zn_message_p_result_t r) {
                         sto->query_handler(
                             r.value.message->payload.query.rname,
                             r.value.message->payload.query.predicate,
-                            send_storage_replies, 
+                            send_storage_replies,
                             query_handle,
                             sto->arg);
                         lit = z_list_tail(lit);
@@ -287,7 +304,7 @@ void handle_msg(zn_session_t *z, _zn_message_p_result_t r) {
                         eval->query_handler(
                             r.value.message->payload.query.rname,
                             r.value.message->payload.query.predicate,
-                            send_eval_replies, 
+                            send_eval_replies,
                             query_handle,
                             eval->arg);
                         lit = z_list_tail(lit);
@@ -337,7 +354,7 @@ void handle_msg(zn_session_t *z, _zn_message_p_result_t r) {
                     rvalue.kind = ZN_REPLY_FINAL;
                 }
                 rw->reply_handler(&rvalue, rw->arg);
-                
+
                 switch (rvalue.kind) {
                     case ZN_STORAGE_DATA:
                         free((void *)rvalue.data);
@@ -459,6 +476,6 @@ void* zn_recv_loop(zn_session_t *z) {
     return 0;
 }
 
-int zn_running(zn_session_t *z) { 
+int zn_running(zn_session_t *z) {
     return z->running;
 }

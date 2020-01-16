@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2014, 2020 Contributors to the Eclipse Foundation
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0, or the Apache License, Version 2.0
+ * which is available at https://www.apache.org/licenses/LICENSE-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
+ *
+ * Contributors: Julien Enoch, ADLINK Technology Inc.
+ * Initial implementation of Eclipse Zenoh.
+ */
+
 #include <stdio.h>
 #include <unistd.h>
 #include <assert.h>
@@ -32,35 +49,35 @@ z_mvar_t *storage_replies_mvar = 0;
 z_list_t *eval_replies = 0;
 z_mvar_t *eval_replies_mvar = 0;
 
-void z1_sub1_listener(const zn_resource_key_t *rkey, const unsigned char *data, size_t length, const zn_data_info_t *info, void *arg) {    
+void z1_sub1_listener(const zn_resource_key_t *rkey, const unsigned char *data, size_t length, const zn_data_info_t *info, void *arg) {
   Z_UNUSED_ARG_3(length, info, arg);
   z1_sub1_last_res.name = strdup(rkey->key.rname);
   z1_sub1_last_res.data = *data;
   z_mvar_put(z1_sub1_mvar, &z1_sub1_last_res);
 }
 
-void z2_sub1_listener(const zn_resource_key_t *rkey, const unsigned char *data, size_t length, const zn_data_info_t *info, void *arg) {    
+void z2_sub1_listener(const zn_resource_key_t *rkey, const unsigned char *data, size_t length, const zn_data_info_t *info, void *arg) {
   Z_UNUSED_ARG_3(length, info, arg);
   z2_sub1_last_res.name = strdup(rkey->key.rname);
   z2_sub1_last_res.data = *data;
   z_mvar_put(z2_sub1_mvar, &z2_sub1_last_res);
 }
 
-void z3_sub1_listener(const zn_resource_key_t *rkey, const unsigned char *data, size_t length, const zn_data_info_t *info, void *arg) {    
+void z3_sub1_listener(const zn_resource_key_t *rkey, const unsigned char *data, size_t length, const zn_data_info_t *info, void *arg) {
   Z_UNUSED_ARG_3(length, info, arg);
   z3_sub1_last_res.name = strdup(rkey->key.rname);
   z3_sub1_last_res.data = *data;
   z_mvar_put(z3_sub1_mvar, &z3_sub1_last_res);
 }
 
-void z1_sto1_listener(const zn_resource_key_t *rkey, const unsigned char *data, size_t length, const zn_data_info_t *info, void *arg) {    
+void z1_sto1_listener(const zn_resource_key_t *rkey, const unsigned char *data, size_t length, const zn_data_info_t *info, void *arg) {
   Z_UNUSED_ARG_3(length, info, arg);
   z1_sto1_last_res.name = strdup(rkey->key.rname);
   z1_sto1_last_res.data = *data;
   z_mvar_put(z1_sto1_mvar, &z1_sto1_last_res);
 }
 
-void z2_sto1_listener(const zn_resource_key_t *rkey, const unsigned char *data, size_t length, const zn_data_info_t *info, void *arg) {    
+void z2_sto1_listener(const zn_resource_key_t *rkey, const unsigned char *data, size_t length, const zn_data_info_t *info, void *arg) {
   Z_UNUSED_ARG_3(length, info, arg);
   z2_sto1_last_res.name = strdup(rkey->key.rname);
   z2_sto1_last_res.data = *data;
@@ -145,13 +162,13 @@ void reply_handler(const zn_reply_value_t *reply, void *arg) {
   Z_UNUSED_ARG(arg);
   resource *res;
   switch (reply->kind) {
-    case ZN_STORAGE_DATA: 
+    case ZN_STORAGE_DATA:
       res = (resource*)malloc(sizeof(resource));
       res->name = strdup(reply->rname);
       res->data = *reply->data;
       storage_replies = z_list_cons(storage_replies, res);
       break;
-    case ZN_EVAL_DATA: 
+    case ZN_EVAL_DATA:
       res = (resource*)malloc(sizeof(resource));
       res->name = strdup(reply->rname);
       res->data = *reply->data;
@@ -253,7 +270,7 @@ int main(int argc, char **argv) {
   assert(1 == zn_running(z1));
   assert(1 == zn_running(z2));
   assert(1 == zn_running(z3));
-  
+
   resource  sent_res;
   resource *rcvd_res;
 
@@ -300,7 +317,7 @@ int main(int argc, char **argv) {
   z_list_free(&storage_replies);
   z_mvar_get(eval_replies_mvar);
   // assert(0 == z_list_len(eval_replies));
-  // This may not be true for now as : 
+  // This may not be true for now as :
   //  - zenoh-c does not check received query properties
   //  - zenohd does not filter out replies
   z_list_free(&eval_replies);
@@ -308,7 +325,7 @@ int main(int argc, char **argv) {
   zn_query_wo(z1, "/test/client/**", "", reply_handler, NULL, none, best_match);
   z_mvar_get(storage_replies_mvar);
   // assert(0 == z_list_len(storage_replies));
-  // This may not be true for now as : 
+  // This may not be true for now as :
   //  - zenoh-c does not check received query properties
   //  - zenohd does not filter out replies
   z_list_free(&storage_replies);
@@ -336,7 +353,7 @@ int main(int argc, char **argv) {
   z_list_free(&storage_replies);
   z_mvar_get(eval_replies_mvar);
   // assert(0 == z_list_len(eval_replies));
-  // This may not be true for now as : 
+  // This may not be true for now as :
   //  - zenoh-c does not check received query properties
   //  - zenohd does not filter out replies
   z_list_free(&eval_replies);
@@ -344,7 +361,7 @@ int main(int argc, char **argv) {
   zn_query_wo(z2, "/test/client/**", "", reply_handler, NULL, none, best_match);
   z_mvar_get(storage_replies_mvar);
   // assert(0 == z_list_len(storage_replies));
-  // This may not be true for now as : 
+  // This may not be true for now as :
   //  - zenoh-c does not check received query properties
   //  - zenohd does not filter out replies
   z_list_free(&storage_replies);

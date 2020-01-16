@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2014, 2020 Contributors to the Eclipse Foundation
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0, or the Apache License, Version 2.0
+ * which is available at https://www.apache.org/licenses/LICENSE-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
+ *
+ * Contributors: Julien Enoch, ADLINK Technology Inc.
+ * Initial implementation of Eclipse Zenoh.
+ */
+
 #include <stdio.h>
 #include <unistd.h>
 #include <assert.h>
@@ -20,7 +37,7 @@ z_mvar_t *sto_mvar = 0;
 resource rep_last_res;
 z_mvar_t *rep_mvar = 0;
 
-void sub_listener(const zn_resource_key_t *rkey, const unsigned char *data, size_t length, const zn_data_info_t *info, void *arg) {    
+void sub_listener(const zn_resource_key_t *rkey, const unsigned char *data, size_t length, const zn_data_info_t *info, void *arg) {
   Z_UNUSED_ARG_2(info, arg);
   sub_last_res.name = strdup(rkey->key.rname);
   sub_last_res.data = malloc(length);
@@ -29,7 +46,7 @@ void sub_listener(const zn_resource_key_t *rkey, const unsigned char *data, size
   z_mvar_put(sub_mvar, &sub_last_res);
 }
 
-void sto_listener(const zn_resource_key_t *rkey, const unsigned char *data, size_t length, const zn_data_info_t *info, void *arg) {    
+void sto_listener(const zn_resource_key_t *rkey, const unsigned char *data, size_t length, const zn_data_info_t *info, void *arg) {
   Z_UNUSED_ARG_2(info, arg);
   sto_last_res.name = strdup(rkey->key.rname);
   sto_last_res.data = malloc(length);
@@ -59,7 +76,7 @@ void sto_handler(const char *rname, const char *predicate, zn_replies_sender_t s
 void reply_handler(const zn_reply_value_t *reply, void *arg) {
   Z_UNUSED_ARG(arg);
   switch (reply->kind) {
-    case ZN_STORAGE_DATA: 
+    case ZN_STORAGE_DATA:
       rep_last_res.name = strdup(reply->rname);
       rep_last_res.data = malloc(reply->data_length);
       memcpy(rep_last_res.data, reply->data, reply->data_length);
@@ -107,7 +124,7 @@ int main(int argc, char **argv) {
   zn_sto_t *z2_sto1 = z2_sto1_r.value.sto;
 
   sleep(1);
-  
+
   resource  sent_res;
   resource *rcvd_res;
 
@@ -124,7 +141,7 @@ int main(int argc, char **argv) {
   assert(0 == strcmp(sent_res.name, rcvd_res->name));
   assert(sent_res.length == rcvd_res->length);
   assert(0 == memcmp(sent_res.data, rcvd_res->data, sent_res.length));
-  
+
   zn_query(z1, "/test/large_data/big", "", reply_handler, NULL);
   rcvd_res = z_mvar_get(rep_mvar);
   assert(0 == strcmp(sent_res.name, rcvd_res->name));
