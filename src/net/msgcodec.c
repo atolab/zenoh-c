@@ -664,6 +664,9 @@ _zn_message_encode(z_iobuf_t* buf, const _zn_message_t* m) {
       break;
     case _ZN_QUERY:
       _zn_query_encode(buf, &m->payload.query);
+      if (m->header & _ZN_P_FLAG ) {
+        zn_properties_encode(buf, m->properties);
+      }
       break;
     case _ZN_REPLY:
       _zn_reply_encode(buf, &m->payload.reply, m->header);
