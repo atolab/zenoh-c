@@ -1,3 +1,5 @@
+![zenoh banner](./zenoh-dragon.png)
+
 [![Build Status](https://travis-ci.com/atolab/zenoh-c.svg?branch=master)](https://travis-ci.com/atolab/zenoh-c)
 [![codecov](https://codecov.io/gh/atolab/zenoh-c/branch/master/graph/badge.svg)](https://codecov.io/gh/atolab/zenoh-c)
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/19243/badge.svg)](https://scan.coverity.com/projects/atolab-zenoh-c)
@@ -7,7 +9,7 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 
-# zenoh C Client API
+# Eclipse zenoh C Client API
 
 ## Building 
 To build the **zenoh-c** client API you need to ensure that [cmake](https://cmake.org) is available on your platform -- if not please install it. 
