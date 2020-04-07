@@ -4,8 +4,8 @@ BUILD_DIR=build
 CROSS_BUILD_DIR=$(BUILD_DIR)/crossbuilds
 CROSS_SCRIPTS_DIR=crossbuilds
 
-CROSS_BUILD_TARGETS=linux-x64 linux-armv5 linux-armv6 linux-arm64 osx-64 manylinux2010-x64 #manylinux2010-x86
-# CROSS_BUILD_TARGETS=manylinux2010-x64
+# CROSS_BUILD_TARGETS=linux-x64 linux-armv5 linux-armv6 linux-arm64 osx-64 manylinux2010-x64 #manylinux2010-x86
+CROSS_BUILD_TARGETS=manylinux2010-x64
 
 # NOTES:
 # - MacOS: can't use multiarch/crossbuild since it uses Clang 3.5.0 which lacks <stdatomic.h> (even using -std=gnu11)
