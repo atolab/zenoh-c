@@ -2,9 +2,9 @@ name: Build (simple)
 
 on:
   push:
-    branches: [ master ]
+    branches: [ branch_0.3.0_crossbuilds ]
   pull_request:
-    branches: [ master ]
+    branches: [ branch_0.3.0_crossbuilds ]
 
 jobs:
   build:
