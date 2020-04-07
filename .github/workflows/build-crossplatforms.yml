@@ -19,9 +19,9 @@ jobs:
       run: |
         mkdir -p artifacts/zenoh-c
         for dir in `ls build/crossbuilds`; do
-          mkdir -p artifacts//zenoh-c/$dir/example/net
+          mkdir -p artifacts/zenoh-c/$dir/example
           cp build/crossbuilds/$dir/lib*.* artifacts/zenoh-c/$dir/
-          cp build/crossbuilds/$dir/zn_* artifacts//zenoh-c/$dir/example/net
+          cp build/crossbuilds/$dir/z_* artifacts/zenoh-c/$dir/example/
         done
     - name: Upload artifact
       uses: actions/upload-artifact@v1.0.0

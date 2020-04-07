@@ -20,12 +20,10 @@ jobs:
       run: make
     - name: Gather artifacts
       run: |
-        mkdir -p artifacts/zenoh-c/examples/zenoh artifacts/zenoh-c/examples/zenoh-net
+        mkdir -p artifacts/zenoh-c/example
         cp build/libzenohc.* artifacts/zenoh-c/
-        cp build/z_* artifacts/zenoh-c/examples/zenoh
-        cp build/zn_* artifacts/zenoh-c/examples/zenoh-net
-        chmod +x artifacts/zenoh-c/examples/zenoh/*
-        chmod +x artifacts/zenoh-c/examples/zenoh-net/*
+        cp build/z_* artifacts/zenoh-c/example
+        chmod +x artifacts/zenoh-c/example/*
     - name: Upload artifact
       uses: actions/upload-artifact@v1.0.0
       with:
